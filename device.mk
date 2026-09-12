@@ -457,6 +457,10 @@ PRODUCT_COPY_FILES += \
     vendor/qcom/opensource/vibrator/excluded-input-devices.xml:$(TARGET_COPY_OUT_VENDOR)/etc/excluded-input-devices.xml
 
 # WiFi
+# The shipped MTK driver ignores NL80211_WPA_VERSION_3. Use its existing
+# RSN/SAE path without changing authentication or protected management frames.
+$(call soong_config_set_bool,wpa_supplicant_8,wifi_disable_wpa_version_3,true)
+
 PRODUCT_PACKAGES += \
     android.hardware.wifi-service \
     hostapd \
