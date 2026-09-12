@@ -135,6 +135,11 @@ on property:sys.boot_completed=1
     write /sys/devices/platform/soc/112b0000.ufshci/clkgate_enable 0
 
 on charger
+    # Charger-only boot runs init but never reaches sys.boot_completed.
+    # Release the boot boost using the same governors as normal boot.
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_governor "schedutil"
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_governor "schedutil"
+
     chmod 0664 /sys/class/Charging_Adapter/pd_adapter/usbpd_verifed
     chmod 0664 /sys/class/Charging_Adapter/pd_adapter/request_vdm_cmd
     chmod 0664 /sys/class/Charging_Adapter/pd_adapter/verify_process

@@ -2,9 +2,9 @@ name: Malachite device contracts
 
 on:
   push:
-    branches: [revival/device-config-cleanup]
+    branches: [main, revival/device-config-cleanup]
   pull_request:
-    branches: [lineage-23.2]
+    branches: [main, lineage-23.2]
 
 permissions:
   contents: read
@@ -17,5 +17,13 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
-      - name: Evaluate product fragment and retained compatibility guards
-        run: python3 -m unittest discover -s tests -p 'test_device_contracts.py' -v
+      - name: Install host shell used by Android
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends mksh
+      - name: Check module-loader syntax
+        run: mksh -n modules/init.insmod.sh
+      - name: Evaluate offline device contracts and init regressions
+        env:
+          MALACHITE_TEST_SHELL: /bin/mksh
+        run: python3 -m unittest discover -s tests -v
