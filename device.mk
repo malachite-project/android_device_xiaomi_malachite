@@ -369,6 +369,9 @@ PRODUCT_PACKAGES += \
     LineageSDKResMalachite \
     LineageSystemUIOverlayMalachite
 
+PRODUCT_PACKAGES += \
+    NetworkStackResMalachite
+
 # Pagesize
 PRODUCT_NO_BIONIC_PAGE_SIZE_MACRO := true
 
