@@ -10,8 +10,9 @@
          is no longer indicative, and a separate config now exists for each band -->
     <bool translatable="false" name="config_wifi5ghzSupport">true</bool>
 
-    <!-- boolean indicating whether the WiFi chipset has 6GHz band support -->
-    <bool translatable="false" name="config_wifi6ghzSupport">true</bool>
+    <!-- boolean indicating whether the WiFi chipset has 6GHz band support.
+         The MT6631 combo chip reports fgIsHwSupport6G = 0. -->
+    <bool translatable="false" name="config_wifi6ghzSupport">false</bool>
 
     <!-- Indicates that 11ax mode is supported on this device
            Note that if this flag is set to true, then 11ax is assumed to be supported.
@@ -39,7 +40,7 @@
     <!-- List of allowed channels in 5GHz band for softap. If the device doesn't want to restrict
          channels this should be empty. Values is a comma separated channel string and/or channel
          range string like '36-48,149'. -->
-    <string translatable="false" name="config_wifiSoftap5gChannelList">36,38,40,42,44,46,48,149,153,157,161,165</string>
+    <string translatable="false" name="config_wifiSoftap5gChannelList">36,40,44,48,149,153,157,161,165</string>
 
     <!-- Wifi driver supports Automatic channel selection (ACS) for softap -->
     <bool translatable="false" name="config_wifi_softap_acs_supported">true</bool>
@@ -54,7 +55,7 @@
     <bool translatable="false" name="config_wifiSoftapIeee80211axSupported">true</bool>
 
     <!-- Wifi driver supports 6GHz band for softap when chip support 6GHz -->
-    <bool translatable="false" name="config_wifiSoftap6ghzSupported">true</bool>
+    <bool translatable="false" name="config_wifiSoftap6ghzSupported">false</bool>
 
     <!-- Indicates that connected MAC randomization is supported on this device -->
     <bool translatable="false" name="config_wifi_connected_mac_randomization_supported">true</bool>
