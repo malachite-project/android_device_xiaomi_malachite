@@ -165,5 +165,6 @@ MT6878 `tetris` trees ship `pmf=1`.
 Verified on the September 11, 2026 image, 2026-09-21: with the version-bit
 patch alone, association to a WPA2/WPA3 transition-mode access point failed
 with status 31; with `pmf=1` applied to the live configuration as well, it
-connected. Not yet verified: the negotiated security type, WPA3-only access
+connected, and Android reports the connection as WPA3-Personal. Not yet
+verified: WPA3-only access
 points, SoftAP, and absence of the 2024 mixed-mode driver crash over time.
