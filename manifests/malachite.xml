@@ -13,6 +13,8 @@
                            LineageOS
        hardware/mediatek   chara + MediaTek wpa_supplicant driver-command
                            library (lib_driver_cmd_mt66xx)
+       sepolicy_vndr       current LineageOS + chara's six MT6878 labels
+                           and radio-property rules
      lineage-23.2 branches are chara's release state, unmodified.
 
      Kernel sources are built separately; see kernel_manifest-6.1.
@@ -34,7 +36,7 @@
   <remove-project path="hardware/xiaomi" optional="true" />
   <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
-  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="lineage-23.2" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="vendor/mediatek/ims" optional="true" />
   <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-23.2" />
 

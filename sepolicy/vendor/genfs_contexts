@@ -18,9 +18,6 @@ genfscon sysfs /devices/virtual/touch/touch_dev/fod_press_status u:object_r:vend
 genfscon sysfs /nfc/chip_name u:object_r:vendor_sysfs_nfc_chip_name:s0
 genfscon sysfs /devices/platform/soc/11c22000.i2c/i2c-2/2-0028/chip_name u:object_r:vendor_sysfs_nfc_chip_name:s0
 
-# Lights
-genfscon sysfs /devices/platform/mtk-leds/leds/lcd-backlight u:object_r:sysfs_leds:s0
-
 # PD Adapter
 genfscon sysfs /devices/platform/pd-adapter/Charging_Adapter/pd_adapter u:object_r:vendor_sysfs_pd_adapter:s0
 
@@ -40,9 +37,6 @@ genfscon sysfs /devices/virtual/power_supply/batt_verify u:object_r:sysfs_power_
 # Wi-Fi (the gen4m netdev parent is the wifi@18400000 platform device)
 genfscon sysfs /devices/platform/18400000.wifi/net/wlan0/mtu u:object_r:sysfs_net:s0
 genfscon sysfs /devices/platform/18400000.wifi/net/wlan1/mtu u:object_r:sysfs_net:s0
-
-# Trusted Execution Environment (TEE)
-genfscon proc /mitee_log u:object_r:proc_mitee_log:s0
 
 # Wakeup (https://lkml.org/lkml/2019/8/6/1275)
 genfscon sysfs /devices/platform/18000000.consys/wakeup u:object_r:sysfs_wakeup:s0
