@@ -9,5 +9,5 @@
              android:isStatic="true"
              android:priority="10"
              android:requiredSystemPropertyName="ro.boot.hwc"
-             android:requiredSystemPropertyValue="China" />
+             android:requiredSystemPropertyValue="CN" />
 </manifest>
