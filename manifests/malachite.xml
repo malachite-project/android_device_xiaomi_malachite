@@ -17,6 +17,11 @@
                            and radio-property rules
      lineage-23.2 branches are chara's release state, unmodified.
 
+     This copy is on noam/lineage-23.2-untested: the device tree and
+     sepolicy_vndr come from their -untested branches, which carry the
+     2026-09-21 audit changes that have not been built or run on a device.
+     Use the manifest on noam/lineage-23.2 for the tested state.
+
      Kernel sources are built separately; see kernel_manifest-6.1.
 -->
 <manifest>
@@ -24,7 +29,7 @@
 
   <!-- Device -->
   <remove-project path="device/xiaomi/malachite" optional="true" />
-  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2-untested" />
   <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
   <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/xiaomi/malachite" optional="true" />
@@ -36,7 +41,7 @@
   <remove-project path="hardware/xiaomi" optional="true" />
   <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
-  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="noam/lineage-23.2-untested" />
   <remove-project path="vendor/mediatek/ims" optional="true" />
   <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-23.2" />
 
