@@ -88,4 +88,10 @@
 
     <!-- Indicates whether the network-centric QoS policy feature is enabled. -->
     <bool translatable="false" name="config_wifiNetworkCentricQosPolicyFeatureEnabled">true</bool>
+    <!-- Enable WPA2 to WPA3 auto-upgrade. Disabled: with the WPA version-bit
+         workaround, SAE authentication completes but the association is refused
+         with status 31 (robust management frame policy violation), while WPA2-PSK
+         associates on the same access point. See bringup/WPA3.md. -->
+    <bool translatable="false" name="config_wifiSaeUpgradeEnabled">false</bool>
+
 </resources>
