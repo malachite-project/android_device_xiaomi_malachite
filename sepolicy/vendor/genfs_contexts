@@ -34,6 +34,12 @@ genfscon sysfs /devices/platform/soc/11e00000.i2c/i2c-3/3-0065/power_supply/ti-c
 genfscon sysfs /devices/platform/soc/11280000.i2c/i2c-5/5-0034/11280000.i2c:mt6375@34:mtk-gauge/power_supply u:object_r:sysfs_power_supply:s0
 genfscon sysfs /devices/platform/soc/11e00000.i2c/i2c-3/3-006a/switching_charger/cp_master u:object_r:sysfs_power_supply:s0
 genfscon sysfs /devices/virtual/power_supply/mtk-gauge u:object_r:sysfs_power_supply:s0
+genfscon sysfs /devices/platform/soc/11e00000.i2c/i2c-3/3-006a/power_supply u:object_r:sysfs_power_supply:s0
+genfscon sysfs /devices/virtual/power_supply/batt_verify u:object_r:sysfs_power_supply:s0
+
+# Wi-Fi (the gen4m netdev parent is the wifi@18400000 platform device)
+genfscon sysfs /devices/platform/18400000.wifi/net/wlan0/mtu u:object_r:sysfs_net:s0
+genfscon sysfs /devices/platform/18400000.wifi/net/wlan1/mtu u:object_r:sysfs_net:s0
 
 # Trusted Execution Environment (TEE)
 genfscon proc /mitee_log u:object_r:proc_mitee_log:s0
