@@ -1,7 +1,6 @@
 service neuralnetworks_hal_service_shim_mtk /vendor/bin/hw/android.hardware.neuralnetworks-shim-service-mtk
     class hal
     user system
-    group system
     group system readproc
     task_profiles NNApiHALPerformance
     disabled
