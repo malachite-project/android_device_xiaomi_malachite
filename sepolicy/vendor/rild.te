@@ -1,1 +1,4 @@
 allow rild metadata_file:dir { search open read };
+
+# ro.vendor.vt.* moved from the radio label to the MediaTek VT label
+get_prop(rild, vendor_mtk_vendor_vt_prop)

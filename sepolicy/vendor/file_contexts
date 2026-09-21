@@ -46,9 +46,6 @@
 /data/vendor/goodix(/.*)? u:object_r:fingerprint_data_file:s0
 /dev/xiaomi-fp u:object_r:vendor_fingerprint_device:s0
 
-# Gatekeeper
-/(vendor|system/vendor)/bin/hw/android\.hardware\.gatekeeper-service\.mitee u:object_r:hal_gatekeeper_default_exec:s0
-
 # Graphics
 /(vendor|system/vendor)/bin/hw/android\.hardware\.graphics\.allocator-V2-service-mediatek u:object_r:hal_graphics_allocator_default_exec:s0
 /vendor/lib(64)?/hw/mapper\.mediatek\.so u:object_r:same_process_hal_file:s0
@@ -82,16 +79,6 @@
 /(vendor|system/vendor)/bin/hw/android\.hardware\.thermal-service\.pixel u:object_r:hal_thermal_default_exec:s0
 /(vendor|system/vendor)/bin/thermal_symlinks u:object_r:init-thermal-symlinks-sh_exec:s0
 /(vendor|system/vendor)/bin/mi_thermald u:object_r:mi_thermald_exec:s0
-
-# Trusted Execution Environment (TEE)
-/(vendor|system/vendor)/bin/tee-supplicant u:object_r:tee_exec:s0
-/(vendor|system/vendor)/bin/miteelog u:object_r:tee_exec:s0
-/dev/0:0:0:49476 u:object_r:teei_rpmb_device:s0
-/dev/tee0 u:object_r:teei_client_device:s0
-/dev/teepriv0 u:object_r:teei_client_device:s0
-/dev/ufs-bsg0 u:object_r:teei_client_device:s0
-/dev/metis u:object_r:teei_client_device:s0
-/data/vendor/mitee(/.*)? u:object_r:mitee_data_file:s0
 
 # Vibrator
 /vendor/bin/hw/vendor\.qti\.hardware\.vibrator\.service                            u:object_r:hal_vibrator_default_exec:s0
