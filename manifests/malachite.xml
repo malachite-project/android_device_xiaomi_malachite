@@ -11,6 +11,8 @@
        frameworks/native   chara's libgui ABI fix, rebased on current LineageOS
        Settings, Telephony chara's native eSIM selection, rebased on current
                            LineageOS
+       hardware/mediatek   chara + MediaTek wpa_supplicant driver-command
+                           library (lib_driver_cmd_mt66xx)
      lineage-23.2 branches are chara's release state, unmodified.
 
      Kernel sources are built separately; see kernel_manifest-6.1.
@@ -28,7 +30,7 @@
 
   <!-- Platform -->
   <remove-project path="hardware/mediatek" optional="true" />
-  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="lineage-23.2" />
+  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="hardware/xiaomi" optional="true" />
   <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
