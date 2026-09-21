@@ -7,6 +7,8 @@
 #include <aidl/android/hardware/power/BnPower.h>
 #include <android-base/file.h>
 #include <android-base/logging.h>
+#include <android-base/unique_fd.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 
 #define SET_CUR_VALUE 0
@@ -15,6 +17,8 @@
 #define TOUCH_IOC_SETMODE _IO(TOUCH_MAGIC, SET_CUR_VALUE)
 #define TOUCH_DEV_PATH "/dev/xiaomi-touch"
 #define TOUCH_ID 0
+// xiaomi_touch_dev_ioctl() copies this many ints from userspace on every call.
+#define TOUCH_BUF_SIZE 256
 
 namespace aidl {
 namespace google {
@@ -38,10 +42,15 @@ bool isDeviceSpecificModeSupported(Mode type, bool* _aidl_return) {
 bool setDeviceSpecificMode(Mode type, bool enabled) {
     switch (type) {
         case Mode::DOUBLE_TAP_TO_WAKE: {
-            int fd = open(TOUCH_DEV_PATH, O_RDWR);
-            int arg[3] = {TOUCH_ID, TOUCH_DOUBLETAP_MODE, enabled ? 1 : 0};
-            ioctl(fd, TOUCH_IOC_SETMODE, &arg);
-            close(fd);
+            android::base::unique_fd fd(open(TOUCH_DEV_PATH, O_RDWR | O_CLOEXEC));
+            if (fd < 0) {
+                PLOG(ERROR) << "Failed to open " << TOUCH_DEV_PATH;
+                return true;
+            }
+            int arg[TOUCH_BUF_SIZE] = {TOUCH_ID, TOUCH_DOUBLETAP_MODE, enabled ? 1 : 0};
+            if (ioctl(fd, TOUCH_IOC_SETMODE, &arg) < 0) {
+                PLOG(ERROR) << "Failed to set double tap to wake";
+            }
             return true;
         }
         default:
