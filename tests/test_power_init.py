@@ -24,15 +24,22 @@ def actions():
     return result
 
 
-def governors(events):
+UFS_CLKGATE = "/sys/devices/platform/soc/112b0000.ufshci/clkgate_enable"
+
+
+def writes(events, paths):
     # Assumes successful writes on existing nodes; other rc files and drivers
     # are intentionally outside this source-level lifecycle model.
     state = {}
     for event in events:
         for words in actions().get(event, []):
-            if words[0] == "write" and words[1] in POLICIES:
+            if words[0] == "write" and words[1] in paths:
                 state[words[1]] = words[2]
     return state
+
+
+def governors(events):
+    return writes(events, POLICIES)
 
 
 class PowerInitTests(unittest.TestCase):
@@ -45,6 +52,19 @@ class PowerInitTests(unittest.TestCase):
 
     def test_charger_mode_releases_boost_without_android_boot_completion(self):
         self.assertEqual(governors(["init", "charger"]), dict.fromkeys(POLICIES, "schedutil"))
+
+    def test_ufs_clock_gating_is_disabled_only_during_boot(self):
+        self.assertEqual(writes(["init"], {UFS_CLKGATE}), {UFS_CLKGATE: "0"})
+        self.assertEqual(writes(["init", "property:sys.boot_completed=1"], {UFS_CLKGATE}),
+                         {UFS_CLKGATE: "1"})
+        self.assertEqual(writes(["init", "charger"], {UFS_CLKGATE}), {UFS_CLKGATE: "1"})
+
+    def test_top_app_uclamp_min_targets_top_app(self):
+        top_app = [w for w in actions()["init"]
+                   if w[0] == "write" and w[1].startswith("/dev/cpuctl/")]
+        paths = [w[1] for w in top_app]
+        self.assertIn("/dev/cpuctl/top-app/cpu.uclamp.min", paths)
+        self.assertEqual(paths.count("/dev/cpuctl/foreground/cpu.uclamp.min"), 1)
 
     def test_charger_retains_authentication_without_enabling_powerhal(self):
         commands = actions()["charger"]
