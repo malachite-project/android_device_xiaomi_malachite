@@ -6,21 +6,22 @@
 
      noam/lineage-23.2 branches carry changes on top of their source:
        device tree         chara's release + unmerged charger/module-loader
-                           fixes + WPA3 nl80211 version opt-in
+                           fixes + WPA3 nl80211 version opt-in + the
+                           September 2026 audit fixes
        wpa_supplicant_8    current LineageOS + CONFIG_DISABLE_WPA_VERSION_3
        frameworks/native   chara's libgui ABI fix, rebased on current LineageOS
        Settings, Telephony chara's native eSIM selection, rebased on current
-                           LineageOS
+                           LineageOS; Telephony also keeps an accepted SIM
+                           switch running when the dialog closes
        hardware/mediatek   chara + MediaTek wpa_supplicant driver-command
-                           library (lib_driver_cmd_mt66xx)
+                           library (lib_driver_cmd_mt66xx), built with the
+                           supplicant's flags
        sepolicy_vndr       current LineageOS + chara's six MT6878 labels
                            and radio-property rules
      lineage-23.2 branches are chara's release state, unmodified.
 
-     This copy is on noam/lineage-23.2-untested: the device tree and
-     sepolicy_vndr come from their -untested branches, which carry the
-     2026-09-21 audit changes that have not been built or run on a device.
-     Use the manifest on noam/lineage-23.2 for the tested state.
+     Commits whose subject starts with [UNTESTED] have not been built or
+     run on a device.
 
      Kernel sources are built separately; see kernel_manifest-6.1.
 -->
@@ -29,7 +30,7 @@
 
   <!-- Device -->
   <remove-project path="device/xiaomi/malachite" optional="true" />
-  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2-untested" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
   <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/xiaomi/malachite" optional="true" />
@@ -41,7 +42,7 @@
   <remove-project path="hardware/xiaomi" optional="true" />
   <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
-  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="noam/lineage-23.2-untested" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="vendor/mediatek/ims" optional="true" />
   <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-23.2" />
 
