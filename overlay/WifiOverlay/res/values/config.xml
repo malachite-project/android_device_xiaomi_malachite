@@ -89,4 +89,9 @@
 
     <!-- Indicates whether the network-centric QoS policy feature is enabled. -->
     <bool translatable="false" name="config_wifiNetworkCentricQosPolicyFeatureEnabled">true</bool>
+
+    <!-- Allow a second, local-only STA (car or IoT access point) alongside the
+         primary connection. The gen4m driver implements the multi-STA vendor
+         commands, and the HAL declares two STA interfaces. -->
+    <bool translatable="false" name="config_wifiMultiStaLocalOnlyConcurrencyEnabled">true</bool>
 </resources>
