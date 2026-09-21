@@ -138,3 +138,32 @@ disconnect/status codes if failures remain.
 
 The static mismatch and its source-level remedy are confirmed. Resolution of
 the device failure is unverified until that runtime comparison passes.
+
+## Protected management frames
+
+With the version bit fixed, SAE authentication completes but the association
+is refused with status 31, `WLAN_STATUS_ROBUST_MGMT_FRAME_POLICY_VIOLATION`:
+WPA3-SAE requires PMF, and `pmf=0` left MFPC=0 in the association request.
+This build's `wpas_get_ssid_pmf()` has no SAE override, and the AIDL
+`setRequirePmf(false)` leaves `ieee80211w` at its default, so the global
+`pmf` value decides.
+
+`pmf=1` is set in both `wpa_supplicant.conf` and `wpa_supplicant_overlay.conf`.
+The supplicant runs from `/data/vendor/wifi/wpa/wpa_supplicant.conf`, which
+`ensureConfigFileExists()` copies from the vendor template only when absent,
+so a template change alone never reaches an existing install. The overlay is
+passed as `confanother` on every interface start and read into the same
+configuration after the base file, so it overrides a stale `/data` copy on
+dirty flashes too.
+
+`pmf=0` came from a122ee35ee2a (July 2024), which reported driver crashes when
+mixed-mode access points queried PMF. The identical commit exists in the
+Motorola `scout` tree, so it originated in a shared template. The two MediaTek
+trees carrying this same WPA3 workaround (`emerald`, `tanzanite`) and three
+MT6878 `tetris` trees ship `pmf=1`.
+
+Verified on the September 11, 2026 image, 2026-09-21: with the version-bit
+patch alone, association to a WPA2/WPA3 transition-mode access point failed
+with status 31; with `pmf=1` applied to the live configuration as well, it
+connected. Not yet verified: the negotiated security type, WPA3-only access
+points, SoftAP, and absence of the 2024 mixed-mode driver crash over time.
