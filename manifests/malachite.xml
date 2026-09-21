@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
      Local manifest for building LineageOS 23.2 for malachite entirely from
-     the noamtu123 forks. Copy to .repo/local_manifests/malachite.xml after
+     the malachite-project forks. Copy to .repo/local_manifests/malachite.xml after
      `repo init -u https://github.com/LineageOS/android.git -b lineage-23.2`.
 
      noam/lineage-23.2 branches carry changes on top of their source:
@@ -16,33 +16,33 @@
      Kernel sources are built separately; see kernel_manifest-6.1.
 -->
 <manifest>
-  <remote name="noamtu123" fetch="https://github.com/noamtu123/" />
+  <remote name="malachite-project" fetch="https://github.com/malachite-project/" />
 
   <!-- Device -->
   <remove-project path="device/xiaomi/malachite" optional="true" />
-  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="noamtu123" revision="noam/lineage-23.2" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
-  <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="noamtu123" revision="lineage-23.2" />
+  <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/xiaomi/malachite" optional="true" />
-  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="noamtu123" revision="lineage-23.2" />
+  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="lineage-23.2" />
 
   <!-- Platform -->
   <remove-project path="hardware/mediatek" optional="true" />
-  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="noamtu123" revision="lineage-23.2" />
+  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="hardware/xiaomi" optional="true" />
-  <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="noamtu123" revision="lineage-23.2" />
+  <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
-  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="noamtu123" revision="lineage-23.2" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/mediatek/ims" optional="true" />
-  <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="noamtu123" revision="lineage-23.2" />
+  <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-23.2" />
 
   <!-- Overrides of LineageOS projects -->
   <remove-project path="external/wpa_supplicant_8" optional="true" />
-  <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="noamtu123" revision="noam/lineage-23.2" />
+  <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="frameworks/native" optional="true" />
-  <project path="frameworks/native" name="android_frameworks_native" remote="noamtu123" revision="noam/lineage-23.2" />
+  <project path="frameworks/native" name="android_frameworks_native" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="packages/apps/Settings" optional="true" />
-  <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="noamtu123" revision="noam/lineage-23.2" />
+  <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="packages/services/Telephony" optional="true" />
-  <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="noamtu123" revision="noam/lineage-23.2" />
+  <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="malachite-project" revision="noam/lineage-23.2" />
 </manifest>
