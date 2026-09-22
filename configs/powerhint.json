@@ -290,16 +290,16 @@
       "PowerHint": "GAME",
       "Node": "CPULittleClusterMinFreq",
       "Duration": 0,
-      "Value": "9999999"
+      "Value": "1600000"
     },
     {
       "PowerHint": "GAME",
       "Node": "CPUBigClusterMinFreq",
       "Duration": 0,
-      "Value": "9999999"
+      "Value": "1500000"
     },
     {
-      "PowerHint": "GAME",
+      "PowerHint": "GAME_LOADING",
       "Node": "MemFreq",
       "Duration": 0,
       "Value": "9999999999"
