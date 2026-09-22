@@ -224,9 +224,8 @@ PRODUCT_PACKAGES += \
 # Graphics
 # MediaTek GPU DVFS wants per-frame timestamps from libgui (GED KPI). The
 # frameworks/native fork builds that code only with this flag, and turns it
-# off at runtime when /proc/ged reports GED KPI disabled. Off until a build
-# without it has booted; then set it to true and compare GPU clocks.
-$(call soong_config_set_bool,libgui,support_mtk_ged_kpi,false)
+# off at runtime when /proc/ged reports GED KPI disabled.
+$(call soong_config_set_bool,libgui,support_mtk_ged_kpi,true)
 
 PRODUCT_PACKAGES += \
     android.hardware.memtrack-service.mediatek
