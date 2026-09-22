@@ -7,6 +7,7 @@ import unittest
 
 ROOT = Path(os.environ.get("MALACHITE_DEVICE_ROOT", Path(__file__).resolve().parents[1]))
 CEILING = "/proc/sys/kernel/sched_util_clamp_min"
+MIN_FREQ_NODES = ("CPULittleClusterMinFreq", "CPUBigClusterMinFreq")
 
 
 def table():
@@ -15,6 +16,10 @@ def table():
 
 def nodes():
     return {n["Name"]: n for n in table()["Nodes"]}
+
+
+def actions(hint):
+    return [a for a in table()["Actions"] if a["PowerHint"] == hint and "Node" in a]
 
 
 def rc_writes():
@@ -54,6 +59,20 @@ class PowerHintTests(unittest.TestCase):
         for where, value in requests:
             with self.subTest(where=where, value=value):
                 self.assertLessEqual(float(value), limit)
+
+    def test_game_mode_does_not_pin_cpus_at_maximum(self):
+        # GameManagerService holds GAME for as long as any game is in front,
+        # so a Duration 0 floor here lasts the whole session.
+        declared = nodes()
+        game = {a["Node"]: a for a in actions("GAME")}
+        for name in MIN_FREQ_NODES:
+            with self.subTest(node=name):
+                self.assertIn(name, game)
+                self.assertNotEqual(game[name]["Value"], declared[name]["Values"][0])
+
+    def test_memory_is_boosted_only_while_a_game_loads(self):
+        self.assertNotIn("MemFreq", {a["Node"] for a in actions("GAME")})
+        self.assertIn("MemFreq", {a["Node"] for a in actions("GAME_LOADING")})
 
 
 if __name__ == "__main__":
