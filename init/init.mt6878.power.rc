@@ -12,7 +12,6 @@ on init
     setprop dalvik.vm.dex2oat-threads 4
 
     # fs
-    write /sys/block/mmcblk0/queue/nr_requests 64
     write /sys/block/sda/queue/scheduler mq-deadline
     write /sys/block/sda/queue/nr_requests 64
     write /sys/block/sdb/queue/nr_requests 64
