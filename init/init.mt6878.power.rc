@@ -135,6 +135,10 @@ on property:sys.boot_completed=1
     write /sys/devices/system/cpu/cpufreq/policy4/scaling_governor "schedutil"
     write /sys/devices/platform/soc/112b0000.ufshci/clkgate_enable 1
 
+    # cpuqos_v3.ko stays disabled until boot completes; this switches it to
+    # BALANCE and partitions L3 between top-app and background groups.
+    write /sys/devices/system/cpu/cpuqos/cpuqos_boot_complete 1
+
 on charger
     # Charger-only boot runs init but never reaches sys.boot_completed.
     # Release the boot boost using the same governors as normal boot.
