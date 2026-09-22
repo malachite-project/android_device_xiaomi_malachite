@@ -9,7 +9,9 @@
                            fixes + WPA3 nl80211 version opt-in + the
                            September 2026 audit fixes
        wpa_supplicant_8    current LineageOS + CONFIG_DISABLE_WPA_VERSION_3
-       frameworks/native   chara's libgui ABI fix, rebased on current LineageOS
+       frameworks/native   chara's libgui ABI fix, rebased on current LineageOS,
+                           + PHH's MediaTek GED KPI frame timestamps (GPU
+                           DVFS), built only with libgui support_mtk_ged_kpi
        frameworks/base     current LineageOS + PixelOS's FaceSense provider
                            (face unlock, off unless ro.face.sense_service)
        Settings, Telephony chara's native eSIM selection, rebased on current
