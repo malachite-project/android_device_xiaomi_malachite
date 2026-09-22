@@ -1,3 +1,14 @@
 allow hal_power_default vendor_touchfeature_device:chr_file rw_file_perms;
 rw_dir_file(hal_power_default, sysfs_ged)
 rw_dir_file(hal_power_default, sysfs_gpu)
+
+# ADPF hint sessions set uclamp on the threads they manage with
+# sched_setattr (hardware/google/pixel-sepolicy power-libperfmgr).
+# App processes carry per-user MLS categories, so setsched on them
+# also needs mlstrustedsubject.
+typeattribute hal_power_default mlstrustedsubject;
+allow hal_power_default self:capability sys_nice;
+allow hal_power_default appdomain:process { getsched setsched };
+allow hal_power_default surfaceflinger:process setsched;
+allow hal_power_default hal_graphics_composer_default:process setsched;
+allow hal_power_default system_server:process setsched;
