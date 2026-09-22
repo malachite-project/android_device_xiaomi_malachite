@@ -673,4 +673,9 @@
     <bool name="config_powerDecoupleInteractiveModeFromDisplay">true</bool>
 
     <bool name="config_dozeAfterScreenOffByDefault">true</bool>
+
+    <!-- Quick Settings QR scanner. LineageOS gets this from Aperture's overlay,
+         which the Xiaomi camera replaces. Google Play services' scanner; with
+         no GApps the component doesn't resolve and SystemUI hides the tile. -->
+    <string name="config_defaultQrCodeComponent" translatable="false">com.google.android.gms/.mlkit.barcode.ui.PlatformBarcodeScanningActivityProxy</string>
 </resources>
