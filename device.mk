@@ -196,6 +196,23 @@ PRODUCT_SYSTEM_EXT_PROPERTIES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.biometrics.face.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/android.hardware.biometrics.face.xml
 
+# Diagnostics (userdebug). Keep logcat, kernel log included, from every boot
+# in /data/misc/logd, so a bootloop, freeze or reboot can be read afterwards
+# with `adb bugreport` or tools/collect_logs.sh. Up to 32 x 4 MiB. Build with
+# MALACHITE_DIAGNOSTICS=false, or run `adb shell logpersist.stop`, to turn it
+# off. Persisted settings on the phone override these defaults.
+ifneq ($(TARGET_BUILD_VARIANT),user)
+ifneq ($(MALACHITE_DIAGNOSTICS),false)
+PRODUCT_PRODUCT_PROPERTIES += \
+    persist.logd.logpersistd=logcatd \
+    persist.logd.logpersistd.buffer=all \
+    persist.logd.logpersistd.rotate_kbytes=4096 \
+    persist.logd.logpersistd.size=32 \
+    persist.logd.size=16M \
+    ro.logd.kernel=true
+endif
+endif
+
 # Fastboot
 PRODUCT_PACKAGES += \
     android.hardware.fastboot-service.example_recovery \
