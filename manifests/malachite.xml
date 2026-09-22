@@ -10,6 +10,8 @@
                            September 2026 audit fixes
        wpa_supplicant_8    current LineageOS + CONFIG_DISABLE_WPA_VERSION_3
        frameworks/native   chara's libgui ABI fix, rebased on current LineageOS
+       frameworks/base     current LineageOS + PixelOS's FaceSense provider
+                           (face unlock, off unless ro.face.sense_service)
        Settings, Telephony chara's native eSIM selection, rebased on current
                            LineageOS; Telephony also keeps an accepted SIM
                            switch running when the dialog closes
@@ -19,6 +21,7 @@
        sepolicy_vndr       current LineageOS + chara's six MT6878 labels
                            and radio-property rules
      lineage-23.2 branches are chara's release state, unmodified.
+     ParanoidSense (face unlock app) is PixelOS's sixteen-qpr2, unmodified.
 
      Commits whose subject starts with [UNTESTED] have not been built or
      run on a device.
@@ -49,10 +52,15 @@
   <!-- Overrides of LineageOS projects -->
   <remove-project path="external/wpa_supplicant_8" optional="true" />
   <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="noam/lineage-23.2" />
+  <remove-project path="frameworks/base" optional="true" />
+  <project path="frameworks/base" name="android_frameworks_base" remote="malachite-project" revision="noam/lineage-23.2" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
   <remove-project path="frameworks/native" optional="true" />
   <project path="frameworks/native" name="android_frameworks_native" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="packages/apps/Settings" optional="true" />
   <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="packages/services/Telephony" optional="true" />
   <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="malachite-project" revision="noam/lineage-23.2" />
+
+  <!-- Additions -->
+  <project path="packages/apps/ParanoidSense" name="android_packages_apps_ParanoidSense" remote="malachite-project" revision="sixteen-qpr2" />
 </manifest>
