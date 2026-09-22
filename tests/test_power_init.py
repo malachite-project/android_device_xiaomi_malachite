@@ -25,6 +25,7 @@ def actions():
 
 
 UFS_CLKGATE = "/sys/devices/platform/soc/112b0000.ufshci/clkgate_enable"
+CPUQOS = "/sys/devices/system/cpu/cpuqos/cpuqos_boot_complete"
 
 
 def writes(events, paths):
@@ -52,6 +53,11 @@ class PowerInitTests(unittest.TestCase):
 
     def test_charger_mode_releases_boost_without_android_boot_completion(self):
         self.assertEqual(governors(["init", "charger"]), dict.fromkeys(POLICIES, "schedutil"))
+
+    def test_cpuqos_starts_after_boot_completes(self):
+        self.assertEqual(writes(["init"], {CPUQOS}), {})
+        self.assertEqual(writes(["init", "property:sys.boot_completed=1"], {CPUQOS}),
+                         {CPUQOS: "1"})
 
     def test_ufs_clock_gating_is_disabled_only_during_boot(self):
         self.assertEqual(writes(["init"], {UFS_CLKGATE}), {UFS_CLKGATE: "0"})
