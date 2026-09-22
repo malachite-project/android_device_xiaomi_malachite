@@ -1,4 +1,4 @@
-"""Static checks for libgui's MediaTek GED KPI support (off for the first build)."""
+"""Static checks that libgui's MediaTek GED KPI support is switched on."""
 import os
 from pathlib import Path
 import unittest
@@ -8,11 +8,10 @@ ROOT = Path(os.environ.get("MALACHITE_DEVICE_ROOT", Path(__file__).resolve().par
 
 
 class GedKpiTests(unittest.TestCase):
-    def test_libgui_flag_is_off_for_the_first_build(self):
-        # frameworks/native compiles the GED KPI code only under this flag. It
-        # stays off until a build without it has booted on the phone.
+    def test_libgui_flag_is_set(self):
+        # frameworks/native compiles the GED KPI code only under this flag.
         mk = (ROOT / "device.mk").read_text()
-        self.assertIn("$(call soong_config_set_bool,libgui,support_mtk_ged_kpi,false)", mk)
+        self.assertIn("$(call soong_config_set_bool,libgui,support_mtk_ged_kpi,true)", mk)
 
     def test_manifest_takes_patched_native(self):
         root = ET.parse(ROOT / "manifests/malachite.xml").getroot()
