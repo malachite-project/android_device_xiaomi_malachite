@@ -29,11 +29,30 @@ def rc_writes():
             yield words[1], words[2]
 
 
-def ceiling_percent():
+def ceiling():
     values = [value for path, value in rc_writes() if path == CEILING]
     if len(values) != 1:
         raise AssertionError(f"expected one {CEILING} write, found {values}")
-    return int(values[0]) * 100 / 1024
+    return int(values[0])
+
+
+# Group and power-hint boosts keep the value they had under the old 128/1024
+# system cap; bringup/POWER-BOOSTS.md keeps the larger profile.
+GROUP_BOOST_LIMIT = 12.5
+
+# Required AdpfConfig entries and their jsoncpp type checks, from
+# HintManager::ParseAdpfConfigs (hardware/google/pixel lineage-23.2). A
+# missing or mistyped entry drops every ADPF profile, silently disabling ADPF.
+ADPF_REQUIRED = {
+    "PID_On": bool, "PID_Po": float, "PID_Pu": float, "PID_I": float,
+    "PID_I_Init": int, "PID_I_High": int, "PID_I_Low": int,
+    "PID_Do": float, "PID_Du": float, "UclampMin_On": bool,
+    "UclampMin_Init": int, "UclampMin_High": int, "UclampMin_Low": int,
+    "SamplingWindow_P": int, "SamplingWindow_I": int, "SamplingWindow_D": int,
+    "StaleTimeFactor": float, "ReportingRateLimitNs": int, "TargetTimeFactor": float,
+}
+ADPF_UNSIGNED = {"UclampMin_Init", "UclampMin_High", "UclampMin_Low", "SamplingWindow_P",
+                 "SamplingWindow_I", "SamplingWindow_D", "ReportingRateLimitNs"}
 
 
 class PowerHintTests(unittest.TestCase):
@@ -46,10 +65,16 @@ class PowerHintTests(unittest.TestCase):
                 self.assertIn(action["Node"], declared)
                 self.assertIn(action["Value"], declared[action["Node"]]["Values"])
 
-    def test_uclamp_min_values_fit_under_the_system_ceiling(self):
-        # The kernel caps every uclamp.min at sched_util_clamp_min, so a larger
-        # value is silently cut; bringup/POWER-BOOSTS.md keeps the full profile.
-        limit = ceiling_percent()
+    def test_system_ceiling_does_not_cap_adpf(self):
+        # The kernel caps every uclamp.min at sched_util_clamp_min, including
+        # the per-thread values ADPF sets.
+        self.assertEqual(ceiling(), 1024)
+        for profile in table()["AdpfConfig"]:
+            with self.subTest(profile=profile["Name"]):
+                self.assertLessEqual(profile["UclampMin_High"], ceiling())
+
+    def test_group_boosts_keep_their_effective_values(self):
+        limit = GROUP_BOOST_LIMIT
         requests = [(path, value) for path, value in rc_writes()
                     if path.endswith("/cpu.uclamp.min")]
         for node in nodes().values():
@@ -73,6 +98,35 @@ class PowerHintTests(unittest.TestCase):
     def test_memory_is_boosted_only_while_a_game_loads(self):
         self.assertNotIn("MemFreq", {a["Node"] for a in actions("GAME")})
         self.assertIn("MemFreq", {a["Node"] for a in actions("GAME_LOADING")})
+
+    def test_adpf_profiles_parse(self):
+        profiles = table().get("AdpfConfig", [])
+        self.assertTrue(profiles)
+        self.assertEqual(len({p["Name"] for p in profiles}), len(profiles))
+        for profile in profiles:
+            for key, kind in ADPF_REQUIRED.items():
+                with self.subTest(profile=profile.get("Name"), key=key):
+                    self.assertIn(key, profile)
+                    value = profile[key]
+                    if kind is bool:
+                        self.assertIsInstance(value, bool)
+                    elif kind is float:
+                        self.assertIsInstance(value, (int, float))
+                        self.assertNotIsInstance(value, bool)
+                    else:
+                        self.assertIsInstance(value, int)
+                        self.assertNotIsInstance(value, bool)
+                        if key in ADPF_UNSIGNED:
+                            self.assertGreaterEqual(value, 0)
+            with self.subTest(profile=profile["Name"], check="heuristic boost"):
+                # HeuristicBoost_On needs a further nine entries; leave it out.
+                self.assertNotIn("HeuristicBoost_On", profile)
+            with self.subTest(profile=profile["Name"], check="efficiency pair"):
+                self.assertEqual("UclampMax_EfficientBase" in profile,
+                                 "UclampMax_EfficientOffset" in profile)
+            with self.subTest(profile=profile["Name"], check="ordering"):
+                self.assertLessEqual(profile["UclampMin_Low"], profile["UclampMin_Init"])
+                self.assertLessEqual(profile["UclampMin_Init"], profile["UclampMin_High"])
 
 
 if __name__ == "__main__":

@@ -56,10 +56,11 @@ on init
 ## Utilization Clamping
     # Tuning
     write /proc/sys/kernel/sched_util_clamp_min_rt_default 0
-    # Upper bound for every uclamp.min request, so no group or power hint
-    # can raise a task above 12.5% (128/1024). Keep uclamp.min values at or
-    # below it; see bringup/POWER-BOOSTS.md for the profile it overrides.
-    write /proc/sys/kernel/sched_util_clamp_min 128
+    # No system-wide cap on uclamp.min: ADPF sizes app render threads with
+    # per-thread uclamp.min and a cap would cut it off. Group and power-hint
+    # boosts stay at 12.5%, their effective value under the old 128 cap;
+    # see bringup/POWER-BOOSTS.md.
+    write /proc/sys/kernel/sched_util_clamp_min 1024
 
     # Real-Time tasks
     write /dev/cpuctl/rt/cpu.uclamp.latency_sensitive 1
