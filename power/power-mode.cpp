@@ -42,7 +42,7 @@ bool isDeviceSpecificModeSupported(Mode type, bool* _aidl_return) {
 bool setDeviceSpecificMode(Mode type, bool enabled) {
     switch (type) {
         case Mode::DOUBLE_TAP_TO_WAKE: {
-            android::base::unique_fd fd(open(TOUCH_DEV_PATH, O_RDWR | O_CLOEXEC));
+            ::android::base::unique_fd fd(open(TOUCH_DEV_PATH, O_RDWR | O_CLOEXEC));
             if (fd < 0) {
                 PLOG(ERROR) << "Failed to open " << TOUCH_DEV_PATH;
                 return true;
