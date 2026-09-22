@@ -57,6 +57,9 @@ on init
 ## Utilization Clamping
     # Tuning
     write /proc/sys/kernel/sched_util_clamp_min_rt_default 0
+    # Upper bound for every uclamp.min request, so no group or power hint
+    # can raise a task above 12.5% (128/1024). Keep uclamp.min values at or
+    # below it; see bringup/POWER-BOOSTS.md for the profile it overrides.
     write /proc/sys/kernel/sched_util_clamp_min 128
 
     # Real-Time tasks
@@ -78,7 +81,7 @@ on init
     # Camera daemon tasks
     write /dev/cpuctl/camera-daemon/cpu.uclamp.latency_sensitive 1
     write /dev/cpuctl/camera-daemon/cpu.uclamp.max max
-    write /dev/cpuctl/camera-daemon/cpu.uclamp.min 70
+    write /dev/cpuctl/camera-daemon/cpu.uclamp.min 12.5
     write /dev/cpuctl/camera-daemon/cpu.shares 20480
 
     # dex2oat tasks
@@ -102,7 +105,7 @@ on init
     # NeuralNetwork API HAL tasks
     write /dev/cpuctl/nnapi-hal/cpu.uclamp.latency_sensitive 1
     write /dev/cpuctl/nnapi-hal/cpu.uclamp.max max
-    write /dev/cpuctl/nnapi-hal/cpu.uclamp.min 90
+    write /dev/cpuctl/nnapi-hal/cpu.uclamp.min 12.5
     write /dev/cpuctl/nnapi-hal/cpu.shares 20480
 
     # Top app tasks
