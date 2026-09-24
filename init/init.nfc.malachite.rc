@@ -6,7 +6,15 @@ on post-fs-data
     mkdir /data/vendor/nfc/param 0777 nfc nfc
     mkdir /data/vendor/secure_element 0777  secure_element secure_element
 
-on boot
+# Only the SKUs that start the NFC HAL (below) have the chip. India units
+# have none, and waiting for its nodes there stalls boot for about 6 s.
+on boot && property:ro.boot.hwc=CN
+    trigger nfc-nodes
+
+on boot && property:ro.boot.hwc=Global
+    trigger nfc-nodes
+
+on nfc-nodes
     wait /sys/nfc/chip_name
     chmod 0660 /dev/tms_nfc
     chown nfc nfc /dev/tms_nfc
