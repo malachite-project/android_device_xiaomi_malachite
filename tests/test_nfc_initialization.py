@@ -57,8 +57,20 @@ class NfcInitializationTests(unittest.TestCase):
             command[0] == "wait"
             for command in nfc_actions.get("post-fs-data", [])
         ))
-        self.assertIn(["wait", "/sys/nfc/chip_name"], nfc_actions["boot"])
-        self.assertIn(["wait", "/dev/tms_ese", "1"], nfc_actions["boot"])
+        self.assertIn(["wait", "/sys/nfc/chip_name"], nfc_actions["nfc-nodes"])
+        self.assertIn(["wait", "/dev/tms_ese", "1"], nfc_actions["nfc-nodes"])
+
+    def test_only_nfc_skus_wait_for_nfc_nodes(self):
+        nfc_actions = actions(ROOT / "init/init.nfc.malachite.rc")
+        waiting = sorted(
+            trigger for trigger, commands in nfc_actions.items()
+            if ["trigger", "nfc-nodes"] in commands
+        )
+        self.assertEqual(waiting, [
+            "boot && property:ro.boot.hwc=CN",
+            "boot && property:ro.boot.hwc=Global",
+        ])
+        self.assertFalse(any(command[0] == "wait" for command in nfc_actions.get("boot", [])))
 
 
 if __name__ == "__main__":
