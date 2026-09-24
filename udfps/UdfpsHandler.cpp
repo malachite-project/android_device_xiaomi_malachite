@@ -75,9 +75,11 @@ static disp_event_resp* parseDispEvent(int fd) {
         LOG(ERROR) << "read fod event failed";
         return nullptr;
     }
-    if (size < sizeof(struct disp_event)) {
+    // FOD events carry one payload byte after the header; without it data[0]
+    // would be left over from the previous event.
+    if (size < sizeof(struct disp_event) + 1) {
         LOG(ERROR) << "Invalid event size " << size << ", expect at least "
-                   << sizeof(struct disp_event);
+                   << sizeof(struct disp_event) + 1;
         return nullptr;
     }
 
