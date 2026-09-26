@@ -14,6 +14,14 @@ on early-init
     # Avoid delay for vblank disable from DRM
     write /sys/module/drm/parameters/vblankoffdelay -1
 
+# Plugging a cable into a switched-off phone can make the bootloader start
+# Android in normal mode (boot reason "usb") instead of off-mode charging.
+# Restart into the bootloader's power-off charging mode (reboot-mode "kpoc")
+# before anything else starts. That restart reports boot reason "reboot", and
+# a power-key start reports its own reason, so neither comes back here.
+on early-init && property:ro.boot.bootreason=usb && property:ro.bootmode=normal
+    setprop sys.powerctl reboot,kpoc
+
 on early-boot
     # set RLIMIT_MEMLOCK to 64KB
     setrlimit 8 65536 65536
