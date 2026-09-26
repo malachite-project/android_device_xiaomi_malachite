@@ -7,5 +7,8 @@ set_prop(vendor_init, vendor_camera_prop)
 set_prop(vendor_init, vendor_mtk_vendor_vt_prop)
 set_prop(vendor_init, vendor_batterysecret_prop)
 
+# init.mt6878.rc restarts a cable-started boot into off-mode charging.
+set_prop(vendor_init, powerctl_prop)
+
 # init.mt6878.power.rc tunes the per-CPU page lists (Pixel, d008a71).
 allow vendor_init proc_percpu_pagelist_high_fraction:file w_file_perms;
