@@ -77,6 +77,18 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(table[-1], 4095)
         self.assertTrue(all(low < high for low, high in zip(table[1:], table[2:])))
 
+    def test_lights_hal_keeps_brightness_clone_set(self):
+        node = "/sys/devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone"
+        light = (ROOT / "lights/Light.cpp").read_text()
+        self.assertIn(f'#define BRIGHTNESS_CLONE "{node}"', light)
+        self.assertIn("set(BRIGHTNESS_CLONE,", light)
+        self.assertIn(f"genfscon sysfs {node.removeprefix('/sys')} u:object_r:sysfs_leds:s0\n",
+                      (ROOT / "sepolicy/vendor/genfs_contexts").read_text())
+        self.assertIn("allow hal_light_default sysfs_gpu:dir search;",
+                      (ROOT / "sepolicy/vendor/hal_light_default.te").read_text())
+        init = (ROOT / "init/init.mt6878.rc").read_text()
+        self.assertIn("chown system system /sys/class/mi_display/disp-DSI-0/brightness_clone\n", init)
+
     def test_euicc_permission_has_one_copy(self):
         entries = product_copies("vendor/mediatek/ims")
         destination = "product/etc/permissions/android.hardware.telephony.euicc.xml"

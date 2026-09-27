@@ -1,0 +1,2 @@
+# brightness_clone is labeled sysfs_leds; its parent directories are sysfs_gpu.
+allow hal_light_default sysfs_gpu:dir search;
