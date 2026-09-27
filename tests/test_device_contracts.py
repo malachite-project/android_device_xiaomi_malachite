@@ -67,6 +67,18 @@ class DeviceContracts(unittest.TestCase):
             with self.subTest(sku=path.stem):
                 self.assertNotIn("ro.product.marketname", path.read_text())
 
+    def test_lowest_brightness_holds_one_refresh_rate(self):
+        config = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml").getroot()
+        integer = {node.get("name"): node.text for node in config.iter("integer")}
+        arrays = {node.get("name"): [item.text for item in node.iter("item")]
+                  for node in config.iter("integer-array")}
+        self.assertEqual(integer["config_defaultRefreshRateInZone"], "60")
+        self.assertEqual(arrays["config_brightnessThresholdsOfPeakRefreshRate"], ["2"])
+        self.assertEqual(arrays["config_ambientThresholdsOfPeakRefreshRate"], ["-1"])
+        # A <refreshRate> block in the display config would replace these overlay values.
+        display = (ROOT / "configs/display_id_4627039422300187648.xml").read_text()
+        self.assertNotIn("<refreshRate>", display)
+
     def test_euicc_permission_has_one_copy(self):
         entries = product_copies("vendor/mediatek/ims")
         destination = "product/etc/permissions/android.hardware.telephony.euicc.xml"
