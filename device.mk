@@ -118,6 +118,7 @@ PRODUCT_COPY_FILES += \
 
 # Camera
 PRODUCT_PACKAGES += \
+    MalachiteQrResult \
     miui-cameraopt
 
 PRODUCT_COPY_FILES += \
