@@ -39,7 +39,7 @@
   <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
   <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/xiaomi/malachite" optional="true" />
-  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="lineage-23.2" />
+  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2" />
 
   <!-- Platform -->
   <remove-project path="hardware/mediatek" optional="true" />

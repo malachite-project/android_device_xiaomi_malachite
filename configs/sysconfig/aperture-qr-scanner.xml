@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<!-- The Xiaomi camera is the camera app. Aperture is kept only for the Quick
+     Settings QR scanner, so it gets no launcher icon and answers no camera
+     intents. QrScannerActivity stays enabled. -->
+<config>
+    <component-override package="org.lineageos.aperture">
+        <component class=".CameraLauncher" enabled="false" />
+        <component class=".CameraActivity" enabled="false" />
+        <component class=".CaptureActivity" enabled="false" />
+        <component class=".VideoCamera" enabled="false" />
+        <component class=".SecureCameraActivity" enabled="false" />
+    </component-override>
+</config>

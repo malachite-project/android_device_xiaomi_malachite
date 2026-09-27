@@ -99,6 +99,24 @@ class DeviceContracts(unittest.TestCase):
             with self.subTest(sink=sink):
                 self.assertEqual(routes[sink], ["a2dp output", "a2dp spatializer output"])
 
+    def test_qr_tile_uses_aperture_without_a_second_camera(self):
+        self.assertIn("product/priv-app/MiuiCamera/MiuiCamera.apk\n",
+                      (ROOT / "proprietary-files.txt").read_text())
+        config = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml").getroot()
+        strings = {node.get("name"): node.text for node in config.iter("string")}
+        self.assertEqual(strings["config_defaultQrCodeComponent"],
+                         "org.lineageos.aperture/.QrScannerActivity")
+        override = ET.parse(ROOT / "configs/sysconfig/aperture-qr-scanner.xml").getroot().find(
+            "component-override")
+        self.assertEqual(override.get("package"), "org.lineageos.aperture")
+        disabled = {node.get("class") for node in override.iter("component")
+                    if node.get("enabled") == "false"}
+        self.assertEqual(disabled, {".CameraLauncher", ".CameraActivity", ".CaptureActivity",
+                                    ".VideoCamera", ".SecureCameraActivity"})
+        self.assertIn("configs/sysconfig/aperture-qr-scanner.xml:"
+                      "$(TARGET_COPY_OUT_PRODUCT)/etc/sysconfig/aperture-qr-scanner.xml",
+                      (ROOT / "device.mk").read_text())
+
     def test_euicc_permission_has_one_copy(self):
         entries = product_copies("vendor/mediatek/ims")
         destination = "product/etc/permissions/android.hardware.telephony.euicc.xml"
