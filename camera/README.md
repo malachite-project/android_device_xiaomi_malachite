@@ -3,8 +3,11 @@
 The product ships `com.android.camera` from malachite
 `OS3.0.10.0.WOOMIXM` (version `6.2.000660.6`, target SDK 35). Its six
 system_ext native bridges come from the same build as the existing OS3
-vendor/ODM camera stack. `MiuiCamera` overrides Aperture after successful
-photo and video bring-up on the global device.
+vendor/ODM camera stack. `MiuiCamera` is the camera app since successful
+photo and video bring-up on the global device. Aperture stays installed only
+for the Quick Settings QR scanner (no Google services needed):
+`configs/sysconfig/aperture-qr-scanner.xml` disables its launcher and camera
+activities.
 
 The ROM signs the APK with its platform certificate and retains the stock
 privileged permission and hidden-API declarations. The small `miui-cameraopt`

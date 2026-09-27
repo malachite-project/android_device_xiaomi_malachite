@@ -1315,7 +1315,7 @@ vendor/lib64/vendor.xiaomi.hardware.quickcamera-V1-ndk.so
 
 # Camera (MiuiCamera)
 # APK and JNI bridges: malachite OS3.0.10.0.WOOMIXM, matching vendor.
-product/priv-app/MiuiCamera/MiuiCamera.apk;OVERRIDES=Aperture
+product/priv-app/MiuiCamera/MiuiCamera.apk
 system_ext/lib64/libcamera_algoup_jni.xiaomi.so
 system_ext/lib64/libcamera_ispinterface_jni.xiaomi.so
 system_ext/lib64/libcamera_mianode_jni.xiaomi.so
