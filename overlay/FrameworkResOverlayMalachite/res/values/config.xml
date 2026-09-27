@@ -577,17 +577,6 @@
          non-zero. -->
     <integer name="config_defaultPeakRefreshRate">120</integer>
 
-    <!-- At the lowest panel levels (lights HAL writes 15-16) the panel flickers each time the
-         touch and idle timers switch it between 60 and 120 Hz. Hold 60 Hz there, whatever the
-         ambient light. Brightness 2 of 255 is 0.0039, about the bottom tenth of the slider. -->
-    <integer name="config_defaultRefreshRateInZone">60</integer>
-    <integer-array name="config_brightnessThresholdsOfPeakRefreshRate">
-        <item>2</item>
-    </integer-array>
-    <integer-array name="config_ambientThresholdsOfPeakRefreshRate">
-        <item>-1</item>
-    </integer-array>
-
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->
     <string name="config_displayLightSensorType">android.sensor.light</string>
