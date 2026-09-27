@@ -4,6 +4,7 @@ genfscon sysfs /class/smartpa/re25_calib u:object_r:sysfs_re25_calib:s0
 # Display
 genfscon sysfs /devices/platform/soc/14000000.dispsys-config/drm u:object_r:sysfs_gpu:s0
 genfscon sysfs /devices/virtual/mi_display/disp_feature u:object_r:sysfs_gpu:s0
+genfscon sysfs /devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone u:object_r:sysfs_leds:s0
 
 # Extcon
 genfscon sysfs /devices/platform/extcon-usb/extcon/extcon0/cable.0/name u:object_r:sysfs_extcon:s0

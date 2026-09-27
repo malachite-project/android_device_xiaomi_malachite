@@ -16,11 +16,22 @@
 
 #include "Light.h"
 
+#include <algorithm>
 #include <fstream>
 
 #define LCD_LED         "/sys/devices/platform/mtk-leds/leds/lcd-backlight/"
 
 #define BRIGHTNESS      "brightness"
+
+/*
+ * HyperOS keeps this non-zero while the screen is on. The o16u 42-02
+ * panel drivers send a different refresh-rate switch sequence (page 3
+ * register BA = 0x80) only while it is set; without it every 60/120 Hz
+ * switch uses the screen-off sequence. The scale is Xiaomi's, five steps
+ * per panel level (normal maximum 10239, peak 20479).
+ */
+#define BRIGHTNESS_CLONE "/sys/devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone"
+#define MAX_BRIGHTNESS_CLONE 20479
 
 namespace {
 /*
@@ -77,6 +88,7 @@ static inline uint32_t getScaledBrightness(const HwLightState& state) {
 static void handleBacklight(const HwLightState& state) {
     uint32_t brightness = getScaledBrightness(state);
     set(LCD_LED BRIGHTNESS, brightness);
+    set(BRIGHTNESS_CLONE, std::min<uint32_t>(brightness * 5, MAX_BRIGHTNESS_CLONE));
 }
 
 /* Keep sorted in the order of importance. */
