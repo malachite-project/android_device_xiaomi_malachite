@@ -24,11 +24,12 @@ public final class QrContentTest {
 
     public static void main(String[] args) {
         kind("https://lineageos.org", QrContent.Kind.LINK, "https://lineageos.org");
-        kind("  HTTP://example.com/a?b=c  ", QrContent.Kind.LINK, "HTTP://example.com/a?b=c");
+        kind("  HTTP://example.com/a?b=c  ", QrContent.Kind.LINK, "http://example.com/a?b=c");
         kind("www.example.com", QrContent.Kind.LINK, "https://www.example.com");
         kind("tel:+972501234567", QrContent.Kind.PHONE, "tel:+972501234567");
         kind("mailto:a@b.c", QrContent.Kind.EMAIL, "mailto:a@b.c");
-        kind("SMSTO:123:hello", QrContent.Kind.SMS, "SMSTO:123:hello");
+        kind("SMSTO:123:hello", QrContent.Kind.SMS, "smsto:123:hello");
+        kind("HTTPS://EXAMPLE.COM/Path", QrContent.Kind.LINK, "https://EXAMPLE.COM/Path");
         kind("geo:32.1,34.8", QrContent.Kind.LOCATION, "geo:32.1,34.8");
         kind("javascript:alert(1)", QrContent.Kind.TEXT, null);
         kind("intent://x#Intent;end", QrContent.Kind.TEXT, null);

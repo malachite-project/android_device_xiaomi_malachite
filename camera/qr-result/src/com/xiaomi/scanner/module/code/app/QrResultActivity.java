@@ -81,16 +81,18 @@ public class QrResultActivity extends Activity {
         WifiNetworkSuggestion.Builder network = new WifiNetworkSuggestion.Builder()
                 .setSsid(wifi.ssid)
                 .setIsHiddenSsid(wifi.hidden);
-        if (wifi.security == QrContent.Wifi.Security.WPA2) {
-            network.setWpa2Passphrase(wifi.password);
-        } else if (wifi.security == QrContent.Wifi.Security.WPA3) {
-            network.setWpa3Passphrase(wifi.password);
-        }
         ArrayList<WifiNetworkSuggestion> networks = new ArrayList<>();
         try {
+            // The passphrase setters throw for non-ASCII or wrong-length
+            // passwords, so they belong inside the try too.
+            if (wifi.security == QrContent.Wifi.Security.WPA2) {
+                network.setWpa2Passphrase(wifi.password);
+            } else if (wifi.security == QrContent.Wifi.Security.WPA3) {
+                network.setWpa3Passphrase(wifi.password);
+            }
             networks.add(network.build());
         } catch (IllegalArgumentException e) {
-            // Invalid SSID or passphrase length: fall back to copying.
+            // Invalid SSID or passphrase: fall back to copying.
             copy(wifi.password);
             return;
         }
