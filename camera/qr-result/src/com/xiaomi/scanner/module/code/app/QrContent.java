@@ -40,22 +40,25 @@ final class QrContent {
         }
         int colon = lower.indexOf(':');
         String scheme = colon > 0 ? lower.substring(0, colon) : "";
+        // Intent filters match schemes case-sensitively; QR codes often use
+        // upper case (HTTPS://, SMSTO:), so open the lower-case form.
+        String uri = scheme + text.substring(Math.max(colon, 0));
         // Only schemes whose handlers show the user what will happen.
         switch (scheme) {
             case "http":
             case "https":
-                return new QrContent(Kind.LINK, text, text, null);
+                return new QrContent(Kind.LINK, text, uri, null);
             case "tel":
-                return new QrContent(Kind.PHONE, text, text, null);
+                return new QrContent(Kind.PHONE, text, uri, null);
             case "mailto":
-                return new QrContent(Kind.EMAIL, text, text, null);
+                return new QrContent(Kind.EMAIL, text, uri, null);
             case "sms":
             case "smsto":
             case "mms":
             case "mmsto":
-                return new QrContent(Kind.SMS, text, text, null);
+                return new QrContent(Kind.SMS, text, uri, null);
             case "geo":
-                return new QrContent(Kind.LOCATION, text, text, null);
+                return new QrContent(Kind.LOCATION, text, uri, null);
             default:
                 return new QrContent(Kind.TEXT, text, null, null);
         }
