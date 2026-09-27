@@ -94,6 +94,10 @@ ro.hardware.consumerir=common
 ro.crypto.volume.options=aes-256-xts:aes-256-hctr2
 
 # Display
+# As on stock: the display compositor drives the backlight, so Android can
+# give SurfaceFlinger separate SDR and HDR brightness and keep the UI dim
+# while HDR content is boosted.
+ro.vendor.mtk_backlight_hwc_support=1
 ro.vendor.hdr10plus.enable=1
 ro.vendor.mtk_cuva_hdr_support=1
 ro.vendor.mtk_hdr10p_adaptive_support=1
