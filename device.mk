@@ -113,7 +113,8 @@ PRODUCT_COPY_FILES += \
 
 # BoardID properties
 PRODUCT_COPY_FILES += \
-    $(call find-copy-subdir-files,*,$(DEVICE_PATH)/boardid/,$(TARGET_COPY_OUT_ODM)/etc/boardid)
+    $(call find-copy-subdir-files,*,$(DEVICE_PATH)/boardid/,$(TARGET_COPY_OUT_ODM)/etc/boardid) \
+    $(call find-copy-subdir-files,*,$(DEVICE_PATH)/marketname/,$(TARGET_COPY_OUT_PRODUCT)/etc/marketname)
 
 # Camera
 PRODUCT_PACKAGES += \
