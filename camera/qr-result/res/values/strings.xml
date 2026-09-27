@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="app_name">QR codes</string>
+
+    <string name="title_link">Link</string>
+    <string name="title_wifi">Wi-Fi network</string>
+    <string name="title_phone">Phone number</string>
+    <string name="title_email">Email address</string>
+    <string name="title_sms">Text message</string>
+    <string name="title_location">Location</string>
+    <string name="title_text">Text</string>
+
+    <string name="wifi_details">Network: <xliff:g id="ssid" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%1$s</xliff:g></string>
+    <string name="wifi_unsupported">This network type can\'t be added from a QR code. You can copy the password.</string>
+
+    <string name="action_open">Open</string>
+    <string name="action_connect">Connect</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_copy_password">Copy password</string>
+    <string name="action_share">Share</string>
+
+    <string name="copied">Copied</string>
+    <string name="no_app">No app can open this</string>
+</resources>

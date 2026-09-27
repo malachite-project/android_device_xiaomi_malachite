@@ -9,6 +9,22 @@ for the Quick Settings QR scanner (no Google services needed):
 `configs/sysconfig/aperture-qr-scanner.xml` disables its launcher and camera
 activities.
 
+## QR codes in the camera
+
+The camera decodes QR codes itself with the ML Kit barcode model bundled in
+the APK (`libbarhopper_v3.so`), with no Google services. It then sends the
+text to Xiaomi's Scanner app (`com.xiaomi.scanner`, receiver
+`module.code.app.BarCodeScannerReceiver`, action
+`com.xiaomi.scanner.receiver.senderbarcodescanner`, extra `result`), and it
+turns "Scan QR codes" off when that package is not installed.
+
+`qr-result/` (`MalachiteQrResult`) is our own small app under that package
+name. It shows the code with Open, Connect (Wi-Fi codes, through Settings'
+add-network confirmation), Copy and Share. Open is offered only for
+http(s), tel, mailto, sms/mms and geo. The receiver requires the
+`com.xiaomi.scanner.receiver.RECEIVER` permission, signature-level, which the
+platform-signed camera holds.
+
 The ROM signs the APK with its platform certificate and retains the stock
 privileged permission and hidden-API declarations. The small `miui-cameraopt`
 library supplies the MIUI classes used by the app; it does not import the full

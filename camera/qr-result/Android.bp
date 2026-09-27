@@ -1,0 +1,15 @@
+//
+// SPDX-FileCopyrightText: 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Receives QR codes decoded by the Xiaomi camera, which hands them to
+// com.xiaomi.scanner, and offers to open, copy or share them.
+android_app {
+    name: "MalachiteQrResult",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    certificate: "platform",
+    product_specific: true,
+    sdk_version: "current",
+}
