@@ -7,7 +7,8 @@
      noam/lineage-23.2 branches carry changes on top of their source:
        device tree         chara's release + unmerged charger/module-loader
                            fixes + WPA3 nl80211 version opt-in + the
-                           September 2026 audit fixes
+                           September 2026 audit, power, display and
+                           user-report fixes
        wpa_supplicant_8    current LineageOS + CONFIG_DISABLE_WPA_VERSION_3
        frameworks/native   chara's libgui ABI fix, rebased on current LineageOS,
                            + PHH's MediaTek GED KPI frame timestamps (GPU
@@ -22,6 +23,8 @@
                            supplicant's flags
        sepolicy_vndr       current LineageOS + chara's six MT6878 labels
                            and radio-property rules
+       vendor              chara + Aperture kept beside MiuiCamera
+                           (QR scanner)
      lineage-23.2 branches are chara's release state, unmodified.
      ParanoidSense (face unlock app) is PixelOS's sixteen-qpr2, unmodified.
 
