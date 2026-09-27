@@ -67,6 +67,16 @@ class DeviceContracts(unittest.TestCase):
             with self.subTest(sku=path.stem):
                 self.assertNotIn("ro.product.marketname", path.read_text())
 
+    def test_brightness_table_stays_in_the_panel_range(self):
+        header = (ROOT / "lights/Light.h").read_text()
+        body = header.split("brightness_table[256] = {", 1)[1].split("};", 1)[0]
+        table = [int(value) for value in re.findall(r"\d+", body)]
+        self.assertEqual(len(table), 256)
+        self.assertEqual(table[0], 0)
+        # 0x51 holds 12 bits; 4095 is the panel's peak mode.
+        self.assertEqual(table[-1], 4095)
+        self.assertTrue(all(low < high for low, high in zip(table[1:], table[2:])))
+
     def test_euicc_permission_has_one_copy(self):
         entries = product_copies("vendor/mediatek/ims")
         destination = "product/etc/permissions/android.hardware.telephony.euicc.xml"
