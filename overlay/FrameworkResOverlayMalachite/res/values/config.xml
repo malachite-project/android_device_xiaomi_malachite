@@ -601,6 +601,33 @@
          we only enabled it while the device has ability of mixed color spaces composition -->
     <bool name="config_enableWcgMode">true</bool>
 
+    <!-- Colour modes in Settings > Display > Colors. Natural (0) lets SurfaceFlinger use
+         the panel PQ table's MediaTek template modes (HAL_sRGB / HAL_displayP3); wide-colour
+         content turns pink there. 256-258 are vendor render intents 0x100-0x102 from the
+         same table (/vendor/etc/o16u_*_pq.xml), Xiaomi's own modes with an sRGB and a
+         Display P3 variant each. The first entry is the default. -->
+    <integer-array name="config_availableColorModes">
+        <item>0</item>   <!-- COLOR_MODE_NATURAL -->
+        <item>256</item> <!-- 0x100 HAL_native -->
+        <item>257</item> <!-- 0x101 HAL_sRGB / HAL_displayP3 -->
+        <item>258</item> <!-- 0x102 smart_MC -->
+    </integer-array>
+
+    <!-- Let SurfaceFlinger pick sRGB or Display P3 per content in every mode, and clear
+         any forced composition colour mode left from older builds. -->
+    <integer-array name="config_displayCompositionColorModes">
+        <item>0</item>
+        <item>256</item>
+        <item>257</item>
+        <item>258</item>
+    </integer-array>
+    <integer-array name="config_displayCompositionColorSpaces">
+        <item>0</item> <!-- COLOR_MODE_DEFAULT -->
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
+    </integer-array>
+
     <!-- Whether the device enable the standalone (SA) mode of 5G NR.-->
     <bool name="config_telephony5gStandalone">true</bool>
 
