@@ -75,6 +75,9 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(table[0], 0)
         # 0x51 holds 12 bits; 4095 is the panel's peak mode.
         self.assertEqual(table[-1], 4095)
+        # 217 is the top of the slider without sunlight: normal maximum.
+        self.assertEqual(table[217], 2047)
+        self.assertTrue(all(value > 2047 for value in table[218:]))
         self.assertTrue(all(low < high for low, high in zip(table[1:], table[2:])))
 
     def test_lights_hal_keeps_brightness_clone_set(self):
