@@ -1701,7 +1701,6 @@ vendor/lib64/vendor.mediatek.hardware.mtkradioex.voice-V1-ndk.so
 # Radio (Configs)
 vendor/etc/apdb/APDB_MT6878___W2411
 vendor/etc/apdb/APDB_MT6878___W2411_ENUM
-vendor/etc/MNL_Config.xml
 vendor/etc/ecc_list.xml
 vendor/etc/ecc_list_preference.xml
 vendor/etc/mpe.conf
