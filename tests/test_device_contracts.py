@@ -51,6 +51,22 @@ class DeviceContracts(unittest.TestCase):
         self.assertIn("bluetooth.device.default_name=POCO X7\n",
                       (ROOT / "boardid/S99016IA1.prop").read_text())
 
+    def test_poco_boards_override_the_marketname_from_product(self):
+        product = (ROOT / "product.prop").read_text()
+        self.assertIn("ro.product.marketname=Redmi Note 14 Pro 5G\n"
+                      "import /product/etc/marketname/${ro.boot.board_id}.prop\n", product)
+        self.assertIn("$(DEVICE_PATH)/marketname/,$(TARGET_COPY_OUT_PRODUCT)/etc/marketname",
+                      (ROOT / "device.mk").read_text())
+        boards = [path for path in (ROOT / "boardid").glob("*.prop") if "_" not in path.stem]
+        poco = {path.stem for path in boards if "ro.product.odm.brand=POCO\n" in path.read_text()}
+        self.assertEqual(poco, {"S99016IA1", "S99116EA1"})
+        overrides = {path.stem: path.read_text() for path in (ROOT / "marketname").glob("*.prop")}
+        self.assertEqual(overrides, {sku: "ro.product.marketname=POCO X7\n" for sku in poco})
+        # vendor_init loads the odm files and may not set default_prop.
+        for path in (ROOT / "boardid").glob("*.prop"):
+            with self.subTest(sku=path.stem):
+                self.assertNotIn("ro.product.marketname", path.read_text())
+
     def test_euicc_permission_has_one_copy(self):
         entries = product_copies("vendor/mediatek/ims")
         destination = "product/etc/permissions/android.hardware.telephony.euicc.xml"
