@@ -30,7 +30,7 @@
     <ambientLightHorizonShort>1000</ambientLightHorizonShort>
     <highBrightnessMode enabled="true">
         <!-- Transition point brightness from normal to HBM mode -->
-        <transitionPoint>0.85</transitionPoint>
+        <transitionPoint>0.499951</transitionPoint>
         <!-- Minimum lux to enter HBM -->
         <minimumLux>6001</minimumLux>
         <!-- Time limitation for HBM-->
