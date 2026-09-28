@@ -62,7 +62,7 @@ static unsigned int brightness_table[256] = {
       2823,   2878,   2933,   2989,   3044,   3099,   3154,   3210,
       3265,   3320,   3376,   3431,   3486,   3542,   3597,   3652,
       3708,   3763,   3818,   3874,   3929,   3984,   4040,   4095,
-
+};
 
 
 using ::aidl::android::hardware::light::HwLightState;

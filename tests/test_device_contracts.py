@@ -70,6 +70,9 @@ class DeviceContracts(unittest.TestCase):
     def test_brightness_table_stays_in_the_panel_range(self):
         header = (ROOT / "lights/Light.h").read_text()
         body = header.split("brightness_table[256] = {", 1)[1].split("};", 1)[0]
+        # The initializer must close right after the 256th value.
+        self.assertRegex(header, r"4095,\s*
+\};")
         table = [int(value) for value in re.findall(r"\d+", body)]
         self.assertEqual(len(table), 256)
         self.assertEqual(table[0], 0)
