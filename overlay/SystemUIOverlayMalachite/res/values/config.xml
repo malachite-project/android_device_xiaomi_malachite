@@ -20,10 +20,10 @@
                brightness. -->
     <integer-array name="config_doze_brightness_sensor_to_brightness">
         <item>0</item>     <!-- 0.0: Pitch black -->
-        <item>4</item>     <!-- 1.0: Dim room -->
-        <item>4</item>     <!-- 2.0: Normal room -->
-        <item>14</item>    <!-- 3.0: Bright room -->
-        <item>24</item>    <!-- 4.0: Flashlight / Direct Sun -->
+        <item>2</item>     <!-- 1.0: Dim room -->
+        <item>2</item>     <!-- 2.0: Normal room -->
+        <item>3</item>     <!-- 3.0: Bright room -->
+        <item>4</item>     <!-- 4.0: Flashlight / Direct Sun -->
         <item>2</item>     <!-- 5.0: Dark environment (Xiaomi specific) -->
     </integer-array>
 

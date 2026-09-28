@@ -77,13 +77,17 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(table[0], 0)
         # 0x51 holds 12 bits; 4095 is the panel's peak mode.
         self.assertEqual(table[-1], 4095)
-        # The release's curve up to 158, where it reaches the normal maximum.
-        self.assertEqual(table[158], 2045)
-        self.assertTrue(all(low < high for low, high in zip(table[1:159], table[2:159])))
-        # 159-217 (the slider top without sunlight) hold the normal maximum.
-        self.assertEqual(set(table[159:218]), {2047})
-        self.assertTrue(all(value > 2047 for value in table[218:]))
-        self.assertTrue(all(low < high for low, high in zip(table[217:], table[218:])))
+        # Linear like stock's composer: level L is float (L - 1) / 254.
+        self.assertEqual(table[1], 15)
+        self.assertTrue(all(low < high for low, high in zip(table[1:], table[2:])))
+        for level in range(2, 256):
+            with self.subTest(level=level):
+                self.assertLessEqual(abs(table[level] - 4095 * (level - 1) / 254), 1)
+        # Float 0.5, the high-brightness transition point, is the normal maximum.
+        self.assertEqual(table[128], 2047)
+        self.assertGreater(table[129], 2047)
+        display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
+        self.assertEqual(display.find("highBrightnessMode/transitionPoint").text, "0.499951")
 
     def test_lights_hal_keeps_brightness_clone_set(self):
         node = "/sys/devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone"
