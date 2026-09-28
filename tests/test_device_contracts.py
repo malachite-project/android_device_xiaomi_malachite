@@ -88,6 +88,12 @@ class DeviceContracts(unittest.TestCase):
         self.assertGreater(table[129], 2047)
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
         self.assertEqual(display.find("highBrightnessMode/transitionPoint").text, "0.499951")
+        # Zero HBM time makes the controller reschedule itself continuously in sunlight.
+        timing = display.find("highBrightnessMode/timing")
+        self.assertGreater(int(timing.find("timeMaxSecs").text), 0)
+        self.assertGreater(int(timing.find("timeMinSecs").text), 0)
+        self.assertLessEqual(int(timing.find("timeMinSecs").text),
+                             int(timing.find("timeMaxSecs").text))
 
     def test_colour_mode_lists_agree(self):
         def arrays(path, kind):
