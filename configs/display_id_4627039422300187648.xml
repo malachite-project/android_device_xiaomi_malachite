@@ -33,11 +33,15 @@
         <transitionPoint>0.499951</transitionPoint>
         <!-- Minimum lux to enter HBM -->
         <minimumLux>6001</minimumLux>
-        <!-- Time limitation for HBM-->
+        <!-- Time limitation for HBM. All zeros leave no remaining time, and
+             HighBrightnessModeController then re-arms its recalculation for
+             "now" on every pass while brightness is above the transition point.
+             Allow sunlight brightness for up to the whole 30 min window; once
+             it is used up, wait for 60 s of budget before boosting again. -->
         <timing>
-            <timeWindowSecs>0</timeWindowSecs>
-            <timeMaxSecs>0</timeMaxSecs>
-            <timeMinSecs>0</timeMinSecs>
+            <timeWindowSecs>1800</timeWindowSecs>
+            <timeMaxSecs>1800</timeMaxSecs>
+            <timeMinSecs>60</timeMinSecs>
         </timing>
         <!-- Thermal limitation for HBM -->
         <thermalStatusLimit>critical</thermalStatusLimit>
