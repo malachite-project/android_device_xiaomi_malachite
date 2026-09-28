@@ -603,26 +603,37 @@
 
     <!-- Colour modes in Settings > Display > Colors. Natural (0) lets SurfaceFlinger use
          the panel PQ table's MediaTek template modes (HAL_sRGB / HAL_displayP3); wide-colour
-         content turns pink there. 256-258 are vendor render intents 0x100-0x102 from the
-         same table (/vendor/etc/o16u_*_pq.xml), Xiaomi's own modes with an sRGB and a
-         Display P3 variant each. The first entry is the default. -->
+         content turns pink there. The others are vendor render intents 256 + n from the same
+         table (/vendor/etc/o16u_*_pq.xml, identical for all four panels), Xiaomi's own modes
+         with an sRGB and a Display P3 variant each. Only intents whose table entries differ
+         are listed: 0x100-0x102 are identical to each other, 0x10c equals 0x10b.
+         The first entry is the default. -->
     <integer-array name="config_availableColorModes">
         <item>0</item>   <!-- COLOR_MODE_NATURAL -->
-        <item>256</item> <!-- 0x100 HAL_native -->
-        <item>257</item> <!-- 0x101 HAL_sRGB / HAL_displayP3 -->
-        <item>258</item> <!-- 0x102 smart_MC -->
+        <item>263</item> <!-- 0x107 GM1 -->
+        <item>264</item> <!-- 0x108 GM2 -->
+        <item>265</item> <!-- 0x109 GM3 -->
+        <item>267</item> <!-- 0x10b expert_srgb -->
+        <item>269</item> <!-- 0x10d expert_wcg -->
+        <item>273</item> <!-- 0x111 Native_D65 -->
     </integer-array>
 
     <!-- Let SurfaceFlinger pick sRGB or Display P3 per content in every mode, and clear
          any forced composition colour mode left from older builds. -->
     <integer-array name="config_displayCompositionColorModes">
         <item>0</item>
-        <item>256</item>
-        <item>257</item>
-        <item>258</item>
+        <item>263</item>
+        <item>264</item>
+        <item>265</item>
+        <item>267</item>
+        <item>269</item>
+        <item>273</item>
     </integer-array>
     <integer-array name="config_displayCompositionColorSpaces">
         <item>0</item> <!-- COLOR_MODE_DEFAULT -->
+        <item>0</item>
+        <item>0</item>
+        <item>0</item>
         <item>0</item>
         <item>0</item>
         <item>0</item>

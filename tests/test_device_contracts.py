@@ -89,6 +89,26 @@ class DeviceContracts(unittest.TestCase):
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
         self.assertEqual(display.find("highBrightnessMode/transitionPoint").text, "0.499951")
 
+    def test_colour_mode_lists_agree(self):
+        def arrays(path, kind):
+            root = ET.parse(ROOT / path).getroot()
+            return {node.get("name"): [item.text.strip() for item in node.iter("item")]
+                    for node in root.iter(kind)}
+        framework = arrays("overlay/FrameworkResOverlayMalachite/res/values/config.xml",
+                           "integer-array")
+        settings = arrays("overlay/SettingsResOverlayMalachite/res/values/config.xml",
+                          "integer-array")
+        names = arrays("overlay/SettingsResOverlayMalachite/res/values/config.xml",
+                       "string-array")["config_color_mode_options_strings"]
+        modes = framework["config_availableColorModes"]
+        self.assertEqual(modes[0], "0")
+        self.assertTrue(all(256 <= int(mode) <= 511 for mode in modes[1:]))
+        self.assertEqual(len(set(modes)), len(modes))
+        self.assertEqual(framework["config_displayCompositionColorModes"], modes)
+        self.assertEqual(framework["config_displayCompositionColorSpaces"], ["0"] * len(modes))
+        self.assertEqual(settings["config_color_mode_options_values"], modes)
+        self.assertEqual(len(names), len(modes))
+
     def test_lights_hal_keeps_brightness_clone_set(self):
         node = "/sys/devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone"
         light = (ROOT / "lights/Light.cpp").read_text()
