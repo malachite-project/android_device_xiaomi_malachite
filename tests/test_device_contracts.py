@@ -77,10 +77,13 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(table[0], 0)
         # 0x51 holds 12 bits; 4095 is the panel's peak mode.
         self.assertEqual(table[-1], 4095)
-        # 217 is the top of the slider without sunlight: normal maximum.
-        self.assertEqual(table[217], 2047)
+        # The release's curve up to 158, where it reaches the normal maximum.
+        self.assertEqual(table[158], 2045)
+        self.assertTrue(all(low < high for low, high in zip(table[1:159], table[2:159])))
+        # 159-217 (the slider top without sunlight) hold the normal maximum.
+        self.assertEqual(set(table[159:218]), {2047})
         self.assertTrue(all(value > 2047 for value in table[218:]))
-        self.assertTrue(all(low < high for low, high in zip(table[1:], table[2:])))
+        self.assertTrue(all(low < high for low, high in zip(table[217:], table[218:])))
 
     def test_lights_hal_keeps_brightness_clone_set(self):
         node = "/sys/devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone"
