@@ -236,15 +236,18 @@
 
          This array should have size one greater than the size of the config_autoBrightnessLevels
          array. The brightness values must be non-negative and non-decreasing. This must be
-         overridden in platform specific overlays -->
+         overridden in platform specific overlays.
+         The values are the stock AOSP overlay's plus 15 nits from 7 lux up; the offset
+         fades in over 0-7 lux instead of starting as a 17-nit step at 7 lux.
+     -->
      <array name="config_autoBrightnessDisplayValuesNits">
         <item>3.5</item>
-        <item>7.6833</item>
-        <item>11.8667</item>
-        <item>16.05</item>
-        <item>20.2333</item>
-        <item>24.4167</item>
-        <item>28.6</item>
+        <item>9.83</item>
+        <item>16.15</item>
+        <item>22.48</item>
+        <item>28.8</item>
+        <item>35.13</item>
+        <item>41.46</item>
         <item>45.84</item>
         <item>47.07</item>
         <item>48.54</item>
