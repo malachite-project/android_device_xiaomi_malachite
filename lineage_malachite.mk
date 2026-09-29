@@ -13,6 +13,17 @@ $(call inherit-product, device/xiaomi/malachite/device.mk)
 # Inherit some common LineageOS stuff.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
+# Tester builds, the default until the ROM is released: ro.debuggable=1 with
+# ADB authorisation kept, so testers can switch on Rooted debugging for checks
+# that need root, and bug reports include the root-only sections. LineageOS
+# makes userdebug builds non-debuggable unless WITH_ADB_INSECURE is set, and
+# the build treats any non-empty value as true, so clear it here, after the
+# inherits (this assignment replaces their values). MALACHITE_RELEASE=true
+# builds keep LineageOS's non-debuggable release setting.
+ifneq ($(MALACHITE_RELEASE),true)
+PRODUCT_NOT_DEBUGGABLE_IN_USERDEBUG :=
+endif
+
 PRODUCT_NAME := lineage_malachite
 PRODUCT_DEVICE := malachite
 PRODUCT_MANUFACTURER := Xiaomi
