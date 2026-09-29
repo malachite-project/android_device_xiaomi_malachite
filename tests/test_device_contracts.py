@@ -149,6 +149,23 @@ class DeviceContracts(unittest.TestCase):
                      "config_ambientDarkeningThresholds"):
             self.assertNotIn(f'name="{name}"', overlay)
 
+    def test_auto_brightness_curve_has_no_steps(self):
+        root = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml").getroot()
+        levels = [float(item.text) for item in
+                  root.find("integer-array[@name='config_autoBrightnessLevels']").iter("item")]
+        nits = [float(item.text) for item in
+                root.find("array[@name='config_autoBrightnessDisplayValuesNits']").iter("item")]
+        self.assertEqual(len(nits), len(levels) + 1)
+        self.assertTrue(all(a < b for a, b in zip(levels, levels[1:])))
+        self.assertTrue(all(a <= b for a, b in zip(nits, nits[1:])))
+        lux = [0.0] + levels
+        for i in range(1, len(lux)):
+            if lux[i] > 30:
+                break
+            with self.subTest(lux=lux[i]):
+                # A dim room's sensor noise must not switch between distant levels.
+                self.assertLessEqual((nits[i] - nits[i - 1]) / (lux[i] - lux[i - 1]), 7)
+
     def test_lights_hal_reads_the_unrounded_level(self):
         overlay = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
         flag = overlay.getroot().find("bool[@name='config_backlightHighPrecision']")
