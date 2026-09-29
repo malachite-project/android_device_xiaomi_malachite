@@ -933,6 +933,15 @@ on property:sys.boot_completed=1
 on property:persist.vendor.mediatek.fast_charging.support=*
     write /sys/devices/platform/charger/fast_chg_indicator ${persist.vendor.mediatek.fast_charging.support}
 
+# Off-mode charging. Xiaomi's bootloader shows the charging screen for a
+# cable plugged into a switched-off phone only when power_off_mode in the
+# charger partition is 1; otherwise it boots Android. The value is used up
+# once (it reads 2 afterwards); on stock, Xiaomi's framework presumably
+# sets it again. Set it on every start, Android or charging screen, once the
+# battery driver (mt6375-battery.ko) is loaded.
+on property:vendor.all.modules.ready=1
+    write /sys/class/power_supply/battery/charger_partition_poweroffmode 1
+
 # Modify the log level
 on property:ro.build.type=user
     write /proc/sys/kernel/printk "6 4 1 7"
