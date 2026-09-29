@@ -114,6 +114,8 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(framework["config_displayCompositionColorSpaces"], ["0"] * len(modes))
         self.assertEqual(settings["config_color_mode_options_values"], modes)
         self.assertEqual(len(names), len(modes))
+        # 0x10d, expert wide colour, shows only a faint red without Xiaomi's display service.
+        self.assertNotIn("269", modes)
 
     def test_auto_brightness_ramps_slowly(self):
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
