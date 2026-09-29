@@ -28,6 +28,69 @@
     </screenBrightnessMap>
     <ambientLightHorizonLong>3000</ambientLightHorizonLong>
     <ambientLightHorizonShort>1000</ambientLightHorizonShort>
+    <!-- Brightness ramps, in HLG (perceptual) brightness per second; the whole normal
+         range (2-500 nits) is about 0.83. Without these the framework uses config.xml's
+         0.705 and 0.232 for everything, so an auto-brightness change was over in about half
+         a second (a quarter with a 0.5x animator duration scale) and looked like a jump.
+         Slow: auto-brightness following the light. Brightening at 0.05 is capped at 3 s so
+         stepping outside stays quick (HyperOS: about 4 s); darkening at 0.03 is capped at
+         10 s (HyperOS: 10-30 s). Fast: the first value after the screen turns on and
+         slider changes, unchanged. All four rates must be present or all are ignored. -->
+    <screenBrightnessRampFastDecrease>0.7047244</screenBrightnessRampFastDecrease>
+    <screenBrightnessRampFastIncrease>0.7047244</screenBrightnessRampFastIncrease>
+    <screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>
+    <screenBrightnessRampSlowIncrease>0.05</screenBrightnessRampSlowIncrease>
+    <screenBrightnessRampIncreaseMaxMillis>3000</screenBrightnessRampIncreaseMaxMillis>
+    <screenBrightnessRampDecreaseMaxMillis>10000</screenBrightnessRampDecreaseMaxMillis>
+    <!-- How much the ambient light must change before auto-brightness recalculates, in
+         percent of the current lux from each lux level up, and at least `minimum` lux.
+         HyperOS waits for much larger changes (at 30 lux: above 160 or below 16). The
+         screen then changes only if the new brightness differs by 10 % up or 20 % down. -->
+    <ambientBrightnessChangeThresholds>
+        <brighteningThresholds>
+            <minimum>2</minimum>
+            <brightnessThresholdPoints>
+                <brightnessThresholdPoint>
+                    <threshold>0</threshold><percentage>100</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>2</threshold><percentage>60</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>10</threshold><percentage>50</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>30</threshold><percentage>40</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>100</threshold><percentage>30</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>800</threshold><percentage>25</percentage>
+                </brightnessThresholdPoint>
+            </brightnessThresholdPoints>
+        </brighteningThresholds>
+        <darkeningThresholds>
+            <minimum>1</minimum>
+            <brightnessThresholdPoints>
+                <brightnessThresholdPoint>
+                    <threshold>0</threshold><percentage>60</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>10</threshold><percentage>50</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>30</threshold><percentage>40</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>100</threshold><percentage>35</percentage>
+                </brightnessThresholdPoint>
+                <brightnessThresholdPoint>
+                    <threshold>800</threshold><percentage>30</percentage>
+                </brightnessThresholdPoint>
+            </brightnessThresholdPoints>
+        </darkeningThresholds>
+    </ambientBrightnessChangeThresholds>
     <highBrightnessMode enabled="true">
         <!-- Transition point brightness from normal to HBM mode -->
         <transitionPoint>0.499951</transitionPoint>

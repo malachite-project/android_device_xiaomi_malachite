@@ -115,6 +115,40 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(settings["config_color_mode_options_values"], modes)
         self.assertEqual(len(names), len(modes))
 
+    def test_auto_brightness_ramps_slowly(self):
+        display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
+        ramp = {name: float(display.find("screenBrightnessRamp" + name).text)
+                for name in ("FastDecrease", "FastIncrease", "SlowDecrease", "SlowIncrease",
+                             "IncreaseMaxMillis", "DecreaseMaxMillis")}
+        # The framework ignores the rates unless all four are present.
+        self.assertLess(ramp["SlowIncrease"], ramp["FastIncrease"])
+        self.assertLess(ramp["SlowDecrease"], ramp["FastDecrease"])
+        self.assertLessEqual(ramp["SlowDecrease"], ramp["SlowIncrease"])
+        # config.xml's default slow rate (0.232) finished a change in about half a second.
+        self.assertLessEqual(ramp["SlowIncrease"], 0.1)
+        # Stepping into sunlight must still brighten within a few seconds.
+        self.assertLessEqual(ramp["IncreaseMaxMillis"], 4000)
+        self.assertGreaterEqual(ramp["DecreaseMaxMillis"], ramp["IncreaseMaxMillis"])
+
+    def test_ambient_thresholds_live_in_the_display_config(self):
+        display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
+        for side in ("brighteningThresholds", "darkeningThresholds"):
+            with self.subTest(side=side):
+                node = display.find(f"ambientBrightnessChangeThresholds/{side}")
+                self.assertGreater(float(node.find("minimum").text), 0)
+                points = [(float(point.find("threshold").text),
+                           float(point.find("percentage").text))
+                          for point in node.iter("brightnessThresholdPoint")]
+                # Below the first level the framework uses 0 %, so start at 0 lux.
+                self.assertEqual(points[0][0], 0)
+                self.assertTrue(all(a[0] < b[0] for a, b in zip(points, points[1:])))
+                # Percent, not the permille config.xml uses.
+                self.assertTrue(all(10 <= percentage <= 100 for _, percentage in points))
+        overlay = (ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml").read_text()
+        for name in ("config_ambientThresholdLevels", "config_ambientBrighteningThresholds",
+                     "config_ambientDarkeningThresholds"):
+            self.assertNotIn(f'name="{name}"', overlay)
+
     def test_lights_hal_reads_the_unrounded_level(self):
         overlay = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
         flag = overlay.getroot().find("bool[@name='config_backlightHighPrecision']")
