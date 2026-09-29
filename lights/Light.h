@@ -30,6 +30,8 @@
  * framework sends level L = 1 + 254 * float, so 128 (float 0.5, the
  * high-brightness transition point) is the normal maximum and 129-255 only
  * apply in sunlight. Level 1 keeps the release's minimum of 15.
+ * With config_backlightHighPrecision the framework also sends the float
+ * itself, and Light.cpp maps it on the same line (4095 * float) instead.
  */
 static unsigned int brightness_table[256] = {
          0,     15,     16,     32,     48,     64,     80,     96,
@@ -67,6 +69,7 @@ static unsigned int brightness_table[256] = {
 };
 
 
+using ::aidl::android::hardware::light::FlashMode;
 using ::aidl::android::hardware::light::HwLightState;
 using ::aidl::android::hardware::light::HwLight;
 using ::aidl::android::hardware::light::LightType;

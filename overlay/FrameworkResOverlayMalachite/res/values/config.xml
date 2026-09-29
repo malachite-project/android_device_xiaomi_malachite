@@ -9,6 +9,10 @@
          available on some devices. -->
     <bool name="config_enableHapticTextHandle">true</bool>
 
+    <!-- The lights HAL reads the unrounded backlight level from flashOnMs, so brightness
+         ramps move in single panel levels instead of the 8-bit colour's steps of 16. -->
+    <bool name="config_backlightHighPrecision">true</bool>
+
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">true</bool>

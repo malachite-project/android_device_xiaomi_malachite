@@ -115,6 +115,26 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(settings["config_color_mode_options_values"], modes)
         self.assertEqual(len(names), len(modes))
 
+    def test_lights_hal_reads_the_unrounded_level(self):
+        overlay = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
+        flag = overlay.getroot().find("bool[@name='config_backlightHighPrecision']")
+        self.assertEqual(flag.text, "true")
+        light = (ROOT / "lights/Light.cpp").read_text()
+        self.assertIn("state.flashMode == FlashMode::NONE && state.flashOnMs > 0", light)
+        self.assertIn("#define PRECISE_LEVEL_MAX 65535", light)
+        self.assertIn("#define PANEL_LEVEL_MAX 4095", light)
+        header = (ROOT / "lights/Light.h").read_text()
+        body = header.split("brightness_table[256] = {", 1)[1].split("};", 1)[0]
+        table = [int(value) for value in re.findall(r"\d+", body)]
+        # The unrounded path (LightsService: round(float * 65535)) lands on the table's
+        # line, so an 8-bit and an unrounded value never disagree by more than a level.
+        for level in range(1, 256):
+            brightness = (level - 1) / 254
+            precise = max(1, round(brightness * 65535))
+            panel = max((precise * 4095 + 65535 // 2) // 65535, table[1])
+            with self.subTest(level=level):
+                self.assertLessEqual(abs(panel - table[level]), 1)
+
     def test_lights_hal_keeps_brightness_clone_set(self):
         node = "/sys/devices/virtual/mi_display/disp_feature/disp-DSI-0/brightness_clone"
         light = (ROOT / "lights/Light.cpp").read_text()

@@ -81,8 +81,26 @@ static inline uint32_t scaleBrightness(uint32_t brightness) {
     return brightness_table[brightness];
 }
 
+/*
+ * The framework's unrounded level (config_backlightHighPrecision), sent in
+ * flashOnMs because a backlight never flashes: 1-65535 for float 0.0-1.0.
+ * The 8-bit colour moves 16 panel levels per step, which a slow
+ * auto-brightness ramp shows as jumps at low brightness.
+ */
+#define PRECISE_LEVEL_MAX 65535
+#define PANEL_LEVEL_MAX 4095
+
 static inline uint32_t getScaledBrightness(const HwLightState& state) {
-    return scaleBrightness(getBrightness(state));
+    uint32_t brightness = getBrightness(state);
+
+    if (brightness != 0 && state.flashMode == FlashMode::NONE && state.flashOnMs > 0 &&
+            state.flashOnMs <= PRECISE_LEVEL_MAX) {
+        uint32_t level = (static_cast<uint32_t>(state.flashOnMs) * PANEL_LEVEL_MAX +
+                          PRECISE_LEVEL_MAX / 2) / PRECISE_LEVEL_MAX;
+        return std::max<uint32_t>(level, brightness_table[1]);
+    }
+
+    return scaleBrightness(brightness);
 }
 
 static void handleBacklight(const HwLightState& state) {
