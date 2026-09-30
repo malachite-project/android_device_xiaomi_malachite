@@ -288,6 +288,7 @@ PRODUCT_PACKAGES += \
     init.mt6878.rc \
     init.project.rc \
     init.recovery.mt6878.rc \
+    offmode_charge.sh \
     ueventd.mtk.rc
 
 # Keymint
