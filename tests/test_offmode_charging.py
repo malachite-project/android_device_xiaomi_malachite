@@ -6,7 +6,11 @@ import unittest
 
 ROOT = Path(os.environ.get("MALACHITE_DEVICE_ROOT", Path(__file__).resolve().parents[1]))
 NODE = "/sys/class/power_supply/battery/charger_partition_poweroffmode"
-TRIGGER = "property:vendor.all.modules.ready=1"
+# ShutdownThread sets sys.shutdown.requested to "0" (power-off) or "1" (reboot) plus the
+# reason; PowerManager's power-off reasons are userrequested, battery, thermal,
+# thermal,battery and service.
+POWER_OFF_TRIGGERS = {"property:sys.shutdown.requested=0" + reason for reason in
+                      ("", "userrequested", "battery", "thermal", "thermal,battery", "service")}
 
 
 def actions_of(name):
@@ -30,20 +34,18 @@ def actions():
 
 
 class OffModeChargingTests(unittest.TestCase):
-    def test_flag_is_set_after_modules_load(self):
-        self.assertIn(["write", NODE, "1"], actions().get(TRIGGER, []))
+    def test_flag_is_set_on_every_power_off(self):
+        for trigger in POWER_OFF_TRIGGERS:
+            with self.subTest(trigger=trigger):
+                self.assertIn(["write", NODE, "1"], actions().get(trigger, []))
 
     def test_flag_is_written_nowhere_else(self):
+        # Not at boot: the charger partition is not ready until ~58 s after the kernel
+        # starts, so vendor.all.modules.ready=1 only produced "charger partition not rdy".
+        # Not on reboots, so a restart with a cable keeps booting Android.
         for trigger, commands in actions().items():
-            if trigger != TRIGGER:
+            if trigger not in POWER_OFF_TRIGGERS:
                 self.assertFalse([c for c in commands if NODE in c], trigger)
-
-    def test_modules_ready_is_set_in_every_mode(self):
-        # insmod_sh starts at early-init, which runs in charger mode too.
-        self.assertEqual(actions_of("modules/init.insmod.rc").get("early-init", [])[:2],
-                         [["setprop", "vendor.all.modules.ready", "0"], ["start", "insmod_sh"]])
-        cfg = (ROOT / "modules/init.insmod.mt6878.cfg").read_text()
-        self.assertIn("setprop|vendor.all.modules.ready", cfg)
 
     def test_no_reboot_into_kpoc(self):
         # The bootloader ignores reboot,kpoc (reverted 0646150).
