@@ -228,7 +228,9 @@ class DeviceContracts(unittest.TestCase):
         device = (ROOT / "device.mk").read_text()
         self.assertIn("charging_control_charging_path,/sys/class/power_supply/battery/", device)
         policy = (ROOT / "sepolicy/vendor/hal_lineage_health_default.te").read_text()
-        self.assertIn("rw_dir_file(hal_lineage_health_default, sysfs_batteryinfo)", policy)
+        self.assertIn("r_dir_file(hal_lineage_health_default, sysfs_batteryinfo)", policy)
+        self.assertIn("allow hal_lineage_health_default sysfs_batteryinfo:file rw_file_perms;",
+                      policy)
 
     def test_a2dp_has_a_plain_output_beside_the_spatializer(self):
         module = ET.parse(ROOT / "configs/audio/bluetooth_audio_policy_configuration.xml").getroot()

@@ -1,4 +1,6 @@
 # Charging control switches /sys/class/power_supply/battery/input_suspend (device.mk);
 # the battery supply is labelled sysfs_batteryinfo, the chargers sysfs_power_supply.
-rw_dir_file(hal_lineage_health_default, sysfs_batteryinfo)
+# Same rules as other MediaTek Xiaomi trees (emerald, yunluo, begonia, mt6768-common).
+r_dir_file(hal_lineage_health_default, sysfs_batteryinfo)
+allow hal_lineage_health_default sysfs_batteryinfo:file rw_file_perms;
 rw_dir_file(hal_lineage_health_default, sysfs_power_supply)
