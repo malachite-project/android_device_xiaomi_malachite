@@ -61,9 +61,12 @@
          for debouncing the light sensor.  Different constants are used to debounce the light sensor
          when adapting to brighter or darker environments.  This parameter controls how quickly
          brightness changes occur in response to an observed change in light level that exceeds the
-         hysteresis threshold. -->
+         hysteresis threshold.
+         Both must stay below ambientLightHorizonLong in configs/display_id_*.xml (3000 ms):
+         the framework keeps only that much sensor history, so a longer debounce is never met
+         and auto-brightness never follows the light in that direction. -->
     <integer name="config_autoBrightnessBrighteningLightDebounce">2000</integer>
-    <integer name="config_autoBrightnessDarkeningLightDebounce">4000</integer>
+    <integer name="config_autoBrightnessDarkeningLightDebounce">2500</integer>
 
     <!-- The maximum range of gamma adjustment possible using the screen
          auto-brightness adjustment setting. -->

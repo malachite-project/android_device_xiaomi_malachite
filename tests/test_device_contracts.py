@@ -132,6 +132,28 @@ class DeviceContracts(unittest.TestCase):
         self.assertLessEqual(ramp["IncreaseMaxMillis"], 4000)
         self.assertGreaterEqual(ramp["DecreaseMaxMillis"], ramp["IncreaseMaxMillis"])
 
+    def test_light_debounce_fits_in_the_sensor_history(self):
+        # AutomaticBrightnessController prunes its lux ring buffer to ambientLightHorizonLong
+        # and needs debounce-long runs of samples past the threshold inside it. With 4000 ms
+        # darkening and a 3000 ms horizon the screen never dimmed again (2026-09-30 report).
+        display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
+        horizon = int(display.find("ambientLightHorizonLong").text)
+        overlay = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
+        debounce = {node.get("name"): int(node.text) for node in overlay.getroot().iter("integer")
+                    if node.get("name", "").startswith("config_autoBrightness")
+                    and node.get("name", "").endswith(("LightDebounce", "LightDebounceIdle"))}
+        self.assertIn("config_autoBrightnessDarkeningLightDebounce", debounce)
+        self.assertIn("config_autoBrightnessBrighteningLightDebounce", debounce)
+        # The display config's own values, if any, take precedence over config.xml.
+        auto = display.find("autoBrightness")
+        if auto is not None:
+            for node in auto:
+                if node.tag.endswith("LightDebounceMillis") or node.tag.endswith("LightDebounceIdleMillis"):
+                    debounce[node.tag] = int(node.text)
+        for name, millis in debounce.items():
+            with self.subTest(name=name):
+                self.assertLess(millis, horizon)
+
     def test_ambient_thresholds_live_in_the_display_config(self):
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
         for side in ("brighteningThresholds", "darkeningThresholds"):
