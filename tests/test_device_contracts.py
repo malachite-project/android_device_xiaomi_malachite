@@ -222,6 +222,14 @@ class DeviceContracts(unittest.TestCase):
         init = (ROOT / "init/init.mt6878.rc").read_text()
         self.assertIn("chown system system /sys/class/mi_display/disp-DSI-0/brightness_clone\n", init)
 
+    def test_charging_control_can_reach_its_node(self):
+        # The battery supply directory is sysfs_batteryinfo; without access the Lineage
+        # health HAL failed every call ("Failed to read current charging enabled value").
+        device = (ROOT / "device.mk").read_text()
+        self.assertIn("charging_control_charging_path,/sys/class/power_supply/battery/", device)
+        policy = (ROOT / "sepolicy/vendor/hal_lineage_health_default.te").read_text()
+        self.assertIn("rw_dir_file(hal_lineage_health_default, sysfs_batteryinfo)", policy)
+
     def test_a2dp_has_a_plain_output_beside_the_spatializer(self):
         module = ET.parse(ROOT / "configs/audio/bluetooth_audio_policy_configuration.xml").getroot()
         flags = {port.get("name"): port.get("flags") for port in module.iter("mixPort")}
