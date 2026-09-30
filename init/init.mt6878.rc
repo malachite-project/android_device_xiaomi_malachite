@@ -933,14 +933,16 @@ on property:sys.boot_completed=1
 on property:persist.vendor.mediatek.fast_charging.support=*
     write /sys/devices/platform/charger/fast_chg_indicator ${persist.vendor.mediatek.fast_charging.support}
 
-# Off-mode charging. Xiaomi's bootloader shows the charging screen for a
-# cable plugged into a switched-off phone only when power_off_mode in the
-# charger partition is 1; otherwise it boots Android. The value is used up
-# once (it reads 2 afterwards). Stock's framework sets it when shutting
-# down; do the same on every power-off (sys.shutdown.requested "0" plus
-# PowerManager's reason), but not on reboots ("1..."). A write at boot
-# fails: the charger driver reads its partition only about 58 s after the
-# kernel starts ("charger partition not rdy").
+# Off-mode charging. Xiaomi's bootloader (stock 208 lk.img, GetPowerOffMode)
+# reads power_off_mode from the charger partition, writes it back to 2 on
+# every boot, and enters the charging screen only if it was 1, off-mode-charge
+# is on and the power-on reason is not the power key, a restart (warm reboot,
+# long-press, watchdog-sw/hw, panic) or a power loss: in practice a cable
+# plugged into a switched-off phone. The kernel (charger_partition.c) also
+# resets it to 2 once the partition is ready, about 58 s after boot, so a
+# write at boot is lost. Like stock's framework, set it when powering off
+# (sys.shutdown.requested "0" plus PowerManager's reason), not on reboots
+# ("1..."). A 1 is used by the next boot only, so it cannot loop.
 on property:sys.shutdown.requested=0
     write /sys/class/power_supply/battery/charger_partition_poweroffmode 1
 
