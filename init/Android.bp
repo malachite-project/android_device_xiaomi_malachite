@@ -107,3 +107,9 @@ prebuilt_etc {
     filename: "ueventd.rc",
     vendor: true,
 }
+
+sh_binary {
+    name: "offmode_charge.sh",
+    src: "offmode_charge.sh",
+    vendor: true,
+}

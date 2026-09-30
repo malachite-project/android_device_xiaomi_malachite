@@ -961,6 +961,18 @@ on property:sys.shutdown.requested=0thermal,battery
 on property:sys.shutdown.requested=0service
     write /sys/class/power_supply/battery/charger_partition_poweroffmode 1
 
+# On the charging screen the flag has been used up (see above); arm it again
+# once the kernel's reset is done, so unplugging and plugging in again gives
+# the charging screen instead of Android (vendor/bin/offmode_charge.sh).
+on charger
+    start vendor.offmode_charge
+
+service vendor.offmode_charge /vendor/bin/offmode_charge.sh
+    user root
+    group root
+    oneshot
+    disabled
+
 # Modify the log level
 on property:ro.build.type=user
     write /proc/sys/kernel/printk "6 4 1 7"

@@ -1,0 +1,14 @@
+# /vendor/bin/offmode_charge.sh: arms power_off_mode again on the charging screen.
+type vendor_offmode_charge, domain;
+type vendor_offmode_charge_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(vendor_offmode_charge)
+
+# /vendor/bin/sh runs the script; sleep is the vendor toybox.
+allow vendor_offmode_charge vendor_shell_exec:file rx_file_perms;
+allow vendor_offmode_charge vendor_toolbox_exec:file rx_file_perms;
+
+# /sys/class/power_supply/battery/charger_partition_poweroffmode, as the health HALs reach it.
+r_dir_file(vendor_offmode_charge, sysfs_power_supply)
+r_dir_file(vendor_offmode_charge, sysfs_batteryinfo)
+allow vendor_offmode_charge sysfs_batteryinfo:file w_file_perms;
