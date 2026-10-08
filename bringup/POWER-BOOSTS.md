@@ -62,16 +62,27 @@ their clamp when paused or closed, and a stale session times out after
 `StaleTimeFactor` frame periods. If they appear, write `128` back to the
 ceiling to confirm the cause.
 
-## Governor: sugov_ext
+## Governor: schedutil
 
-After boot the tree selects `sugov_ext` (`cpufreq_sugov_ext.ko`), MediaTek's
-schedutil, as stock OS3 does. Its frequency choice uses the non-linear OPP
-capacity table that `scheduler.ko` already applies to task placement and
-frequency invariance, adds a per-cluster adaptive margin, and votes the DSU
-frequency. Plain `schedutil` maps utilisation to frequency linearly with a
-fixed 25% margin. `schedutil` is written first so a failed `sugov_ext` write
-leaves the previous behaviour rather than the boot-time `performance`
-governor.
+After boot the tree selects `schedutil`. From `b0bfe22` until this change it
+selected `sugov_ext` (`cpufreq_sugov_ext.ko`), MediaTek's schedutil, as stock
+OS3 does. `sugov_ext` maps utilisation to the lowest OPP whose non-linear
+capacity covers it and adds a per-cluster adaptive margin of 0-25%
+(`nonlinear_opp_cap.c`, `am_floor` 1024 to `am_ceiling` 1280); `schedutil`
+maps linearly with a fixed 25% margin.
+
+Stock pairs `sugov_ext` with a 4x PELT multiplier (`init.cgroup.rc`), FPSGO
+and the camera HAL's perf locks (`libcom.xiaomi.mivihal.cpupolicy.so`,
+`powerscntbl.xml` `MTKPOWER_HINT_CAMERA_MODE`). This ROM has none of them:
+PELT stays at 1x and the perf locks reach `libmtkperf_client`, which only
+logs them. The camera HAL and cameraserver run in the `top-app` cpu group
+(`MaxPerformance`) with `uclamp.min` 0 and no ADPF session, so the governor
+alone sets their frequency. A tester reported choppy video recording on the
+2026-10-01 release, unlike chara's release, which ran `schedutil`.
+
+The switch is live and reversible
+(`echo sugov_ext|schedutil > …/policy{0,4}/scaling_governor`); to try
+`sugov_ext` again, test it together with the PELT multiplier.
 
 ## Cache QoS
 

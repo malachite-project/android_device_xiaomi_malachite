@@ -49,19 +49,20 @@ class PowerInitTests(unittest.TestCase):
 
     def test_normal_boot_releases_boost(self):
         self.assertEqual(governors(["init", "property:sys.boot_completed=1"]),
-                         dict.fromkeys(POLICIES, "sugov_ext"))
+                         dict.fromkeys(POLICIES, "schedutil"))
 
     def test_charger_mode_releases_boost_without_android_boot_completion(self):
-        self.assertEqual(governors(["init", "charger"]), dict.fromkeys(POLICIES, "sugov_ext"))
+        self.assertEqual(governors(["init", "charger"]), dict.fromkeys(POLICIES, "schedutil"))
 
-    def test_schedutil_is_written_before_sugov_ext(self):
-        # A failed sugov_ext write must not leave the performance boot boost.
+    def test_sugov_ext_is_not_selected(self):
+        # Without PELT x4, FPSGO and the camera HAL's perf locks, sugov_ext
+        # can starve the camera pipeline; see bringup/POWER-BOOSTS.md.
         for event in ("property:sys.boot_completed=1", "charger"):
             for policy in POLICIES:
                 with self.subTest(event=event, policy=policy):
                     values = [w[2] for w in actions()[event]
                               if w[0] == "write" and w[1] == policy]
-                    self.assertEqual(values, ["schedutil", "sugov_ext"])
+                    self.assertEqual(values, ["schedutil"])
 
     def test_cpuqos_starts_after_boot_completes(self):
         self.assertEqual(writes(["init"], {CPUQOS}), {})
