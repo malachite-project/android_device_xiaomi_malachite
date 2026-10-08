@@ -21,6 +21,8 @@ ro.vendor.oem.psno u:object_r:vendor_mtk_radio_prop:s0
 ro.vendor.oem.imei u:object_r:vendor_mtk_radio_prop:s0
 ro.vendor.oem.meid u:object_r:vendor_mtk_radio_prop:s0
 persist.vendor.sarstatus u:object_r:vendor_mtk_radio_prop:s0
+# Written by the RIL (libmtkmipc-ril) per SIM; stock labels the prefix the same way.
+odm.ril.radio.status. u:object_r:vendor_mtk_radio_prop:s0
 
 # Sensors
 ro.vendor.sensors.xiaomi. u:object_r:vendor_sensors_prop:s0
