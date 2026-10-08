@@ -13,6 +13,10 @@
          ramps move in single panel levels instead of the 8-bit colour's steps of 16. -->
     <bool name="config_backlightHighPrecision">true</bool>
 
+    <!-- The MediaTek audio HAL applies call and VoIP gain from its gain table at the index
+         MediaTek's audio policy passes as volumeStreamType/volumeDevice/volumeIndex. -->
+    <bool name="config_sendVoiceVolumeIndexToHal">true</bool>
+
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">true</bool>
