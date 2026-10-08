@@ -18,6 +18,17 @@ ro.vendor.audio.us.proximity_waitfornegative_feature=true
 ro.vendor.mtk_hifiaudio_support=1
 vendor.audio.usb.super_hifi=true
 vendor.audio.usb.iems.period_us=5000
+
+# Dolby DAX and MiSound, as in stock's vendor build.prop. Stock keeps MiSound's
+# effect library and its aurisys chain but sets it disabled, so it does not
+# process on top of Dolby.
+ro.vendor.audio.device.db=DB_XM
+ro.vendor.audio.device.dbcom=dolby_common
+ro.vendor.audio.dolby.dax.support=true
+ro.vendor.audio.dolby.dax3_3point8=true
+ro.vendor.dolby.dax.version=DAX3_3.8.5.20_r1
+vendor.audio.dolby.control.support=true
+persist.vendor.audio.misound.disable=true
 persist.vendor.audiohal.aurisys.pcm_dump_on=0
 persist.vendor.audiohal.p2w_dump_on=0
 persist.vendor.audiohal.pcm_mixer_dump_on=0
