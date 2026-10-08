@@ -70,6 +70,10 @@ vendor/lib64/libmisound.so
 vendor/lib64/libaudio_param_parser-vnd.so|c4d32fe174d64c59a38bd0eb3ef6bbef96d95d53
 
 # Audio (Configs)
+# Stock picks its tuning folder from ro.miui.build.region and loads
+# audio_param_cust/audio_param_global on global units; the plain audio_param
+# folder is never read there. The record tuning below comes from the global
+# folder so recordings match stock.
 vendor/etc/audio_param/AudioParamOptions_mgvi.xml
 vendor/etc/audio_param/AudioParamOptions_vext.xml
 vendor/etc/audio_param/BtInfo_AudioParam.xml
@@ -103,15 +107,15 @@ vendor/etc/audio_param/Power_AudioParam.xml
 vendor/etc/audio_param/Power_ParamUnitDesc.xml
 vendor/etc/audio_param/RecordDMNR_AudioParam.xml
 vendor/etc/audio_param/RecordDMNR_ParamUnitDesc.xml
-vendor/etc/audio_param/RecordFIR_AudioParam.xml
+vendor/etc/audio_param_cust/audio_param_global/RecordFIR_AudioParam.xml:vendor/etc/audio_param/RecordFIR_AudioParam.xml
 vendor/etc/audio_param/RecordFIR_ParamUnitDesc.xml
 vendor/etc/audio_param/RecordUI_AudioParam.xml
 vendor/etc/audio_param/RecordUI_ParamUnitDesc.xml
 vendor/etc/audio_param/RecordVolUI_AudioParam.xml
 vendor/etc/audio_param/RecordVolUI_ParamUnitDesc.xml
-vendor/etc/audio_param/RecordVol_AudioParam.xml
+vendor/etc/audio_param_cust/audio_param_global/RecordVol_AudioParam.xml:vendor/etc/audio_param/RecordVol_AudioParam.xml
 vendor/etc/audio_param/RecordVol_ParamUnitDesc.xml
-vendor/etc/audio_param/Record_AudioParam.xml
+vendor/etc/audio_param_cust/audio_param_global/Record_AudioParam.xml:vendor/etc/audio_param/Record_AudioParam.xml
 vendor/etc/audio_param/Record_ParamTreeView.xml
 vendor/etc/audio_param/Record_ParamUnitDesc.xml
 vendor/etc/audio_param/RingbackVolUI_AudioParam.xml
