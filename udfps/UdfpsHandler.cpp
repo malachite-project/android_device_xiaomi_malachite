@@ -14,6 +14,7 @@
 #include <poll.h>
 #include <sys/ioctl.h>
 #include <fstream>
+#include <mutex>
 #include <thread>
 
 #include "UdfpsHandler.h"
@@ -120,16 +121,21 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
                     continue;
                 }
                 bool pressed = readBool(fd);
+
+                {
+                    std::lock_guard<std::mutex> lock(fodLock_);
+                    // The touch driver can still report a press after FOD was switched off,
+                    // e.g. a finger sliding over the sensor right after a successful match.
+                    // Its release is then never reported, so the white spot would stay lit
+                    // until the screen turns off. Only act on presses while FOD is armed.
+                    if (pressed && !fodEnabled_) {
+                        continue;
+                    }
+                    setLocalHbm(pressed);
+                }
+                // Outside the lock: the HAL may call back into onAcquired().
                 mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS,
                                 pressed ? PARAM_FOD_PRESSED : PARAM_FOD_RELEASED);
-
-                // Request HBM
-                disp_local_hbm_req req;
-                req.base.flag = 0;
-                req.base.disp_id = MI_DISP_PRIMARY;
-                req.local_hbm_value = pressed ? LHBM_TARGET_BRIGHTNESS_WHITE_1000NIT
-                                              : LHBM_TARGET_BRIGHTNESS_OFF_FINGER_UP;
-                ioctl(disp_fd_.get(), MI_DISP_IOCTL_SET_LOCAL_HBM, &req);
             }
         }).detach();
 
@@ -222,11 +228,6 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
             case AcquiredInfo::IMMOBILE:
             case AcquiredInfo::LIFT_TOO_SOON:
                 // Request to disable HBM already, even if the finger is still pressed
-                disp_local_hbm_req req;
-                req.base.flag = 0;
-                req.base.disp_id = MI_DISP_PRIMARY;
-                req.local_hbm_value = LHBM_TARGET_BRIGHTNESS_OFF_FINGER_UP;
-                ioctl(disp_fd_.get(), MI_DISP_IOCTL_SET_LOCAL_HBM, &req);
                 setFodStatus(FOD_STATUS_OFF);
         }
 
@@ -256,15 +257,33 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
     android::base::unique_fd disp_fd_;
     bool isFpcFod;
 
-    void setFodStatus(int value) {
-        int buf[MAX_BUF_SIZE] = {TOUCH_ID, Touch_Fod_Enable, value};
+    // Guards fodEnabled_ and the local HBM requests, so a press handled by the
+    // fod_press_status thread cannot turn the spot back on after FOD was switched off.
+    std::mutex fodLock_;
+    bool fodEnabled_ = false;
+
+    void setLocalHbm(bool on) {
+        disp_local_hbm_req req;
+        req.base.flag = 0;
+        req.base.disp_id = MI_DISP_PRIMARY;
+        req.local_hbm_value =
+                on ? LHBM_TARGET_BRIGHTNESS_WHITE_1000NIT : LHBM_TARGET_BRIGHTNESS_OFF_FINGER_UP;
+        ioctl(disp_fd_.get(), MI_DISP_IOCTL_SET_LOCAL_HBM, &req);
+    }
+
+    void setTouchFod(bool on) {
+        std::lock_guard<std::mutex> lock(fodLock_);
+        fodEnabled_ = on;
+        if (!on) {
+            setLocalHbm(false);
+        }
+        int buf[MAX_BUF_SIZE] = {TOUCH_ID, Touch_Fod_Enable, on ? 1 : 0};
         ioctl(touch_fd_.get(), TOUCH_IOC_SET_CUR_VALUE, &buf);
     }
 
-    void setFingerDown(bool pressed) {
-        int buf[MAX_BUF_SIZE] = {TOUCH_ID, Touch_Fod_Enable, pressed ? 1 : 0};
-        ioctl(touch_fd_.get(), TOUCH_IOC_SET_CUR_VALUE, &buf);
-    }
+    void setFodStatus(int value) { setTouchFod(value == FOD_STATUS_ON); }
+
+    void setFingerDown(bool pressed) { setTouchFod(pressed); }
 };
 
 static UdfpsHandler* create() {
