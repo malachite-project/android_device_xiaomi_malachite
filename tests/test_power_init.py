@@ -26,6 +26,7 @@ def actions():
 
 UFS_CLKGATE = "/sys/devices/platform/soc/112b0000.ufshci/clkgate_enable"
 CPUQOS = "/sys/devices/system/cpu/cpuqos/cpuqos_boot_complete"
+PELT = "/proc/sys/kernel/sched_pelt_multiplier"
 
 
 def writes(events, paths):
@@ -62,6 +63,13 @@ class PowerInitTests(unittest.TestCase):
                     values = [w[2] for w in actions()[event]
                               if w[0] == "write" and w[1] == policy]
                     self.assertEqual(values, ["schedutil", "sugov_ext"])
+
+    def test_pelt_multiplier_is_stock(self):
+        # Stock vendor/etc/init/hw/init.cgroup.rc: on post-fs-data, 4.
+        self.assertEqual(writes(["early-init", "init"], {PELT}), {})
+        self.assertEqual(writes(["post-fs-data"], {PELT}), {PELT: "4"})
+        self.assertEqual(writes(["early-init", "init", "post-fs-data",
+                                 "property:sys.boot_completed=1"], {PELT}), {PELT: "4"})
 
     def test_cpuqos_starts_after_boot_completes(self):
         self.assertEqual(writes(["init"], {CPUQOS}), {})

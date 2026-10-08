@@ -73,6 +73,12 @@ fixed 25% margin. `schedutil` is written first so a failed `sugov_ext` write
 leaves the previous behaviour rather than the boot-time `performance`
 governor.
 
+Stock pairs `sugov_ext` with a PELT multiplier of 4
+(`vendor/etc/init/hw/init.cgroup.rc`, `on post-fs-data`), so utilisation
+ramps with an 8 ms half-life instead of 32 ms and the governor sees load
+changes four times sooner. The tree writes the same value at the same
+stage.
+
 ## Cache QoS
 
 `cpuqos_v3.ko` keeps L3 partitioning disabled until `1` is written to
