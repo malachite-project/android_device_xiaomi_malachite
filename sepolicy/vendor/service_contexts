@@ -9,3 +9,4 @@ vendor.xiaomi.sensor.citsensorservice.ICitSensorService/default u:object_r:vendo
 
 # NFC
 vendor.tms.tmsnfc_aidl.ITmsNfc/default u:object_r:vendor_tmsnfc_service:s0
+vendor.mediatek.hardware.bluetooth.audio.IBluetoothAudioProviderFactory/default u:object_r:mtk_hal_audio_service:s0
