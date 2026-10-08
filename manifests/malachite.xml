@@ -27,6 +27,9 @@
                            (QR scanner)
      lineage-23.2 branches are chara's release state, unmodified.
      ParanoidSense (face unlock app) is PixelOS's sixteen-qpr2, unmodified.
+     hardware/dolby is crDroid's LunarisDolby branch reduced to its Dolby
+     control app; the Dolby DAX vendor stack comes from stock 208 in
+     vendor/xiaomi/malachite.
 
      Commits whose subject starts with [UNTESTED] have not been built or
      run on a device.
@@ -68,4 +71,5 @@
 
   <!-- Additions -->
   <project path="packages/apps/ParanoidSense" name="android_packages_apps_ParanoidSense" remote="malachite-project" revision="sixteen-qpr2" />
+  <project path="hardware/dolby" name="android_hardware_dolby" remote="malachite-project" revision="noam/lineage-23.2" />
 </manifest>

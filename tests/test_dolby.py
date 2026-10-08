@@ -1,4 +1,5 @@
 """Dolby DAX wiring contracts. Static checks only; audio behavior needs the phone."""
+import os
 from pathlib import Path
 import re
 import unittest
@@ -95,6 +96,32 @@ class DolbyTests(unittest.TestCase):
                      "hal_client_domain(hal_audio_default, hal_dms)"):
             with self.subTest(rule=rule):
                 self.assertIn(rule, te)
+
+    def test_control_app_comes_from_hardware_dolby(self):
+        root = ET.parse(ROOT / "manifests/malachite.xml").getroot()
+        projects = {p.get("path"): p for p in root.findall("project")}
+        dolby = projects["hardware/dolby"]
+        self.assertEqual(dolby.get("name"), "android_hardware_dolby")
+        self.assertEqual(dolby.get("remote"), "malachite-project")
+        self.assertEqual(dolby.get("revision"), "noam/lineage-23.2")
+        self.assertIn("$(call inherit-product, hardware/dolby/dolby.mk)",
+                      (ROOT / "device.mk").read_text())
+
+    def test_hardware_dolby_ships_only_the_app(self):
+        # It must not bring its own Dolby blobs, policy or VINTF: the device has them.
+        repo = Path(os.environ.get("MALACHITE_DOLBY_ROOT", ROOT.parent / "dolby-hwdolby"))
+        if not (repo / "dolby.mk").is_file():
+            self.skipTest("hardware/dolby is not checked out beside the tree")
+        mk = (repo / "dolby.mk").read_text()
+        self.assertIn("LunarisDolby", mk)
+        for word in ("BOARD_VENDOR_SEPOLICY_DIRS", "DEVICE_MANIFEST_FILE",
+                     "DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE", "libswdap", "dax-default"):
+            with self.subTest(word=word):
+                self.assertNotIn(word, mk)
+        self.assertFalse((repo / "proprietary").exists())
+        self.assertFalse((repo / "sepolicy").exists())
+        effect = (repo / "LunarisDolby/src/org/lunaris/dolby/audio/DolbyAudioEffect.kt").read_text()
+        self.assertIn(EFFECTS["dap"][1], effect)
 
 
 if __name__ == "__main__":

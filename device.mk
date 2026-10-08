@@ -86,6 +86,10 @@ PRODUCT_PACKAGES += \
     android.hardware.audio@7.1-impl \
     android.hardware.audio.effect@7.0-impl
 
+# Dolby: control app from hardware/dolby. The DAX vendor stack, its policy
+# and audio_effects.xml entries are in this tree and vendor/xiaomi/malachite.
+$(call inherit-product, hardware/dolby/dolby.mk)
+
 # Bluetooth audio: MediaTek's provider and stock's Bluetooth audio HAL
 # (audio.bluetooth.mt6878) come from vendor/xiaomi/malachite. The AOSP pair
 # uses a separate session library and cannot run beside them.
