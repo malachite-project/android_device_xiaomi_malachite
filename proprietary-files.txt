@@ -1449,7 +1449,9 @@ system_ext/framework/com.android.hotwordenrollment.common.util.jar
 
 # IMS
 vendor/bin/hw/vtservice_aidl
+vendor/bin/ipsec_mon
 vendor/etc/init/init.vtservice_aidl.rc
+vendor/etc/init/ipsec_mon.rc
 vendor/lib64/hw/vendor.mediatek.hardware.videotelephony-impl.so
 vendor/lib64/vendor.mediatek.hardware.videotelephony-V1-ndk.so
 
