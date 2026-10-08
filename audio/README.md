@@ -13,6 +13,15 @@ Its init file is the single definition of `vendor.audio-hal` and retains the
 MediaTek `audio_hw_socket`. The old override in `init.mt6878.rc` must not remain:
 it would select the removed platform executable instead of this service.
 
+The Bluetooth audio provider it loads is MediaTek's stock
+`android.hardware.bluetooth.audio-impl-mediatek` (AIDL V3), not the AOSP one.
+It serves software and offloaded A2DP; for offload it opens the primary HAL
+already loaded in this process and calls `createMTKAudioHardware`. It must stay
+in this process, beside stock's `audio.bluetooth.mt6878` HAL, which links the
+same `libbluetooth_audio_session_aidl_mtk` session library. The AOSP provider
+and AOSP `audio.bluetooth.default` link a separate session library and must not
+be installed with it.
+
 The runtime constructor loader is based on LineageOS hardware/mediatek commit
 `3c04cf3997a30621966da9cf40f8b98ab453ebe3`. Unlike an independent `shared_ptr`
 control block, `SharedRefBase::ref()` uses the ownership expected by binder.

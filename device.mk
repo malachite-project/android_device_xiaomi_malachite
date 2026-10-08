@@ -86,9 +86,9 @@ PRODUCT_PACKAGES += \
     android.hardware.audio@7.1-impl \
     android.hardware.audio.effect@7.0-impl
 
-PRODUCT_PACKAGES += \
-    android.hardware.bluetooth.audio-impl \
-    audio.bluetooth.default
+# Bluetooth audio: MediaTek's provider and stock's Bluetooth audio HAL
+# (audio.bluetooth.mt6878) come from vendor/xiaomi/malachite. The AOSP pair
+# uses a separate session library and cannot run beside them.
 
 PRODUCT_PACKAGES += \
     audio.primary.default \

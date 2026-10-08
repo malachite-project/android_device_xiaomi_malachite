@@ -182,8 +182,10 @@ int main(int /* argc */, char* /* argv */ []) {
     };
 
     const std::vector<std::pair<std::string,std::string>> optionalInterfaceSharedLibs = {
+        // MediaTek's provider serves the software and offloaded A2DP sessions. It loads
+        // the primary HAL already open in this process to start offloaded streams.
         {
-            "android.hardware.bluetooth.audio-impl",
+            "android.hardware.bluetooth.audio-impl-mediatek",
             "createIBluetoothAudioProviderFactory",
         },
         {
