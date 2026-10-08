@@ -1,0 +1,25 @@
+# Dolby DAX parameter service (vendor.dolby.hardware.dms@2.0::IDms/default).
+# Mirrors the hal_dms rules in stock 208's vendor_sepolicy.cil.
+hal_attribute(dms)
+
+type hal_dms_hwservice, hwservice_manager_type;
+type hal_dms_default, domain;
+type hal_dms_default_exec, exec_type, vendor_file_type, file_type;
+
+hal_server_domain(hal_dms_default, hal_dms)
+init_daemon_domain(hal_dms_default)
+hwbinder_use(hal_dms_default)
+get_prop(hal_dms_default, hwservicemanager_prop)
+
+hal_attribute_hwservice(hal_dms, hal_dms_hwservice)
+binder_call(hal_dms_client, hal_dms_server)
+binder_call(hal_dms_server, hal_dms_client)
+
+# Tuning database and dax-extra.xml in /data/vendor/dolby (created by the service's rc).
+allow hal_dms_default vendor_data_file:dir rw_dir_perms;
+allow hal_dms_default vendor_data_file:file create_file_perms;
+
+# The Dolby effects (libswdap, libdlbvol, ...) run in the audio HAL process.
+hal_client_domain(hal_audio_default, hal_dms)
+# Control app, as on stock (platform-signed).
+hal_client_domain(platform_app, hal_dms)
