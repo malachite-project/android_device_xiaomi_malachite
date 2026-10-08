@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Bluetooth Audio HAL Audio Policy Configuration file, used with A2DP hardware offload.
+     From stock's bluetooth_offload_audio_policy_configuration.xml. The A2DP ports carry no
+     encoded formats, so audio policy picks them only for codecs the primary module's
+     offloaded ports do not list (SBC and AAC are offloaded). LE Audio ports are left out:
+     every LE Audio profile is disabled in vendor.prop. -->
+<module name="bluetooth" halVersion="2.0">
+    <mixPorts>
+        <!-- A2DP Audio Ports. Spatializer only, as in bluetooth_audio_policy_configuration.xml:
+             a plain output would get a FastMixer and its MonoPipe delay. -->
+        <mixPort name="a2dp output" role="source" flags="AUDIO_OUTPUT_FLAG_SPATIALIZER"/>
+        <!-- Hearing AIDs Audio Ports -->
+        <mixPort name="hearing aid output" role="source">
+            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                     samplingRates="24000 16000"
+                     channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
+        </mixPort>
+    </mixPorts>
+    <devicePorts>
+        <!-- A2DP Audio Ports -->
+        <devicePort tagName="BT A2DP Out" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP" role="sink" encodedFormats="">
+            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                     samplingRates="44100 48000 88200 96000"
+                     channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
+        </devicePort>
+        <devicePort tagName="BT A2DP Headphones" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES" role="sink" encodedFormats="">
+            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                     samplingRates="44100 48000 88200 96000"
+                     channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
+        </devicePort>
+        <devicePort tagName="BT A2DP Speaker" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER" role="sink" encodedFormats="">
+            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                     samplingRates="44100 48000 88200 96000"
+                     channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
+        </devicePort>
+        <!-- Hearing AIDs Audio Ports -->
+        <devicePort tagName="BT Hearing Aid Out" type="AUDIO_DEVICE_OUT_HEARING_AID" role="sink"/>
+    </devicePorts>
+    <routes>
+        <route type="mix" sink="BT A2DP Out"
+               sources="a2dp output"/>
+        <route type="mix" sink="BT A2DP Headphones"
+               sources="a2dp output"/>
+        <route type="mix" sink="BT A2DP Speaker"
+               sources="a2dp output"/>
+        <route type="mix" sink="BT Hearing Aid Out"
+               sources="hearing aid output"/>
+    </routes>
+</module>

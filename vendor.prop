@@ -44,6 +44,14 @@ bluetooth.profile.pan.panu.enabled=true
 bluetooth.profile.pbap.server.enabled=true
 bluetooth.profile.sap.server.enabled=true
 
+# A2DP hardware offload, as on stock. Developer options "Disable Bluetooth A2DP
+# hardware offload" sets persist.bluetooth.a2dp_offload.disabled=true; after a
+# reboot the Bluetooth stack and audio policy both fall back to software A2DP
+# (audio_policy_configuration_a2dp_offload_disabled.xml).
+ro.bluetooth.a2dp_offload.supported=true
+persist.bluetooth.a2dp_offload.cap=sbc-aac
+persist.bluetooth.a2dp_offload.disabled=false
+
 # LE Audio: stock disables every profile, and the Bluetooth audio policy
 # has no LE Audio ports. Keep the whole feature off rather than half on.
 bluetooth.profile.bap.broadcast.assist.enabled=false

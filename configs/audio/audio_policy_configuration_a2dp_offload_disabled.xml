@@ -177,20 +177,6 @@
                     <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
                              samplingRates="8000 16000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
                 </devicePort>
-                <!-- A2DP hardware offload: the audio DSP encodes SBC and AAC (as on stock).
-                     Other codecs use the bluetooth module's software ports. -->
-                <devicePort tagName="BT A2DP Out" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP" role="sink" encodedFormats="AUDIO_FORMAT_SBC AUDIO_FORMAT_AAC">
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
-                </devicePort>
-                <devicePort tagName="BT A2DP Headphones" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES" role="sink" encodedFormats="AUDIO_FORMAT_SBC AUDIO_FORMAT_AAC">
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
-                </devicePort>
-                <devicePort tagName="BT A2DP Speaker" type="AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER" role="sink" encodedFormats="AUDIO_FORMAT_SBC AUDIO_FORMAT_AAC">
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
-                </devicePort>
                 <devicePort tagName="Digital Dock Headset" type="AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET" role="sink">
                     <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
                              samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
@@ -270,12 +256,6 @@
                        sources="primary output,deep_buffer,fast,voip_rx,Voice Call In"/>
                 <route type="mix" sink="BT SCO Car Kit"
                        sources="primary output,deep_buffer,fast,voip_rx,Voice Call In"/>
-                <route type="mix" sink="BT A2DP Out"
-                       sources="primary output,deep_buffer,fast,immersive_out"/>
-                <route type="mix" sink="BT A2DP Headphones"
-                       sources="primary output,deep_buffer,fast,immersive_out"/>
-                <route type="mix" sink="BT A2DP Speaker"
-                       sources="primary output,deep_buffer,fast,immersive_out"/>
                 <route type="mix" sink="Digital Dock Headset"
                        sources="primary output"/>
                 <route type="mix" sink="HDMI"
@@ -300,10 +280,10 @@
 
         </module>
 
-        <!-- Bluetooth Audio HAL: hearing aids and A2DP codecs the DSP does not encode.
-             audio_policy_configuration_a2dp_offload_disabled.xml is used instead when
-             persist.bluetooth.a2dp_offload.disabled=true. -->
-        <xi:include href="bluetooth_offload_audio_policy_configuration.xml"/>
+        <!-- Bluetooth Audio HAL: software A2DP. Audio policy reads this file instead of
+             audio_policy_configuration.xml when persist.bluetooth.a2dp_offload.disabled=true
+             (Developer options, "Disable Bluetooth A2DP hardware offload"). -->
+        <xi:include href="bluetooth_audio_policy_configuration.xml"/>
 
         <!-- USB Audio Accessory -->
         <xi:include href="usbv2_audio_accessory_policy_configuration.xml"/>
