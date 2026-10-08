@@ -149,6 +149,23 @@ on property:sys.boot_completed=1
     # BALANCE and partitions L3 between top-app and background groups.
     write /sys/devices/system/cpu/cpuqos/cpuqos_boot_complete 1
 
+    # Camera C2PS policy. The camera HAL reports its per-frame tasks to
+    # mtk_c2ps.ko itself (/proc/c2ps/c2ps_ioctl); C2PS adjusts their uclamp
+    # (up/down margins, processing-time window). Stock picks the policy via perf
+    # locks from odm/etc/camera/xiaomi/MiCamCPUControl.xml; this ROM's
+    # libmtkperf_client only logs them. Set the rear-camera video values
+    # (DefaultCPUPolicy_30FPS) once instead.
+    write /sys/module/mtk_c2ps/parameters/c2ps_regulator_process_mode 1
+    write /sys/module/mtk_c2ps/parameters/c2ps_uclamp_up_margin 10
+    write /sys/module/mtk_c2ps/parameters/c2ps_uclamp_down_margin 10
+    write /sys/module/mtk_c2ps/parameters/c2ps_regulator_base_update_uclamp 20
+    write /sys/module/mtk_c2ps/parameters/proc_time_window_size 33
+    write /sys/module/mtk_c2ps/parameters/background_monitor_duration 33
+    write /sys/module/mtk_c2ps/parameters/background_idlerate_alert 15
+    write /sys/module/mtk_c2ps/parameters/c2ps_uclamp_bg_up_margin_cluster0 1000
+    write /sys/module/mtk_c2ps/parameters/c2ps_uclamp_bg_up_margin_cluster1 1000
+    write /sys/module/mtk_c2ps/parameters/c2ps_regulator_bg_update_uclamp 20
+
 on charger
     # Charger-only boot runs init but never reaches sys.boot_completed.
     # Release the boot boost using the same governors as normal boot.

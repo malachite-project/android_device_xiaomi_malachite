@@ -27,6 +27,21 @@ def actions():
 UFS_CLKGATE = "/sys/devices/platform/soc/112b0000.ufshci/clkgate_enable"
 CPUQOS = "/sys/devices/system/cpu/cpuqos/cpuqos_boot_complete"
 PELT = "/proc/sys/kernel/sched_pelt_multiplier"
+C2PS = "/sys/module/mtk_c2ps/parameters/"
+# Stock odm/etc/camera/xiaomi/MiCamCPUControl.xml, DefaultCPUPolicy_30FPS,
+# mapped to module parameters by stock vendor/etc/powercontable.xml.
+STOCK_C2PS_VIDEO = {
+    "c2ps_regulator_process_mode": "1",          # C2PS_UCLAMP_POLICY_MODE
+    "c2ps_uclamp_up_margin": "10",               # ..._SIMPLE_POLICY_UP_MARGIN
+    "c2ps_uclamp_down_margin": "10",             # ..._SIMPLE_POLICY_DOWN_MARGIN
+    "c2ps_regulator_base_update_uclamp": "20",   # ..._SIMPLE_POLICY_BASE_UPDATE_UCLAMP
+    "proc_time_window_size": "33",               # C2PS_PROC_TIME_WINDOW_SIZE
+    "background_monitor_duration": "33",         # ..._BG_UCLAMP_POLICY_MONITOR_DURATION
+    "background_idlerate_alert": "15",           # ..._BG_UCLAMP_POLICY_IDLERATE_ALERT
+    "c2ps_uclamp_bg_up_margin_cluster0": "1000", # ..._BG_UCLAMP_POLICY_UP_MARGIN_CLUSTER_0
+    "c2ps_uclamp_bg_up_margin_cluster1": "1000", # ..._BG_UCLAMP_POLICY_UP_MARGIN_CLUSTER_1
+    "c2ps_regulator_bg_update_uclamp": "20",     # ..._BG_UCLAMP_POLICY_BASE_UPDATE_UCLAMP
+}
 
 
 def writes(events, paths):
@@ -70,6 +85,41 @@ class PowerInitTests(unittest.TestCase):
         self.assertEqual(writes(["post-fs-data"], {PELT}), {PELT: "4"})
         self.assertEqual(writes(["early-init", "init", "post-fs-data",
                                  "property:sys.boot_completed=1"], {PELT}), {PELT: "4"})
+
+    def test_c2ps_video_policy_is_stock_after_boot(self):
+        paths = {C2PS + name for name in STOCK_C2PS_VIDEO}
+        self.assertEqual(writes(["early-init", "init", "post-fs-data"], paths), {})
+        self.assertEqual(writes(["property:sys.boot_completed=1"], paths),
+                         {C2PS + k: v for k, v in STOCK_C2PS_VIDEO.items()})
+        self.assertEqual(writes(["charger"], paths), {})
+
+    def test_c2ps_values_match_stock_xml_when_available(self):
+        xml = os.environ.get("MALACHITE_STOCK_MICAMCPUCONTROL")
+        if not xml:
+            self.skipTest("set MALACHITE_STOCK_MICAMCPUCONTROL to stock MiCamCPUControl.xml")
+        import xml.etree.ElementTree as ET
+        mode = next(m for m in ET.parse(xml).getroot()
+                    if m.get("ID") == "DefaultCPUPolicy_30FPS")
+        stock = {c.tag: c.text for c in mode}
+        names = {
+            "c2ps_regulator_process_mode": "PERF_RES_C2PS_UCLAMP_POLICY_MODE",
+            "c2ps_uclamp_up_margin": "PERF_RES_C2PS_UCLAMP_SIMPLE_POLICY_UP_MARGIN",
+            "c2ps_uclamp_down_margin": "PERF_RES_C2PS_UCLAMP_SIMPLE_POLICY_DOWN_MARGIN",
+            "c2ps_regulator_base_update_uclamp":
+                "PERF_RES_C2PS_UCLAMP_SIMPLE_POLICY_BASE_UPDATE_UCLAMP",
+            "proc_time_window_size": "PERF_RES_C2PS_PROC_TIME_WINDOW_SIZE",
+            "background_monitor_duration": "PERF_RES_C2PS_BG_UCLAMP_POLICY_MONITOR_DURATION",
+            "background_idlerate_alert": "PERF_RES_C2PS_BG_UCLAMP_POLICY_IDLERATE_ALERT",
+            "c2ps_uclamp_bg_up_margin_cluster0":
+                "PERF_RES_C2PS_BG_UCLAMP_POLICY_UP_MARGIN_CLUSTER_0",
+            "c2ps_uclamp_bg_up_margin_cluster1":
+                "PERF_RES_C2PS_BG_UCLAMP_POLICY_UP_MARGIN_CLUSTER_1",
+            "c2ps_regulator_bg_update_uclamp":
+                "PERF_RES_C2PS_BG_UCLAMP_POLICY_BASE_UPDATE_UCLAMP",
+        }
+        for param, tag in names.items():
+            with self.subTest(param=param):
+                self.assertEqual(STOCK_C2PS_VIDEO[param], stock[tag])
 
     def test_cpuqos_starts_after_boot_completes(self):
         self.assertEqual(writes(["init"], {CPUQOS}), {})

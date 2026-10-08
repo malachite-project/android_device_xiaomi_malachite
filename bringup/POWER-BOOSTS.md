@@ -79,6 +79,29 @@ ramps with an 8 ms half-life instead of 32 ms and the governor sees load
 changes four times sooner. The tree writes the same value at the same
 stage.
 
+## Camera: C2PS
+
+Stock does not boost the camera with fixed frequencies. The camera HAL
+(`libmtkcam_c2psperfctrl.so`) reports its per-frame tasks and processing
+times to `mtk_c2ps.ko` through `/proc/c2ps/c2ps_ioctl`. Judging by its
+parameters (uclamp up/down margins, a processing-time window; no source is
+available), C2PS adjusts those tasks' uclamp to the frame time. Which policy
+runs is chosen per stream configuration by
+`odm/etc/camera/xiaomi/MiCamCPUControl.xml` through MediaTek perf locks,
+which `powercontable.xml` maps to `/sys/module/mtk_c2ps/parameters/*`.
+
+This ROM's `libmtkperf_client` only logs perf locks, so the HAL's C2PS
+task reports arrive but the policy parameters stay at the module's
+defaults. The tree writes the rear-camera video policy
+(`DefaultCPUPolicy_30FPS`; the 4K 30 fps and 720p video modes use the
+same values) once at boot completion. Not replicated: the per-mode
+switches (1080p/4K 60 fps use a 16 ms background window and 13% idle
+alert), the video modes' CPU frequency caps (2.0/2.5 GHz) and core_ctl
+settings, and the front and photo modes, which use FPSGO instead.
+
+The uclamp values C2PS sets are per task and are no longer capped by
+`sched_util_clamp_min` (see above).
+
 ## Cache QoS
 
 `cpuqos_v3.ko` keeps L3 partitioning disabled until `1` is written to
