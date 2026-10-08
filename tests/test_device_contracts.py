@@ -232,15 +232,17 @@ class DeviceContracts(unittest.TestCase):
         self.assertIn("allow hal_lineage_health_default sysfs_batteryinfo:file rw_file_perms;",
                       policy)
 
-    def test_a2dp_has_a_plain_output_beside_the_spatializer(self):
+    def test_a2dp_runs_on_the_spatializer_output_only(self):
+        # A plain A2DP output gets a FastMixer, which puts normal tracks behind a
+        # 40-75 ms MonoPipe; the spatializer thread mixes in the HAL's 10 ms periods.
         module = ET.parse(ROOT / "configs/audio/bluetooth_audio_policy_configuration.xml").getroot()
         flags = {port.get("name"): port.get("flags") for port in module.iter("mixPort")}
-        self.assertIsNone(flags["a2dp output"])
-        self.assertEqual(flags["a2dp spatializer output"], "AUDIO_OUTPUT_FLAG_SPATIALIZER")
+        self.assertEqual(flags["a2dp output"], "AUDIO_OUTPUT_FLAG_SPATIALIZER")
+        self.assertNotIn("a2dp spatializer output", flags)
         routes = {route.get("sink"): route.get("sources").split(",") for route in module.iter("route")}
         for sink in ("BT A2DP Out", "BT A2DP Headphones", "BT A2DP Speaker"):
             with self.subTest(sink=sink):
-                self.assertEqual(routes[sink], ["a2dp output", "a2dp spatializer output"])
+                self.assertEqual(routes[sink], ["a2dp output"])
 
     def test_qr_tile_uses_aperture_without_a_second_camera(self):
         self.assertIn("product/priv-app/MiuiCamera/MiuiCamera.apk\n",

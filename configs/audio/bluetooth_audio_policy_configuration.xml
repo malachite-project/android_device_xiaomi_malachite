@@ -3,11 +3,7 @@
 <module name="bluetooth" halVersion="2.0">
     <mixPorts>
         <!-- A2DP Audio Ports -->
-        <!-- A plain output carries everything that is not spatialized. Only a plain mixer
-             thread requests the Bluetooth HAL's low latency mode for game audio; the
-             spatializer output is opened on demand for spatialized content. -->
-        <mixPort name="a2dp output" role="source"/>
-        <mixPort name="a2dp spatializer output" role="source" flags="AUDIO_OUTPUT_FLAG_SPATIALIZER"/>
+        <mixPort name="a2dp output" role="source" flags="AUDIO_OUTPUT_FLAG_SPATIALIZER"/>
         <!-- Hearing AIDs Audio Ports -->
         <mixPort name="hearing aid output" role="source">
             <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
@@ -37,11 +33,11 @@
     </devicePorts>
     <routes>
         <route type="mix" sink="BT A2DP Out"
-               sources="a2dp output,a2dp spatializer output"/>
+               sources="a2dp output"/>
         <route type="mix" sink="BT A2DP Headphones"
-               sources="a2dp output,a2dp spatializer output"/>
+               sources="a2dp output"/>
         <route type="mix" sink="BT A2DP Speaker"
-               sources="a2dp output,a2dp spatializer output"/>
+               sources="a2dp output"/>
         <route type="mix" sink="BT Hearing Aid Out"
                sources="hearing aid output"/>
     </routes>
