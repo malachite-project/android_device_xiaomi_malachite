@@ -558,37 +558,35 @@
          we only enabled it while the device has ability of mixed color spaces composition -->
     <bool name="config_enableWcgMode">true</bool>
 
-    <!-- Colour modes in Settings > Display > Colors. Natural (0) lets SurfaceFlinger use
-         the panel PQ table's MediaTek template modes (HAL_sRGB / HAL_displayP3); wide-colour
-         content turns pink there. The others are vendor render intents 256 + n from the same
-         table (/vendor/etc/o16u_*_pq.xml, identical for all four panels), Xiaomi's own modes
-         with an sRGB and a Display P3 variant each. Only intents whose table entries differ
-         are listed: 0x100-0x102 are identical to each other, 0x10c equals 0x10b. 0x10d
-         (expert wide colour) is left out: without Xiaomi's display service it shows only a
-         faint red.
-         The first entry is the default. -->
+    <!-- Colour modes in Settings > Display > Colors: vendor render intents 256 + n from the
+         panel PQ table (/vendor/etc/o16u_*_pq.xml, identical for all four panels), Xiaomi's
+         own modes with an sRGB and a Display P3 variant each. Only intents whose table
+         entries differ are listed: 0x100-0x102 are identical to each other, 0x10c equals
+         0x10b. 0x10d (expert wide colour) is left out: without Xiaomi's display service it
+         shows only a faint red. Natural (0) is left out too: it lets SurfaceFlinger use the
+         table's MediaTek template modes (HAL_sRGB / HAL_displayP3), where the panel looks
+         pink and wide-colour content turns pink.
+         The first entry is the default, and the framework also falls back to it when the
+         stored mode is no longer offered, so phones left on Natural move to native D65. -->
     <integer-array name="config_availableColorModes">
-        <item>0</item>   <!-- COLOR_MODE_NATURAL -->
+        <item>273</item> <!-- 0x111 Native_D65 -->
         <item>263</item> <!-- 0x107 GM1 -->
         <item>264</item> <!-- 0x108 GM2 -->
         <item>265</item> <!-- 0x109 GM3 -->
         <item>267</item> <!-- 0x10b expert_srgb -->
-        <item>273</item> <!-- 0x111 Native_D65 -->
     </integer-array>
 
     <!-- Let SurfaceFlinger pick sRGB or Display P3 per content in every mode, and clear
          any forced composition colour mode left from older builds. -->
     <integer-array name="config_displayCompositionColorModes">
-        <item>0</item>
+        <item>273</item>
         <item>263</item>
         <item>264</item>
         <item>265</item>
         <item>267</item>
-        <item>273</item>
     </integer-array>
     <integer-array name="config_displayCompositionColorSpaces">
         <item>0</item> <!-- COLOR_MODE_DEFAULT -->
-        <item>0</item>
         <item>0</item>
         <item>0</item>
         <item>0</item>

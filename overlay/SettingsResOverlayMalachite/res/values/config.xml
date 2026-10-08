@@ -33,19 +33,17 @@
 
     <!-- Names for config_availableColorModes in the framework overlay (PQ table names). -->
     <string-array name="config_color_mode_options_strings" translatable="false">
-        <item>Natural</item>
+        <item>Xiaomi native D65</item>
         <item>Xiaomi GM1</item>
         <item>Xiaomi GM2</item>
         <item>Xiaomi GM3</item>
         <item>Xiaomi expert sRGB</item>
-        <item>Xiaomi native D65</item>
     </string-array>
     <integer-array name="config_color_mode_options_values" translatable="false">
-        <item>0</item>
+        <item>273</item>
         <item>263</item>
         <item>264</item>
         <item>265</item>
         <item>267</item>
-        <item>273</item>
     </integer-array>
 </resources>

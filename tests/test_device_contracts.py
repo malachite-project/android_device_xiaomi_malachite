@@ -107,13 +107,15 @@ class DeviceContracts(unittest.TestCase):
         names = arrays("overlay/SettingsResOverlayMalachite/res/values/config.xml",
                        "string-array")["config_color_mode_options_strings"]
         modes = framework["config_availableColorModes"]
-        self.assertEqual(modes[0], "0")
-        self.assertTrue(all(256 <= int(mode) <= 511 for mode in modes[1:]))
+        # Native D65 is the default; Natural (0) shows the pink MediaTek template modes.
+        self.assertEqual(modes[0], "273")
+        self.assertTrue(all(256 <= int(mode) <= 511 for mode in modes))
         self.assertEqual(len(set(modes)), len(modes))
         self.assertEqual(framework["config_displayCompositionColorModes"], modes)
         self.assertEqual(framework["config_displayCompositionColorSpaces"], ["0"] * len(modes))
         self.assertEqual(settings["config_color_mode_options_values"], modes)
         self.assertEqual(len(names), len(modes))
+        self.assertEqual(names[0], "Xiaomi native D65")
         # 0x10d, expert wide colour, shows only a faint red without Xiaomi's display service.
         self.assertNotIn("269", modes)
 
