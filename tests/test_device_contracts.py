@@ -264,6 +264,22 @@ class DeviceContracts(unittest.TestCase):
                       "$(TARGET_COPY_OUT_PRODUCT)/etc/sysconfig/aperture-qr-scanner.xml",
                       (ROOT / "device.mk").read_text())
 
+    def test_touch_hal_offers_high_polling_rate(self):
+        node = "/sys/devices/platform/goodix_ts.0/goodix_ts_report_rate"
+        self.assertIn("vendor.lineage.touch-service.malachite", (ROOT / "device.mk").read_text())
+        self.assertIn(node, (ROOT / "touch/HighTouchPollingRate.cpp").read_text())
+        rc = (ROOT / "touch/vendor.lineage.touch-service.malachite.rc").read_text()
+        self.assertIn("chown system system " + node, rc)
+        self.assertIn("genfscon sysfs " + node[len("/sys"):] +
+                      " u:object_r:vendor_sysfs_touch_report_rate:s0",
+                      (ROOT / "sepolicy/vendor/genfs_contexts").read_text())
+        self.assertIn(r"vendor\.lineage\.touch-service\.malachite "
+                      "u:object_r:hal_lineage_touch_default_exec:s0",
+                      (ROOT / "sepolicy/vendor/file_contexts").read_text())
+        manifest = ET.parse(ROOT / "touch/vendor.lineage.touch-service.malachite.xml").getroot()
+        self.assertEqual([i.text for i in manifest.iter("name")],
+                         ["vendor.lineage.touch", "IHighTouchPollingRate"])
+
     def test_euicc_permission_has_one_copy(self):
         entries = product_copies("vendor/mediatek/ims")
         destination = "product/etc/permissions/android.hardware.telephony.euicc.xml"

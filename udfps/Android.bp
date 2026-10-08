@@ -19,3 +19,10 @@ cc_library {
         "//hardware/xiaomi:xiaomifingerprint_headers",
     ],
 }
+
+// mi_disp.h, the Xiaomi display feature interface, for the touch HAL too.
+cc_library_headers {
+    name: "malachite_mi_disp_headers",
+    vendor: true,
+    export_include_dirs: ["."],
+}

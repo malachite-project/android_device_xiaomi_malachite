@@ -1,0 +1,5 @@
+# High touch polling rate: write the Goodix report rate node and listen for display
+# power events on the Xiaomi display feature device to restore it after a touch reset.
+allow hal_lineage_touch_default sysfs:dir search;
+allow hal_lineage_touch_default vendor_sysfs_touch_report_rate:file rw_file_perms;
+allow hal_lineage_touch_default vendor_displayfeature_device:chr_file rw_file_perms;

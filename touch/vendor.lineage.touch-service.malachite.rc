@@ -1,0 +1,8 @@
+on boot
+    chown system system /sys/devices/platform/goodix_ts.0/goodix_ts_report_rate
+    chmod 0664 /sys/devices/platform/goodix_ts.0/goodix_ts_report_rate
+
+service vendor.touch-hal /vendor/bin/hw/vendor.lineage.touch-service.malachite
+    class hal
+    user system
+    group system
