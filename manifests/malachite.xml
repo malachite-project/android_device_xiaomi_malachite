@@ -25,6 +25,11 @@
                            and radio-property rules
        vendor              chara + Aperture kept beside MiuiCamera
                            (QR scanner)
+       Bluetooth           current LineageOS + LineageOS change 507009 (MTK
+                           A2DP offload coex wrap-around fix), approved but
+                           not merged on 2026-10-09. Once it is merged in
+                           lineage-23.2, drop this override and sync
+                           LineageOS's project again
      lineage-23.2 branches are chara's release state, unmodified.
      ParanoidSense (face unlock app) is PixelOS's sixteen-qpr2, unmodified.
      hardware/dolby is crDroid's LunarisDolby branch reduced to its Dolby
@@ -68,6 +73,8 @@
   <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="malachite-project" revision="noam/lineage-23.2" />
   <remove-project path="packages/services/Telephony" optional="true" />
   <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="malachite-project" revision="noam/lineage-23.2" />
+  <remove-project path="packages/modules/Bluetooth" optional="true" />
+  <project path="packages/modules/Bluetooth" name="android_packages_modules_Bluetooth" remote="malachite-project" revision="noam/lineage-23.2" groups="pdk" />
 
   <!-- Additions -->
   <project path="packages/apps/ParanoidSense" name="android_packages_apps_ParanoidSense" remote="malachite-project" revision="sixteen-qpr2" />

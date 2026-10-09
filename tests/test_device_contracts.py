@@ -357,6 +357,17 @@ class DeviceContracts(unittest.TestCase):
                          r"(?m)^persist\.bluetooth\.a2dp_offload\.coex_buf_count=3$")
         self.assertNotIn("coex_buf_count", (ROOT / "vendor.prop").read_text())
 
+    def test_manifest_takes_the_bluetooth_stack_with_the_coex_fix(self):
+        # LineageOS 507009 fixes the coex window wrap-around that can hold the A2DP
+        # offload start; until it is merged in lineage-23.2 the fork carries it.
+        root = ET.parse(ROOT / "manifests/malachite.xml").getroot()
+        removed = {node.get("path") for node in root.findall("remove-project")}
+        bluetooth = {p.get("path"): p for p in root.findall("project")}["packages/modules/Bluetooth"]
+        self.assertIn("packages/modules/Bluetooth", removed)
+        self.assertEqual(bluetooth.get("name"), "android_packages_modules_Bluetooth")
+        self.assertEqual(bluetooth.get("remote"), "malachite-project")
+        self.assertEqual(bluetooth.get("revision"), "noam/lineage-23.2")
+
     def test_offloaded_bluetooth_modules_have_software_a2dp(self):
         # PCM-only A2DP ports catch codecs the DSP does not encode (empty encodedFormats
         # matches any codec in DeviceDescriptorBase::supportsFormat).
