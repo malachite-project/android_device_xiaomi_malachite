@@ -6,6 +6,14 @@
 # vendor_init may not set.
 ro.bluetooth.leaudio_switcher.supported=true
 
+# A2DP hardware offload coex for MediaTek (LineageOS packages/modules/Bluetooth
+# d7165dd2088): while A2DP is offloaded, L2CAP keeps 3 of the controller's
+# classic ACL buffers free and the stack tells the controller so (A2DP vendor
+# command, sub-opcode 0xA0), so other classic links cannot starve the
+# offloaded stream. 0 (unset) skips both. persist.bluetooth.* is
+# bluetooth_prop, which vendor_init may not set.
+persist.bluetooth.a2dp_offload.coex_buf_count=3
+
 # WiFi
 wifi.interface=wlan0
 wifi.supplicant_scan_interval=120

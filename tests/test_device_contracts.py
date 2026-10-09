@@ -321,6 +321,13 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(stripped("audio_policy_configuration.xml"),
                          stripped("audio_policy_configuration_a2dp_offload_disabled.xml"))
 
+    def test_a2dp_offload_reserves_coex_buffers(self):
+        # bta_av_aact.cc reads persist.bluetooth.a2dp_offload.coex_buf_count (default 0)
+        # on each offload start. bluetooth_prop: vendor_init may not set it.
+        self.assertRegex((ROOT / "system.prop").read_text(),
+                         r"(?m)^persist\.bluetooth\.a2dp_offload\.coex_buf_count=3$")
+        self.assertNotIn("coex_buf_count", (ROOT / "vendor.prop").read_text())
+
     def test_offloaded_bluetooth_module_has_software_a2dp(self):
         # PCM-only A2DP ports catch codecs the DSP does not encode (empty encodedFormats
         # matches any codec in DeviceDescriptorBase::supportsFormat).
