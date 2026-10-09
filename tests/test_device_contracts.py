@@ -129,6 +129,13 @@ class DeviceContracts(unittest.TestCase):
         # 0x10d, expert wide colour, shows only a faint red without Xiaomi's display service.
         self.assertNotIn("269", modes)
 
+    def test_hdr_has_headroom_for_full_screen_hdr_only(self):
+        hbm = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot().find(
+            "highBrightnessMode")
+        self.assertEqual(hbm.find("minimumHdrPercentOfScreen").text, "0.5")
+        ratios = [float(p.find("hdrRatio").text) for p in hbm.find("sdrHdrRatioMap").iter("point")]
+        self.assertEqual(ratios, [8.0, 8.0])
+
     def test_auto_brightness_ramps_slowly(self):
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
         ramp = {name: float(display.find("screenBrightnessRamp" + name).text)
