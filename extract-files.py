@@ -180,6 +180,12 @@ blob_fixups: blob_fixups_user_type = {
      'odm/lib64/camera/plugins/com.xiaomi.plugin.mihisv3.so'): blob_fixup()
         .replace_needed('libHISCppAlgos.so','libHISCppAlgos_odm.so'),
 
+    'vendor/lib64/hw/audio.bluetooth.mt6878.so': blob_fixup()
+        .replace_needed('libbluetooth_audio_session.so', 'libbluetooth_audio_session_stock.so'),
+
+    'vendor/lib64/libbluetooth_audio_session_stock.so': blob_fixup()
+        .replace_needed('libbluetooth_audio_session_aidl.so', 'libbluetooth_audio_session_aidl_stock.so'),
+
     'vendor/lib64/vendor.mediatek.hardware.bluetooth.audio-V1-ndk.so': blob_fixup()
         .replace_needed('android.hardware.audio.common-V1-ndk.so', 'android.hardware.audio.common-V2-ndk.so'),
 

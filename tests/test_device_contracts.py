@@ -362,6 +362,26 @@ class DeviceContracts(unittest.TestCase):
                          r"(?m)^persist\.bluetooth\.a2dp_offload\.coex_buf_count=3$")
         self.assertNotIn("coex_buf_count", (ROOT / "vendor.prop").read_text())
 
+    def test_stock_bluetooth_hal_links_stock_session_libraries(self):
+        # audio.bluetooth.mt6878 needs libbluetooth_audio_session(.so), which pulls
+        # libbluetooth_audio_session_aidl. The AOSP modules of those names build against
+        # bluetooth.audio V5 / audio.common V4; Soong refuses them beside the stock HAL's
+        # V3 / audio.common V2. Stock's own copies ship renamed instead.
+        files = (ROOT / "proprietary-files.txt").read_text()
+        for line in ("vendor/lib64/libbluetooth_audio_session.so:"
+                     "vendor/lib64/libbluetooth_audio_session_stock.so;FIX_SONAME",
+                     "vendor/lib64/libbluetooth_audio_session_aidl.so:"
+                     "vendor/lib64/libbluetooth_audio_session_aidl_stock.so;FIX_SONAME"):
+            with self.subTest(line=line):
+                self.assertRegex(files, rf"(?m)^{re.escape(line)}$")
+        fixups = (ROOT / "extract-files.py").read_text()
+        self.assertIn("'vendor/lib64/hw/audio.bluetooth.mt6878.so': blob_fixup()\n"
+                      "        .replace_needed('libbluetooth_audio_session.so', "
+                      "'libbluetooth_audio_session_stock.so')", fixups)
+        self.assertIn("'vendor/lib64/libbluetooth_audio_session_stock.so': blob_fixup()\n"
+                      "        .replace_needed('libbluetooth_audio_session_aidl.so', "
+                      "'libbluetooth_audio_session_aidl_stock.so')", fixups)
+
     def test_manifest_takes_the_bluetooth_stack_with_the_coex_fix(self):
         # LineageOS 507009 fixes the coex window wrap-around that can hold the A2DP
         # offload start; until it is merged in lineage-23.2 the fork carries it.
