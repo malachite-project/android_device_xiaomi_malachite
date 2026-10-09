@@ -1,3 +1,11 @@
+# Bluetooth
+# Developer options "Disable Bluetooth LE audio": sets
+# persist.bluetooth.leaudio_switcher.disabled, and the Bluetooth app turns the
+# LE Audio profiles off on its next start. Here, not in vendor.prop: the
+# property has no own SELinux label, so it is default_prop, which
+# vendor_init may not set.
+ro.bluetooth.leaudio_switcher.supported=true
+
 # WiFi
 wifi.interface=wlan0
 wifi.supplicant_scan_interval=120

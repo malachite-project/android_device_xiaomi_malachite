@@ -321,9 +321,9 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(stripped("audio_policy_configuration.xml"),
                          stripped("audio_policy_configuration_a2dp_offload_disabled.xml"))
 
-    def test_offloaded_bluetooth_module_has_software_a2dp_and_no_le_audio(self):
+    def test_offloaded_bluetooth_module_has_software_a2dp(self):
         # PCM-only A2DP ports catch codecs the DSP does not encode (empty encodedFormats
-        # matches any codec in DeviceDescriptorBase::supportsFormat). LE Audio stays off.
+        # matches any codec in DeviceDescriptorBase::supportsFormat).
         module = ET.parse(ROOT / "configs/audio/bluetooth_offload_audio_policy_configuration.xml"
                           ).getroot()
         ports = {port.get("tagName"): port for port in module.iter("devicePort")}
@@ -331,7 +331,68 @@ class DeviceContracts(unittest.TestCase):
             with self.subTest(sink=sink):
                 self.assertEqual(ports[sink].get("encodedFormats"), "")
         self.assertIn("BT Hearing Aid Out", ports)
-        self.assertFalse([port for port in ports.values() if "BLE" in port.get("type")])
+
+    def test_le_audio_runs_in_software_in_both_a2dp_modes(self):
+        # Stock's LE Audio ports, in the Bluetooth module the policy uses with and
+        # without A2DP offload. ro.bluetooth.leaudio_offload.supported stays unset, so
+        # the stack opens LE_AUDIO_SOFTWARE_* sessions and the primary module (the
+        # offload path) declares no LE Audio device.
+        le_devices = {"BT Le Audio Out HS": ("AUDIO_DEVICE_OUT_BLE_HEADSET", "sink"),
+                      "BT Le Audio Out SPK": ("AUDIO_DEVICE_OUT_BLE_SPEAKER", "sink"),
+                      "BT Le Audio In COMMON": ("AUDIO_DEVICE_IN_BLUETOOTH_BLE", "source"),
+                      "BT Le Audio In HS": ("AUDIO_DEVICE_IN_BLE_HEADSET", "source")}
+        for name in ("bluetooth_audio_policy_configuration.xml",
+                     "bluetooth_offload_audio_policy_configuration.xml"):
+            with self.subTest(file=name):
+                module = ET.parse(ROOT / "configs/audio" / name).getroot()
+                mixes = {port.get("name"): port for port in module.iter("mixPort")}
+                self.assertEqual(mixes["le audio output"].get("role"), "source")
+                self.assertIsNone(mixes["le audio output"].get("flags"))
+                profiles = [profile.attrib for profile in mixes["le audio input"].iter("profile")]
+                self.assertEqual(profiles, [{"name": "", "format": "AUDIO_FORMAT_PCM_16_BIT",
+                                             "samplingRates": "16000",
+                                             "channelMasks": "AUDIO_CHANNEL_IN_MONO"}])
+                ports = {port.get("tagName"): (port.get("type"), port.get("role"))
+                         for port in module.iter("devicePort") if "BLE" in port.get("type")}
+                self.assertEqual(ports, le_devices)
+                routes = {route.get("sink"): route.get("sources").split(",")
+                          for route in module.iter("route")}
+                self.assertEqual(routes["BT Le Audio Out HS"], ["le audio output"])
+                self.assertEqual(routes["BT Le Audio Out SPK"], ["le audio output"])
+                self.assertEqual(routes["le audio input"],
+                                 ["BT Le Audio In COMMON", "BT Le Audio In HS"])
+        for name in ("audio_policy_configuration.xml",
+                     "audio_policy_configuration_a2dp_offload_disabled.xml"):
+            with self.subTest(file=name):
+                primary = primary_module(ET.parse(ROOT / "configs/audio" / name).getroot())
+                self.assertFalse([port for port in primary.iter("devicePort")
+                                  if "BLE" in port.get("type")])
+        self.assertNotIn("leaudio_offload", (ROOT / "vendor.prop").read_text())
+
+    def test_le_audio_unicast_profiles_are_on_with_a_switch(self):
+        # Profile names from BluetoothProperties.sysprop. Broadcast stays off; with it
+        # off, Settings shows "Disable Bluetooth LE audio" (leaudio_switcher), which
+        # the Bluetooth app's Config reads at start. ro.bluetooth.leaudio_switcher.*
+        # is default_prop, which vendor_init may not set, so it lives in system.prop.
+        props = (ROOT / "vendor.prop").read_text()
+        for profile, enabled in (("bap.unicast.client", "true"),
+                                 ("csip.set_coordinator", "true"),
+                                 ("vcp.controller", "true"),
+                                 ("mcp.server", "true"),
+                                 ("ccp.server", "true"),
+                                 ("hap.client", "true"),
+                                 ("bap.broadcast.source", "false"),
+                                 ("bap.broadcast.assist", "false")):
+            with self.subTest(profile=profile):
+                self.assertRegex(
+                    props, rf"(?m)^bluetooth\.profile\.{re.escape(profile)}\.enabled={enabled}$")
+        for stale in ("bap.unicast.server", "tbs.server", "vc.server"):
+            self.assertNotIn(f"bluetooth.profile.{stale}.", props)
+        set_props = re.findall(r"(?m)^([^#\s=]+)=", props)
+        self.assertFalse([prop for prop in set_props
+                          if "leaudio_switcher" in prop or "leaudio.allow_list" in prop])
+        self.assertRegex((ROOT / "system.prop").read_text(),
+                         r"(?m)^ro\.bluetooth\.leaudio_switcher\.supported=true$")
 
     def test_qr_tile_uses_aperture_without_a_second_camera(self):
         self.assertIn("product/priv-app/MiuiCamera/MiuiCamera.apk\n",

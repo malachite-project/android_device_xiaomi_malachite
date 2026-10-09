@@ -15,7 +15,8 @@ it would select the removed platform executable instead of this service.
 
 The Bluetooth audio provider it loads is MediaTek's stock
 `android.hardware.bluetooth.audio-impl-mediatek` (AIDL V3), not the AOSP one.
-It serves software and offloaded A2DP; for offload it opens the primary HAL
+It serves software and offloaded A2DP and software LE Audio (its
+`LeAudioSoftware*AudioProvider` classes); for offload it opens the primary HAL
 already loaded in this process and calls `createMTKAudioHardware`. It must stay
 in this process, beside stock's `audio.bluetooth.mt6878` HAL, which links the
 same `libbluetooth_audio_session_aidl_mtk` session library. The AOSP provider
