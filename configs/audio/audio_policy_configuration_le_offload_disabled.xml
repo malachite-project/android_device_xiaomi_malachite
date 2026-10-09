@@ -191,38 +191,6 @@
                     <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
                              samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
                 </devicePort>
-                <!-- LE Audio hardware offload: the audio DSP encodes and decodes LC3. Stock's
-                     ports from audio_policy_configuration_a2dp_offload_enable_cg_enable.xml. -->
-                <devicePort tagName="BLE Headset Out" type="AUDIO_DEVICE_OUT_BLE_HEADSET" role="sink">
-                    <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
-                </devicePort>
-                <devicePort tagName="BLE Speaker Out" type="AUDIO_DEVICE_OUT_BLE_SPEAKER" role="sink">
-                    <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
-                </devicePort>
-                <devicePort tagName="BLE BlueTooth In" type="AUDIO_DEVICE_IN_BLUETOOTH_BLE" role="source">
-                    <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_IN_MONO"/>
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_IN_MONO"/>
-                </devicePort>
-                <devicePort tagName="BLE Headset In" type="AUDIO_DEVICE_IN_BLE_HEADSET" role="source">
-                    <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_IN_MONO"/>
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_IN_MONO"/>
-                </devicePort>
-                <devicePort tagName="BLE Broadcast" type="AUDIO_DEVICE_OUT_BLE_BROADCAST" role="sink">
-                    <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
-                             samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO"/>
-                </devicePort>
                 <devicePort tagName="Digital Dock Headset" type="AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET" role="sink">
                     <profile name="" format="AUDIO_FORMAT_PCM_32_BIT"
                              samplingRates="44100 48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
@@ -308,20 +276,14 @@
                        sources="primary output,deep_buffer,fast,immersive_out"/>
                 <route type="mix" sink="BT A2DP Speaker"
                        sources="primary output,deep_buffer,fast,immersive_out"/>
-                <route type="mix" sink="BLE Headset Out"
-                       sources="primary output,deep_buffer,fast,voip_rx,Voice Call In,immersive_out"/>
-                <route type="mix" sink="BLE Speaker Out"
-                       sources="primary output,deep_buffer,fast,voip_rx,Voice Call In,immersive_out"/>
-                <route type="mix" sink="BLE Broadcast"
-                       sources="primary output,deep_buffer,fast"/>
                 <route type="mix" sink="Digital Dock Headset"
                        sources="primary output"/>
                 <route type="mix" sink="HDMI"
                        sources="hdmi_mix_output"/>
                 <route type="mix" sink="Telephony Tx"
-                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,incall_music_uplink,USB Device In,USB Headset In,BLE BlueTooth In,BLE Headset In"/>
+                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,incall_music_uplink,USB Device In,USB Headset In"/>
                 <route type="mix" sink="primary input"
-                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,AUX Digital In,USB Device In,USB Headset In,BLE BlueTooth In,BLE Headset In"/>
+                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,AUX Digital In,USB Device In,USB Headset In"/>
                 <route type="mix" sink="mmap_no_irq_in"
                        sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic"/>
                 <route type="mix" sink="voice tx"
@@ -329,22 +291,20 @@
                 <route type="mix" sink="hifi_input"
                        sources="USB Device In,USB Headset In"/>
                 <route type="mix" sink="voip_tx"
-                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,AUX Digital In,USB Device In,USB Headset In,BLE BlueTooth In,BLE Headset In"/>
+                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,AUX Digital In,USB Device In,USB Headset In"/>
                 <route type="mix" sink="fast input"
-                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,AUX Digital In,USB Device In,USB Headset In,BLE BlueTooth In,BLE Headset In"/>
+                       sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,AUX Digital In,USB Device In,USB Headset In"/>
                 <route type="mix" sink="hotword_input"
                        sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic"/>
             </routes>
 
         </module>
 
-        <!-- Bluetooth Audio HAL: hearing aids and A2DP codecs the DSP does not encode; no
-             LE Audio ports, LE Audio is offloaded above. Audio policy reads
-             audio_policy_configuration_le_offload_disabled.xml instead when
-             persist.bluetooth.leaudio_offload.disabled=true, and
-             audio_policy_configuration_a2dp_offload_disabled.xml when
-             persist.bluetooth.a2dp_offload.disabled=true. -->
-        <xi:include href="bluetooth_le_offload_audio_policy_configuration.xml"/>
+        <!-- Bluetooth Audio HAL: hearing aids, A2DP codecs the DSP does not encode, and
+             software LE Audio. Audio policy reads this file instead of
+             audio_policy_configuration.xml when persist.bluetooth.leaudio_offload.disabled=true
+             (Developer options, "Disable LE audio hardware offload"). -->
+        <xi:include href="bluetooth_offload_audio_policy_configuration.xml"/>
 
         <!-- USB Audio Accessory -->
         <xi:include href="usbv2_audio_accessory_policy_configuration.xml"/>

@@ -17,6 +17,12 @@ ROOT = Path(os.environ.get("MALACHITE_DEVICE_ROOT", Path(__file__).resolve().par
 
 A2DP_SINKS = ("BT A2DP Out", "BT A2DP Headphones", "BT A2DP Speaker")
 XINCLUDE = "{http://www.w3.org/2001/XInclude}include"
+# Stock's MediaTek LE Audio offload ports in the primary module.
+BLE_OFFLOAD_PORTS = {"BLE Headset Out": ("AUDIO_DEVICE_OUT_BLE_HEADSET", "sink"),
+                     "BLE Speaker Out": ("AUDIO_DEVICE_OUT_BLE_SPEAKER", "sink"),
+                     "BLE BlueTooth In": ("AUDIO_DEVICE_IN_BLUETOOTH_BLE", "source"),
+                     "BLE Headset In": ("AUDIO_DEVICE_IN_BLE_HEADSET", "source"),
+                     "BLE Broadcast": ("AUDIO_DEVICE_OUT_BLE_BROADCAST", "sink")}
 
 
 def primary_module(config):
@@ -269,27 +275,33 @@ class DeviceContracts(unittest.TestCase):
                 with self.subTest(file=name, sink=sink):
                     self.assertEqual(routes[sink], ["a2dp output"])
 
-    def test_a2dp_offload_is_the_default_with_a_software_fallback(self):
-        # system/media audio_config.h: with ro.bluetooth.a2dp_offload.supported=true,
+    def test_policy_file_follows_the_offload_switches(self):
+        # system/media audio_config.h, with ro.bluetooth.a2dp_offload.supported=true:
         # persist.bluetooth.a2dp_offload.disabled=true selects
-        # audio_policy_configuration_a2dp_offload_disabled.xml; otherwise (no
-        # le_offload_disabled file here) audio_policy_configuration.xml. The Bluetooth
-        # stack reads the same two properties to choose the offload session.
+        # audio_policy_configuration_a2dp_offload_disabled.xml; otherwise LE offload
+        # unsupported or persist.bluetooth.leaudio_offload.disabled=true selects
+        # audio_policy_configuration_le_offload_disabled.xml; otherwise
+        # audio_policy_configuration.xml. The Bluetooth stack reads the same properties
+        # (codec_manager.cc defaults leaudio_offload.disabled to true).
         props = (ROOT / "vendor.prop").read_text()
         for line in ("ro.bluetooth.a2dp_offload.supported=true",
                      "persist.bluetooth.a2dp_offload.disabled=false",
-                     "persist.bluetooth.a2dp_offload.cap=sbc-aac"):
+                     "persist.bluetooth.a2dp_offload.cap=sbc-aac",
+                     "ro.bluetooth.leaudio_offload.supported=true",
+                     "persist.bluetooth.leaudio_offload.disabled=false"):
             with self.subTest(prop=line):
                 self.assertRegex(props, rf"(?m)^{re.escape(line)}$")
         self.assertNotIn("persist.bluetooth.bluetooth_audio_hal.disabled", props)
         audio = ROOT / "configs/audio"
-        self.assertFalse((audio / "audio_policy_configuration_le_offload_disabled.xml").exists())
         self.assertFalse((audio / "audio_policy_configuration_bluetooth_legacy_hal.xml").exists())
+        # file: (bluetooth module, A2DP offloaded, LE Audio offloaded)
         cases = {"audio_policy_configuration.xml":
-                     ("bluetooth_offload_audio_policy_configuration.xml", True),
+                     ("bluetooth_le_offload_audio_policy_configuration.xml", True, True),
+                 "audio_policy_configuration_le_offload_disabled.xml":
+                     ("bluetooth_offload_audio_policy_configuration.xml", True, False),
                  "audio_policy_configuration_a2dp_offload_disabled.xml":
-                     ("bluetooth_audio_policy_configuration.xml", False)}
-        for name, (include, offloaded) in cases.items():
+                     ("bluetooth_audio_policy_configuration.xml", False, False)}
+        for name, (include, a2dp_offloaded, le_offloaded) in cases.items():
             with self.subTest(file=name):
                 config = ET.parse(audio / name).getroot()
                 includes = [node.get("href") for node in config.iter(XINCLUDE)]
@@ -300,7 +312,7 @@ class DeviceContracts(unittest.TestCase):
                 routes = {route.get("sink"): route.get("sources").split(",")
                           for route in primary.iter("route")}
                 for sink in A2DP_SINKS:
-                    if offloaded:
+                    if a2dp_offloaded:
                         self.assertEqual(ports[sink].get("encodedFormats"),
                                          "AUDIO_FORMAT_SBC AUDIO_FORMAT_AAC")
                         self.assertEqual(routes[sink], ["primary output", "deep_buffer", "fast",
@@ -308,18 +320,35 @@ class DeviceContracts(unittest.TestCase):
                     else:
                         self.assertNotIn(sink, ports)
                         self.assertNotIn(sink, routes)
+                primary_ble = [port for port in primary.iter("devicePort")
+                               if "BLE" in port.get("type")]
+                module = ET.parse(audio / include).getroot()
+                module_ble = [port for port in module.iter("devicePort")
+                              if "BLE" in port.get("type")]
+                # LE Audio devices in exactly one module: primary when offloaded.
+                self.assertEqual(bool(primary_ble), le_offloaded)
+                self.assertEqual(bool(module_ble), not le_offloaded)
 
-    def test_offload_and_fallback_primary_modules_differ_only_in_a2dp(self):
+    def test_policy_primary_modules_differ_only_in_offload_ports(self):
+        ble_tags = set(BLE_OFFLOAD_PORTS)
+
         def shape(node):
             children = [shape(child) for child in node
-                        if child.get("tagName") not in A2DP_SINKS
-                        and child.get("sink") not in A2DP_SINKS]
-            return node.tag, sorted(node.attrib.items()), (node.text or "").strip(), children
+                        if child.get("tagName") not in A2DP_SINKS + tuple(ble_tags)
+                        and child.get("sink") not in A2DP_SINKS + tuple(ble_tags)]
+            attrib = dict(node.attrib)
+            if node.tag == "route":
+                attrib["sources"] = ",".join(source for source in attrib["sources"].split(",")
+                                             if source not in ble_tags)
+            return node.tag, sorted(attrib.items()), (node.text or "").strip(), children
 
         def stripped(name):
             return shape(primary_module(ET.parse(ROOT / "configs/audio" / name).getroot()))
-        self.assertEqual(stripped("audio_policy_configuration.xml"),
-                         stripped("audio_policy_configuration_a2dp_offload_disabled.xml"))
+        reference = stripped("audio_policy_configuration_a2dp_offload_disabled.xml")
+        for name in ("audio_policy_configuration.xml",
+                     "audio_policy_configuration_le_offload_disabled.xml"):
+            with self.subTest(file=name):
+                self.assertEqual(stripped(name), reference)
 
     def test_a2dp_offload_reserves_coex_buffers(self):
         # bta_av_aact.cc reads persist.bluetooth.a2dp_offload.coex_buf_count (default 0)
@@ -328,22 +357,53 @@ class DeviceContracts(unittest.TestCase):
                          r"(?m)^persist\.bluetooth\.a2dp_offload\.coex_buf_count=3$")
         self.assertNotIn("coex_buf_count", (ROOT / "vendor.prop").read_text())
 
-    def test_offloaded_bluetooth_module_has_software_a2dp(self):
+    def test_offloaded_bluetooth_modules_have_software_a2dp(self):
         # PCM-only A2DP ports catch codecs the DSP does not encode (empty encodedFormats
         # matches any codec in DeviceDescriptorBase::supportsFormat).
-        module = ET.parse(ROOT / "configs/audio/bluetooth_offload_audio_policy_configuration.xml"
-                          ).getroot()
-        ports = {port.get("tagName"): port for port in module.iter("devicePort")}
-        for sink in A2DP_SINKS:
-            with self.subTest(sink=sink):
-                self.assertEqual(ports[sink].get("encodedFormats"), "")
-        self.assertIn("BT Hearing Aid Out", ports)
+        for name in ("bluetooth_offload_audio_policy_configuration.xml",
+                     "bluetooth_le_offload_audio_policy_configuration.xml"):
+            module = ET.parse(ROOT / "configs/audio" / name).getroot()
+            ports = {port.get("tagName"): port for port in module.iter("devicePort")}
+            for sink in A2DP_SINKS:
+                with self.subTest(file=name, sink=sink):
+                    self.assertEqual(ports[sink].get("encodedFormats"), "")
+            self.assertIn("BT Hearing Aid Out", ports)
 
-    def test_le_audio_runs_in_software_in_both_a2dp_modes(self):
-        # Stock's LE Audio ports, in the Bluetooth module the policy uses with and
-        # without A2DP offload. ro.bluetooth.leaudio_offload.supported stays unset, so
-        # the stack opens LE_AUDIO_SOFTWARE_* sessions and the primary module (the
-        # offload path) declares no LE Audio device.
+    def test_le_audio_offload_ports_are_stocks(self):
+        # Stock's MediaTek LE Audio offload ports and routes
+        # (audio_policy_configuration_a2dp_offload_enable_cg_enable.xml), plus
+        # immersive_out to the BLE outputs as for A2DP. The full-offload bluetooth module
+        # is stock's no-LE module (bluetooth_a2dp_offload_ums_offload_...).
+        primary = primary_module(ET.parse(ROOT / "configs/audio/audio_policy_configuration.xml"
+                                          ).getroot())
+        ports = {port.get("tagName"): port for port in primary.iter("devicePort")
+                 if "BLE" in port.get("type")}
+        self.assertEqual({tag: (port.get("type"), port.get("role"))
+                          for tag, port in ports.items()}, BLE_OFFLOAD_PORTS)
+        for tag, port in ports.items():
+            mask = "AUDIO_CHANNEL_IN_MONO" if port.get("role") == "source" \
+                else "AUDIO_CHANNEL_OUT_MONO"
+            with self.subTest(port=tag):
+                self.assertEqual([profile.attrib for profile in port.iter("profile")],
+                                 [{"name": "", "format": fmt, "samplingRates": "44100 48000",
+                                   "channelMasks": mask}
+                                  for fmt in ("AUDIO_FORMAT_PCM_32_BIT",
+                                              "AUDIO_FORMAT_PCM_16_BIT")])
+        routes = {route.get("sink"): route.get("sources").split(",")
+                  for route in primary.iter("route")}
+        for sink in ("BLE Headset Out", "BLE Speaker Out"):
+            self.assertEqual(routes[sink], ["primary output", "deep_buffer", "fast", "voip_rx",
+                                            "Voice Call In", "immersive_out"])
+        self.assertEqual(routes["BLE Broadcast"], ["primary output", "deep_buffer", "fast"])
+        for sink in ("Telephony Tx", "primary input", "voip_tx", "fast input"):
+            with self.subTest(sink=sink):
+                self.assertEqual(routes[sink][-2:], ["BLE BlueTooth In", "BLE Headset In"])
+        for sink in ("mmap_no_irq_in", "hotword_input", "voice tx", "hifi_input"):
+            self.assertFalse(set(routes[sink]) & set(BLE_OFFLOAD_PORTS))
+
+    def test_le_audio_software_fallback_uses_stocks_ports(self):
+        # With LE offload or A2DP offload disabled, the stack opens LE_AUDIO_SOFTWARE_*
+        # sessions; stock's LE Audio ports in the bluetooth module carry them.
         le_devices = {"BT Le Audio Out HS": ("AUDIO_DEVICE_OUT_BLE_HEADSET", "sink"),
                       "BT Le Audio Out SPK": ("AUDIO_DEVICE_OUT_BLE_SPEAKER", "sink"),
                       "BT Le Audio In COMMON": ("AUDIO_DEVICE_IN_BLUETOOTH_BLE", "source"),
@@ -368,13 +428,10 @@ class DeviceContracts(unittest.TestCase):
                 self.assertEqual(routes["BT Le Audio Out SPK"], ["le audio output"])
                 self.assertEqual(routes["le audio input"],
                                  ["BT Le Audio In COMMON", "BT Le Audio In HS"])
-        for name in ("audio_policy_configuration.xml",
-                     "audio_policy_configuration_a2dp_offload_disabled.xml"):
-            with self.subTest(file=name):
-                primary = primary_module(ET.parse(ROOT / "configs/audio" / name).getroot())
-                self.assertFalse([port for port in primary.iter("devicePort")
-                                  if "BLE" in port.get("type")])
-        self.assertNotIn("leaudio_offload", (ROOT / "vendor.prop").read_text())
+        module = ET.parse(ROOT / "configs/audio/bluetooth_le_offload_audio_policy_configuration.xml"
+                          ).getroot()
+        self.assertFalse([port for port in module.iter("mixPort")
+                          if port.get("name").startswith("le audio")])
 
     def test_le_audio_unicast_profiles_are_on_with_a_switch(self):
         # Profile names from BluetoothProperties.sysprop. Broadcast stays off; with it
