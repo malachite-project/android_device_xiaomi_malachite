@@ -134,7 +134,9 @@ class DeviceContracts(unittest.TestCase):
             "highBrightnessMode")
         self.assertEqual(hbm.find("minimumHdrPercentOfScreen").text, "0.5")
         ratios = [float(p.find("hdrRatio").text) for p in hbm.find("sdrHdrRatioMap").iter("point")]
-        self.assertEqual(ratios, [8.0, 8.0])
+        # The whole screen is boosted here, so stay within the normal range (<= 500 nits).
+        self.assertLessEqual(max(ratios), 2.0)
+        self.assertEqual(ratios[-1], 1.0)
 
     def test_auto_brightness_ramps_slowly(self):
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
