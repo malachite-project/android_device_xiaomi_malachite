@@ -382,6 +382,29 @@ class DeviceContracts(unittest.TestCase):
                       "        .replace_needed('libbluetooth_audio_session_aidl.so', "
                       "'libbluetooth_audio_session_aidl_stock.so')", fixups)
 
+    def test_audio_tuning_is_stocks_global_set(self):
+        # The parser reads the plain folder (no ro.miui.build.region on LineageOS), so it
+        # carries every file stock's global folder overrides. Stock's global folder links
+        # SmartPa and AudioParamOptions back to the plain files.
+        lines = [l for l in (ROOT / "proprietary-files.txt").read_text().splitlines()
+                 if "etc/audio_param" in l and not l.startswith("#")]
+        global_prefix = "vendor/etc/audio_param_cust/audio_param_global/"
+        mapped = {l.split(":")[1].rsplit("/", 1)[1] for l in lines if l.startswith(global_prefix)}
+        for l in lines:
+            if l.startswith(global_prefix):
+                name = l[len(global_prefix):].split(":")[0]
+                self.assertEqual(l.split(":")[1], f"vendor/etc/audio_param/{name}")
+        self.assertEqual(len(lines), 123)
+        self.assertEqual(len(mapped), 62)
+        for name in ("PlaybackVolDigi_AudioParam.xml", "PlaybackDRC_AudioParam.xml",
+                     "Speech_AudioParam.xml", "Speech_ParamUnitDesc.xml",
+                     "Record_AudioParam.xml", "VoIPv2_AudioParam.xml"):
+            self.assertIn(name, mapped)
+        for name in ("SmartPa_AudioParam.xml", "SmartPa_ParamUnitDesc.xml",
+                     "AudioParamOptions_mgvi.xml", "AudioParamOptions_vext.xml"):
+            self.assertNotIn(name, mapped)
+            self.assertIn(f"vendor/etc/audio_param/{name}", lines)
+
     def test_manifest_takes_the_bluetooth_stack_with_the_coex_fix(self):
         # LineageOS 507009 fixes the coex window wrap-around that can hold the A2DP
         # offload start; until it is merged in lineage-23.2 the fork carries it.
