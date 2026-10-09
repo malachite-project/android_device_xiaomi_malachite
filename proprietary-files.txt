@@ -72,6 +72,7 @@ vendor/etc/vintf/manifest/vendor.dolby.hardware.dms.xml
 vendor/lib64/libdapparamstorage.so
 vendor/lib64/libdlbdsservice.so
 vendor/lib64/libdlbpreg.so
+vendor/lib64/soundfx/libaudiopreprocessing_mtk.so
 vendor/lib64/soundfx/libdlbvol.so
 vendor/lib64/soundfx/libswdap.so
 vendor/lib64/soundfx/libswgamedap.so
