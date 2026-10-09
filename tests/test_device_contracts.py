@@ -144,6 +144,11 @@ class DeviceContracts(unittest.TestCase):
         self.assertLessEqual(max(ratios), 2.0)
         self.assertEqual(ratios[-1], 1.0)
 
+    def test_headset_detection_uses_input_events(self):
+        config = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
+        bools = {node.get("name"): node.text for node in config.getroot().iter("bool")}
+        self.assertEqual(bools["config_useDevInputEventForAudioJack"], "true")
+
     def test_auto_brightness_ramps_slowly(self):
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
         ramp = {name: float(display.find("screenBrightnessRamp" + name).text)

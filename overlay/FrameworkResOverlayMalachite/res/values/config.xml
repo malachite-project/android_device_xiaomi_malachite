@@ -13,6 +13,12 @@
          ramps move in single panel levels instead of the 8-bit colour's steps of 16. -->
     <bool name="config_backlightHighPrecision">true</bool>
 
+    <!-- Headset plug-in arrives only as input switch events: mt6369-accdet reports through
+         an ALSA "Headset Jack" (snd_soc_jack_report), and no driver provides the
+         /sys/class/switch/h2w uevents that WiredAccessoryManager uses otherwise. Stock
+         framework-res sets this to true. -->
+    <bool name="config_useDevInputEventForAudioJack">true</bool>
+
     <!-- The MediaTek audio HAL applies call and VoIP gain from its gain table at the index
          MediaTek's audio policy passes as volumeStreamType/volumeDevice/volumeIndex. -->
     <bool name="config_sendVoiceVolumeIndexToHal">true</bool>
