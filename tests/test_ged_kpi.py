@@ -17,7 +17,7 @@ class GedKpiTests(unittest.TestCase):
         root = ET.parse(ROOT / "manifests/malachite.xml").getroot()
         native = {p.get("path"): p for p in root.findall("project")}["frameworks/native"]
         self.assertEqual(native.get("remote"), "malachite-project")
-        self.assertEqual(native.get("revision"), "noam/lineage-23.2")
+        self.assertEqual(native.get("revision"), "lineage-23.2")
 
     def test_apps_may_use_proc_ged(self):
         # MediaTek's common policy already grants what libgui needs: every app

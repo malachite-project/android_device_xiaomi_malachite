@@ -4,7 +4,8 @@
      the malachite-project forks. Copy to .repo/local_manifests/malachite.xml after
      `repo init -u https://github.com/LineageOS/android.git -b lineage-23.2`.
 
-     noam/lineage-23.2 branches carry changes on top of their source:
+     Every project uses its fork's lineage-23.2 branch, the only branch
+     in each fork. These carry changes on top of their source:
        device tree         chara's release + unmerged charger/module-loader
                            fixes + WPA3 nl80211 version opt-in + the
                            September 2026 audit, power, display and
@@ -30,14 +31,13 @@
                            not merged on 2026-10-09. Once it is merged in
                            lineage-23.2, drop this override and sync
                            LineageOS's project again
-     lineage-23.2 branches are chara's release state, unmodified.
-     ParanoidSense (face unlock app) is PixelOS's sixteen-qpr2, unmodified.
+     malachite-kernel, hardware/xiaomi and vendor/mediatek/ims are
+     chara's release state, unmodified.
+     ParanoidSense (face unlock app) is PixelOS's sixteen-qpr2, unmodified,
+     under the name lineage-23.2.
      hardware/dolby is crDroid's LunarisDolby branch reduced to its Dolby
      control app; the Dolby DAX vendor stack comes from stock 208 in
      vendor/xiaomi/malachite.
-
-     Commits whose subject starts with [UNTESTED] have not been built or
-     run on a device.
 
      Kernel sources are built separately; see kernel_manifest-6.1.
 -->
@@ -46,37 +46,37 @@
 
   <!-- Device -->
   <remove-project path="device/xiaomi/malachite" optional="true" />
-  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
   <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/xiaomi/malachite" optional="true" />
-  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="lineage-23.2" />
 
   <!-- Platform -->
   <remove-project path="hardware/mediatek" optional="true" />
-  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="hardware/xiaomi" optional="true" />
   <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
-  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="vendor/mediatek/ims" optional="true" />
   <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-23.2" />
 
   <!-- Overrides of LineageOS projects -->
   <remove-project path="external/wpa_supplicant_8" optional="true" />
-  <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="frameworks/base" optional="true" />
-  <project path="frameworks/base" name="android_frameworks_base" remote="malachite-project" revision="noam/lineage-23.2" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
+  <project path="frameworks/base" name="android_frameworks_base" remote="malachite-project" revision="lineage-23.2" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
   <remove-project path="frameworks/native" optional="true" />
-  <project path="frameworks/native" name="android_frameworks_native" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="frameworks/native" name="android_frameworks_native" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="packages/apps/Settings" optional="true" />
-  <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="packages/services/Telephony" optional="true" />
-  <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="malachite-project" revision="lineage-23.2" />
   <remove-project path="packages/modules/Bluetooth" optional="true" />
-  <project path="packages/modules/Bluetooth" name="android_packages_modules_Bluetooth" remote="malachite-project" revision="noam/lineage-23.2" groups="pdk" />
+  <project path="packages/modules/Bluetooth" name="android_packages_modules_Bluetooth" remote="malachite-project" revision="lineage-23.2" groups="pdk" />
 
   <!-- Additions -->
-  <project path="packages/apps/ParanoidSense" name="android_packages_apps_ParanoidSense" remote="malachite-project" revision="sixteen-qpr2" />
-  <project path="hardware/dolby" name="android_hardware_dolby" remote="malachite-project" revision="noam/lineage-23.2" />
+  <project path="packages/apps/ParanoidSense" name="android_packages_apps_ParanoidSense" remote="malachite-project" revision="lineage-23.2" />
+  <project path="hardware/dolby" name="android_hardware_dolby" remote="malachite-project" revision="lineage-23.2" />
 </manifest>

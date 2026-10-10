@@ -414,7 +414,7 @@ class DeviceContracts(unittest.TestCase):
         self.assertIn("packages/modules/Bluetooth", removed)
         self.assertEqual(bluetooth.get("name"), "android_packages_modules_Bluetooth")
         self.assertEqual(bluetooth.get("remote"), "malachite-project")
-        self.assertEqual(bluetooth.get("revision"), "noam/lineage-23.2")
+        self.assertEqual(bluetooth.get("revision"), "lineage-23.2")
 
     def test_offloaded_bluetooth_modules_have_software_a2dp(self):
         # PCM-only A2DP ports catch codecs the DSP does not encode (empty encodedFormats

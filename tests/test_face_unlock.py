@@ -31,10 +31,10 @@ class FaceUnlockTests(unittest.TestCase):
         projects = manifest_projects()
         base = projects["frameworks/base"]
         self.assertEqual(base.get("name"), "android_frameworks_base")
-        self.assertEqual(base.get("revision"), "noam/lineage-23.2")
+        self.assertEqual(base.get("revision"), "lineage-23.2")
         sense = projects["packages/apps/ParanoidSense"]
         self.assertEqual(sense.get("remote"), "malachite-project")
-        self.assertEqual(sense.get("revision"), "sixteen-qpr2")
+        self.assertEqual(sense.get("revision"), "lineage-23.2")
 
     def test_replaced_paths_are_removed_first(self):
         root = ET.parse(ROOT / "manifests/malachite.xml").getroot()

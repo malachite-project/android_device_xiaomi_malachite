@@ -104,7 +104,7 @@ class DolbyTests(unittest.TestCase):
         dolby = projects["hardware/dolby"]
         self.assertEqual(dolby.get("name"), "android_hardware_dolby")
         self.assertEqual(dolby.get("remote"), "malachite-project")
-        self.assertEqual(dolby.get("revision"), "noam/lineage-23.2")
+        self.assertEqual(dolby.get("revision"), "lineage-23.2")
         self.assertIn("$(call inherit-product, hardware/dolby/dolby.mk)",
                       (ROOT / "device.mk").read_text())
 
