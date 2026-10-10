@@ -61,8 +61,9 @@ class DolbyTests(unittest.TestCase):
         self.assertEqual(post, {"music": ["dlb_music_listener"], "ring": ["dlb_ring_listener"],
                                 "alarm": ["dlb_alarm_listener"]})
 
-    def test_misound_is_disabled_the_stock_way(self):
+    def test_misound_props_match_stock(self):
         # Stock keeps libmisoundfx and the aurisys MiSound chain and sets the prop.
+        # The prop alone does not stop libmisound: see test_dolby_app_switches_misound.
         props = (ROOT / "vendor.prop").read_text()
         for line in ("persist.vendor.audio.misound.disable=true",
                      "ro.vendor.audio.dolby.dax.support=true",
@@ -107,11 +108,15 @@ class DolbyTests(unittest.TestCase):
         self.assertIn("$(call inherit-product, hardware/dolby/dolby.mk)",
                       (ROOT / "device.mk").read_text())
 
-    def test_hardware_dolby_ships_only_the_app(self):
-        # It must not bring its own Dolby blobs, policy or VINTF: the device has them.
+    def dolby_repo(self):
         repo = Path(os.environ.get("MALACHITE_DOLBY_ROOT", ROOT.parent / "dolby-hwdolby"))
         if not (repo / "dolby.mk").is_file():
             self.skipTest("hardware/dolby is not checked out beside the tree")
+        return repo
+
+    def test_hardware_dolby_ships_only_the_app(self):
+        # It must not bring its own Dolby blobs, policy or VINTF: the device has them.
+        repo = self.dolby_repo()
         mk = (repo / "dolby.mk").read_text()
         self.assertIn("LunarisDolby", mk)
         for word in ("BOARD_VENDOR_SEPOLICY_DIRS", "DEVICE_MANIFEST_FILE",
@@ -122,6 +127,19 @@ class DolbyTests(unittest.TestCase):
         self.assertFalse((repo / "sepolicy").exists())
         effect = (repo / "LunarisDolby/src/org/lunaris/dolby/audio/DolbyAudioEffect.kt").read_text()
         self.assertIn(EFFECTS["dap"][1], effect)
+
+    def test_dolby_app_switches_misound(self):
+        # Stock's audio HAL starts with MisoundEnable=1 and forwards the key to
+        # libmisound (its native enable, parameter 19). The app sends it on every
+        # apply, so it survives HAL restarts.
+        src = self.dolby_repo() / "LunarisDolby/src/org/lunaris/dolby"
+        self.assertIn('MISOUND_HAL_KEY = "MisoundEnable"',
+                      (src / "DolbyConstants.kt").read_text())
+        repository = (src / "data/DolbyRepository.kt").read_text()
+        self.assertIn("audioManager.setParameters(\"${DolbyConstants.MISOUND_HAL_KEY}=$value\")",
+                      repository)
+        self.assertIn("getBoolean(DolbyConstants.PREF_MISOUND, false)", repository)
+        self.assertRegex(repository, r"fun applySavedState\(\) \{[^}]*\}[^}]*applyMiSound\(\)")
 
 
 if __name__ == "__main__":

@@ -19,9 +19,11 @@ ro.vendor.mtk_hifiaudio_support=1
 vendor.audio.usb.super_hifi=true
 vendor.audio.usb.iems.period_us=5000
 
-# Dolby DAX and MiSound, as in stock's vendor build.prop. Stock keeps MiSound's
-# effect library and its aurisys chain but sets it disabled, so it does not
-# process on top of Dolby.
+# Dolby DAX and MiSound, as in stock's vendor build.prop. The misound.disable
+# property is read only by libmisoundfx, which nothing in this ROM loads; it does
+# not stop libmisound in the aurisys playback chain. That follows the audio HAL's
+# MisoundEnable key, which starts on and is set by the Dolby app's Mi Sound
+# switch (off by default).
 ro.vendor.audio.device.db=DB_XM
 ro.vendor.audio.device.dbcom=dolby_common
 ro.vendor.audio.dolby.dax.support=true
