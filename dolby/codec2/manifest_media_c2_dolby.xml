@@ -1,0 +1,14 @@
+<manifest version="1.0" type="device">
+    <!-- default1: Dolby audio, default2: Dolby Vision. Both instance names are
+         labeled hal_codec2_service in the platform's service_contexts. -->
+    <hal format="aidl">
+        <name>android.hardware.media.c2</name>
+        <version>1</version>
+        <fqname>IComponentStore/default1</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.media.c2</name>
+        <version>1</version>
+        <fqname>IComponentStore/default2</fqname>
+    </hal>
+</manifest>
