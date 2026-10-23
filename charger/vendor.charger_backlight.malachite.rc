@@ -1,0 +1,5 @@
+# Off-mode charging only: started from init.mt6878.rc's "on charger".
+service vendor.charger_backlight /vendor/bin/vendor.charger_backlight.malachite
+    user system
+    group system
+    disabled

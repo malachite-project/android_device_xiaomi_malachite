@@ -1,0 +1,18 @@
+//
+// SPDX-FileCopyrightText: 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Off-mode charging: restores the backlight each time the panel turns on.
+cc_binary {
+    name: "vendor.charger_backlight.malachite",
+    vendor: true,
+    srcs: ["charger_backlight.cpp"],
+    init_rc: ["vendor.charger_backlight.malachite.rc"],
+    shared_libs: [
+        "libbase",
+    ],
+    header_libs: [
+        "malachite_mi_disp_headers",
+    ],
+}

@@ -11,8 +11,10 @@ ROOT = Path(os.environ.get("SECURE_VIDEO_TEST_DEVICE_ROOT", Path(__file__).resol
 class SecureVideoContractTests(unittest.TestCase):
     def test_advertised_secure_decoders_have_driver_entries_and_enabled_video_path(self):
         public = ET.parse(ROOT / "configs/media/media_codecs_c2.xml").getroot()
+        # Dolby's secure decoder wraps c2.mtk.hevc.decoder.secure (test_dolby.py).
         advertised = {codec.get("name") for codec in public.findall("./Decoders/MediaCodec")
-                      if any(feature.get("name") == "secure-playback"
+                      if codec.get("name").startswith("c2.mtk.")
+                      and any(feature.get("name") == "secure-playback"
                              and feature.get("required") == "true"
                              for feature in codec.findall("Feature"))}
         platform = ET.parse(ROOT / "configs/media/mtk_platform_codecs_config.xml").getroot()

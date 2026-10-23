@@ -10,3 +10,8 @@ hal_server_domain(hal_graphics_composer_default, vendor_hal_citsensorservice_xia
 
 r_dir_file(hal_graphics_composer_default, sysfs_leds)
 rw_dir_file(hal_graphics_composer_default, sysfs_ged)
+
+# The composer sets the backlight (ro.vendor.mtk_backlight_hwc_support) and also writes
+# brightness_clone (sysfs_leds); the node's parent directories under
+# /sys/devices/virtual/mi_display are sysfs_gpu.
+allow hal_graphics_composer_default sysfs_gpu:dir search;

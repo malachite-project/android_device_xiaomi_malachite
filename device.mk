@@ -283,6 +283,10 @@ PRODUCT_PACKAGES += \
     android.hardware.health-service.example \
     android.hardware.health-service.example_recovery
 
+# Off-mode charging: backlight after each wake of the charging screen (charger/)
+PRODUCT_PACKAGES += \
+    vendor.charger_backlight.malachite
+
 # HotwordEnrollement
 PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/configs/permissions/privapp-permissions-hotword.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-hotword.xml
@@ -337,6 +341,13 @@ PRODUCT_PACKAGES += \
 # Media
 PRODUCT_PACKAGES += \
     android.hardware.media.c2-mtk-service
+
+# Media (Dolby): stock's Dolby Codec2 stores over AIDL, with the shims their
+# decoders need on this platform.
+PRODUCT_PACKAGES += \
+    android.hardware.media.c2-dolby-service \
+    libcodec2_hidl_shim \
+    libcodec2_shim
 
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(DEVICE_PATH)/configs/media,$(TARGET_COPY_OUT_VENDOR)/etc)

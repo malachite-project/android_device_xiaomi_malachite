@@ -142,5 +142,98 @@ class DolbyTests(unittest.TestCase):
         self.assertRegex(repository, r"fun applySavedState\(\) \{[^}]*\}[^}]*applyMiSound\(\)")
 
 
+# Dolby Codec2 decoders from stock OS2.0.208.0.VOOMIXM, served over AIDL by
+# dolby/codec2 instead of stock's HIDL services.
+CODEC_BLOBS = (
+    "vendor/etc/dolby_vision.cfg",
+    "vendor/etc/media_codecs_dolby_audio.xml",
+    "vendor/lib64/c2.dolby.client.so",
+    "vendor/lib64/c2.dolby.hevc.dec.so",
+    "vendor/lib64/c2.dolby.hevc.sec.dec.so",
+    "vendor/lib64/c2.dolby.store.so",
+    "vendor/lib64/libcodec2_soft_ac4dec.so",
+    "vendor/lib64/libcodec2_soft_ddpdec.so",
+    "vendor/lib64/libcodec2_store_dolby.so",
+    "vendor/lib64/libdeccfg.so",
+    "vendor/lib64/libdolbydecoderprocessor.so",
+    "vendor/lib64/libdolbyeglcore.so",
+    "vendor/lib64/libdolbyottcameracontrol.so",
+)
+# Imported by stock 208's c2.dolby.client.so; the platform exports it only under
+# the templated BufferPoolSender name.
+OLD_OBJCPY = ("_ZN7android8hardware5media2c24V1_05utils6objcpyEPNS3_10WorkBundleERKNSt3__14list"
+              "INS7_10unique_ptrI6C2WorkNS7_14default_deleteISA_EEEENS7_9allocatorISD_EEEE"
+              "PNS4_16BufferPoolSenderE")
+
+
+class DolbyCodecTests(unittest.TestCase):
+    def test_codec_blobs_are_listed(self):
+        lines = (ROOT / "proprietary-files.txt").read_text().splitlines()
+        for blob in CODEC_BLOBS:
+            with self.subTest(blob=blob):
+                self.assertIn(blob, lines)
+
+    def test_stock_hidl_services_are_not_shipped(self):
+        # The AIDL wrapper replaces them; the framework would not list them anyway.
+        text = (ROOT / "proprietary-files.txt").read_text()
+        for blob in ("vendor/bin/hw/dolbycodec2", "vendor/bin/hw/vendor.dolby.media.c2@1.0-service",
+                     "vendor.dolby.media.c2@1.0-service.rc", "vendor.dolbyvision.media.c2@1.0-service.rc",
+                     "vendor.dolby.media.c2@1.0-service.xml", "libcodec2_soft_common"):
+            with self.subTest(blob=blob):
+                self.assertNotIn(blob, text)
+
+    def test_decoders_get_their_shims(self):
+        fixups = (ROOT / "extract-files.py").read_text()
+        self.assertRegex(fixups, r"'vendor/lib64/c2\.dolby\.client\.so': blob_fixup\(\)\s*"
+                                 r"\.add_needed\('libcodec2_hidl_shim\.so'\)")
+        self.assertRegex(fixups, r"\('vendor/lib64/c2\.dolby\.hevc\.dec\.so', "
+                                 r"'vendor/lib64/c2\.dolby\.hevc\.sec\.dec\.so'\): blob_fixup\(\)\s*"
+                                 r"\.add_needed\('libcodec2_shim\.so'\)")
+        shim = (ROOT / "dolby/codec2/objcpy_shim.cpp").read_text()
+        self.assertIn(OLD_OBJCPY + "(", shim)
+        # Forward to the real conversion; an empty stub returns garbage to queue().
+        self.assertIn("return objcpy(d, s, static_cast<BufferPoolSender*>(bpSender));", shim)
+        bp = (ROOT / "dolby/codec2/Android.bp").read_text()
+        self.assertIn('name: "libcodec2_hidl_shim"', bp)
+        mk = (ROOT / "device.mk").read_text()
+        for package in ("android.hardware.media.c2-dolby-service", "libcodec2_hidl_shim",
+                        "libcodec2_shim"):
+            with self.subTest(package=package):
+                self.assertRegex(mk, rf"(?m)^\s+{re.escape(package)}( \\)?$")
+
+    def test_service_serves_both_stores(self):
+        rc = (ROOT / "dolby/codec2/android.hardware.media.c2-dolby-service.rc").read_text()
+        self.assertIn("/vendor/lib64/libcodec2_store_dolby.so default1", rc)
+        self.assertIn("/vendor/lib64/c2.dolby.store.so default2", rc)
+        manifest = ET.parse(ROOT / "dolby/codec2/manifest_media_c2_dolby.xml").getroot()
+        instances = {hal.findtext("fqname") for hal in manifest.iter("hal")
+                     if hal.get("format") == "aidl" and hal.findtext("name") == "android.hardware.media.c2"}
+        self.assertEqual(instances, {"IComponentStore/default1", "IComponentStore/default2"})
+
+    def test_codec_list_matches_stock(self):
+        codecs = ET.parse(ROOT / "configs/media/media_codecs_c2.xml").getroot()
+        self.assertIn("media_codecs_dolby_audio.xml",
+                      [node.get("href") for node in codecs.findall("Include")])
+        decoders = {codec.get("name"): codec for codec in codecs.findall("./Decoders/MediaCodec")}
+        for name, secure in (("c2.dolby.decoder.hevc", False), ("c2.dolby.decoder.hevc.secure", True)):
+            with self.subTest(name=name):
+                self.assertEqual(decoders[name].get("type"), "video/dolby-vision")
+                features = {f.get("name"): f.get("required") for f in decoders[name].findall("Feature")}
+                self.assertEqual(features.get("secure-playback"), "true" if secure else None)
+        # The Dolby Vision decoders run the MediaTek HEVC decoders underneath.
+        self.assertIn("c2.mtk.hevc.decoder", decoders)
+        self.assertIn("c2.mtk.hevc.decoder.secure", decoders)
+
+
+    def test_display_reports_dolby_vision(self):
+        # MediaTek's composer does not list Dolby Vision; SurfaceFlinger adds it
+        # from this property, which needs a context it can read.
+        props = (ROOT / "vendor.prop").read_text()
+        self.assertRegex(props, r"(?m)^ro\.surface_flinger\.has_dolby_vision=true$")
+        contexts = (ROOT / "sepolicy/private/property_contexts").read_text()
+        self.assertRegex(contexts, r"(?m)^ro\.surface_flinger\.has_dolby_vision\s+"
+                                   r"u:object_r:surfaceflinger_prop:s0 exact bool$")
+
+
 if __name__ == "__main__":
     unittest.main()

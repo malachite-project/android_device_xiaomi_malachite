@@ -7,24 +7,62 @@
             <density>490</density>
         </density>
     </densityMapping>
-    <!-- Global Brightness-Nit mapping -->
+    <!-- Brightness-nits mapping. Each value is the backlight float MediaTek's composer gets:
+         it writes level 1 + 20478 * value to lcd-backlight (range from max_brightness, 20479),
+         and the panel takes that level as is (0x51, 0-4095). So value (L - 1) / 20478 is panel
+         level L. The nits are stock's calibration (/odm/etc/dsi_o16u_*_mi.xml: TargetNit and
+         PanelBrCl, MiBlLut below level 101 where its PCC factor is 1), the median of the four
+         panel variants. Stock reaches these levels through Xiaomi's display service, which the
+         ROM doesn't ship. Level 15 is the minimum (stock goes to ~10, but the 44-0f-0c panel
+         needs ~28 for the same 2 nits); 4094 the maximum, 4095 being the panel's peak mode. -->
     <screenBrightnessMap>
-        <point>
-            <value>0.000683661</value>
-            <nits>2.0</nits>
-        </point>
-        <point>
-            <value>0.499951</value>
-            <nits>500.0</nits>
-        </point>
-        <point>
-            <value>0.999755836</value>
-            <nits>1200.0</nits>
-        </point>
-        <point>
-            <value>1.0</value>
-            <nits>1201.0</nits>
-        </point>
+        <point><value>0.000683661</value><nits>3.27</nits></point> <!-- level 15 -->
+        <point><value>0.000830159</value><nits>4.01</nits></point> <!-- level 18 -->
+        <point><value>0.000976658</value><nits>4.72</nits></point> <!-- level 21 -->
+        <point><value>0.001123157</value><nits>5.48</nits></point> <!-- level 24 -->
+        <point><value>0.001269655</value><nits>6.22</nits></point> <!-- level 27 -->
+        <point><value>0.001416154</value><nits>6.90</nits></point> <!-- level 30 -->
+        <point><value>0.001562653</value><nits>7.61</nits></point> <!-- level 33 -->
+        <point><value>0.001709151</value><nits>8.28</nits></point> <!-- level 36 -->
+        <point><value>0.001904483</value><nits>9.25</nits></point> <!-- level 40 -->
+        <point><value>0.002148647</value><nits>10.45</nits></point> <!-- level 45 -->
+        <point><value>0.002392812</value><nits>11.66</nits></point> <!-- level 50 -->
+        <point><value>0.002636976</value><nits>12.76</nits></point> <!-- level 55 -->
+        <point><value>0.002881141</value><nits>13.79</nits></point> <!-- level 60 -->
+        <point><value>0.003174138</value><nits>15.17</nits></point> <!-- level 66 -->
+        <point><value>0.003467135</value><nits>16.52</nits></point> <!-- level 72 -->
+        <point><value>0.003760133</value><nits>17.86</nits></point> <!-- level 78 -->
+        <point><value>0.004053130</value><nits>19.21</nits></point> <!-- level 84 -->
+        <point><value>0.004346128</value><nits>20.59</nits></point> <!-- level 90 -->
+        <point><value>0.004883289</value><nits>22.86</nits></point> <!-- level 101 -->
+        <point><value>0.005566950</value><nits>27.17</nits></point> <!-- level 115 -->
+        <point><value>0.006299443</value><nits>30.55</nits></point> <!-- level 130 -->
+        <point><value>0.007276101</value><nits>35.19</nits></point> <!-- level 150 -->
+        <point><value>0.008496924</value><nits>41.06</nits></point> <!-- level 175 -->
+        <point><value>0.009717746</value><nits>47.01</nits></point> <!-- level 200 -->
+        <point><value>0.011671062</value><nits>56.06</nits></point> <!-- level 240 -->
+        <point><value>0.013624377</value><nits>65.54</nits></point> <!-- level 280 -->
+        <point><value>0.016066022</value><nits>77.09</nits></point> <!-- level 330 -->
+        <point><value>0.019484325</value><nits>88.69</nits></point> <!-- level 400 -->
+        <point><value>0.023390956</value><nits>104.44</nits></point> <!-- level 480 -->
+        <point><value>0.027297588</value><nits>121.40</nits></point> <!-- level 560 -->
+        <point><value>0.031692548</value><nits>144.32</nits></point> <!-- level 650 -->
+        <point><value>0.036575837</value><nits>171.43</nits></point> <!-- level 750 -->
+        <point><value>0.041947456</value><nits>196.28</nits></point> <!-- level 860 -->
+        <point><value>0.048784061</value><nits>226.25</nits></point> <!-- level 1000 -->
+        <point><value>0.056108995</value><nits>264.61</nits></point> <!-- level 1150 -->
+        <point><value>0.063433929</value><nits>300.63</nits></point> <!-- level 1300 -->
+        <point><value>0.073200508</value><nits>347.02</nits></point> <!-- level 1500 -->
+        <point><value>0.082967087</value><nits>396.14</nits></point> <!-- level 1700 -->
+        <point><value>0.092733665</value><nits>445.31</nits></point> <!-- level 1900 -->
+        <point><value>0.099912101</value><nits>484.62</nits></point> <!-- level 2047 -->
+        <point><value>0.112266823</value><nits>545.86</nits></point> <!-- level 2300 -->
+        <point><value>0.126916691</value><nits>637.74</nits></point> <!-- level 2600 -->
+        <point><value>0.141566559</value><nits>735.26</nits></point> <!-- level 2900 -->
+        <point><value>0.156216427</value><nits>838.25</nits></point> <!-- level 3200 -->
+        <point><value>0.170866296</value><nits>941.03</nits></point> <!-- level 3500 -->
+        <point><value>0.185516164</value><nits>1048.83</nits></point> <!-- level 3800 -->
+        <point><value>0.199873034</value><nits>1199.52</nits></point> <!-- level 4094 -->
     </screenBrightnessMap>
     <ambientLightHorizonLong>3000</ambientLightHorizonLong>
     <ambientLightHorizonShort>1000</ambientLightHorizonShort>
@@ -92,8 +130,10 @@
         </darkeningThresholds>
     </ambientBrightnessChangeThresholds>
     <highBrightnessMode enabled="true">
-        <!-- Transition point brightness from normal to HBM mode -->
-        <transitionPoint>0.499951</transitionPoint>
+        <!-- Transition point from normal to HBM mode, as a BACKLIGHT value on the map's scale
+             (DisplayDeviceConfig reads it as backlight and rejects it at boot unless it is below
+             config_screenBrightnessSettingMaximumFloat): 500 nits. -->
+        <transitionPoint>0.103015</transitionPoint>
         <!-- Minimum lux to enter HBM -->
         <minimumLux>6001</minimumLux>
         <!-- Time limitation for HBM. All zeros leave no remaining time, and
@@ -110,23 +150,17 @@
         <thermalStatusLimit>critical</thermalStatusLimit>
         <!-- Low power mode limitation for HBM -->
         <allowInLowPowerMode>true</allowInLowPowerMode>
-        <!-- HDR headroom (tester's curve): up to 2x from 10 to 200 SDR nits, back to 1x by 500
-             nits, so HDR never leaves the normal range. Without a ratio map the framework has no
-             HDR brightness and HDR video is tone-mapped down to SDR white. Stock's 8x
-             (/product/etc/displayconfig) is not used: the backlight goes through the lights HAL
-             here, not the composer, so the boost raises the whole screen, and 8x would drive it
-             to sunlight/peak brightness (heat, battery, HBM budget). For the same reason HDR
-             must cover half the screen (framework default; stock 0), so thumbnails don't boost. -->
+        <!-- HDR as stock: 8x headroom over the SDR level, capped by the 1200 nit top of the
+             map. The composer sets the backlight (ro.vendor.mtk_backlight_hwc_support), so
+             SurfaceFlinger dims SDR content by the same ratio and only the HDR content gets
+             brighter. Only for HDR layers covering half the screen (AOSP's default): with 0,
+             an HDR thumbnail scrolling through recents toggled the boost several times a
+             second, and each toggle flashed because the composer writes the backlight
+             outside MediaTek's sync mode, a frame apart from the SDR dimming. -->
         <minimumHdrPercentOfScreen>0.5</minimumHdrPercentOfScreen>
         <sdrHdrRatioMap>
-            <point><sdrNits>2.0</sdrNits><hdrRatio>1.0</hdrRatio></point>
-            <point><sdrNits>10.0</sdrNits><hdrRatio>2.0</hdrRatio></point>
-            <point><sdrNits>50.0</sdrNits><hdrRatio>2.0</hdrRatio></point>
-            <point><sdrNits>100.0</sdrNits><hdrRatio>2.0</hdrRatio></point>
-            <point><sdrNits>200.0</sdrNits><hdrRatio>2.0</hdrRatio></point>
-            <point><sdrNits>300.0</sdrNits><hdrRatio>1.4</hdrRatio></point>
-            <point><sdrNits>500.0</sdrNits><hdrRatio>1.0</hdrRatio></point>
-            <point><sdrNits>1201.0</sdrNits><hdrRatio>1.0</hdrRatio></point>
+            <point><sdrNits>2.0</sdrNits><hdrRatio>8.0</hdrRatio></point>
+            <point><sdrNits>1200.0</sdrNits><hdrRatio>8.0</hdrRatio></point>
         </sdrHdrRatioMap>
     </highBrightnessMode>
 </displayConfiguration>

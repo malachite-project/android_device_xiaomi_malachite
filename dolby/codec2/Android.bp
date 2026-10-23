@@ -1,0 +1,38 @@
+//
+// SPDX-FileCopyrightText: 2026 The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Serves stock's Dolby Codec2 stores (Dolby Vision video, Dolby Digital
+// Plus/AC-4 audio) over AIDL. Stock runs them as HIDL services, which the
+// framework does not list with media.c2.hal.selection=aidl.
+cc_binary {
+    name: "android.hardware.media.c2-dolby-service",
+    vendor: true,
+    relative_install_path: "hw",
+
+    init_rc: ["android.hardware.media.c2-dolby-service.rc"],
+    vintf_fragments: ["manifest_media_c2_dolby.xml"],
+
+    defaults: [
+        "libcodec2-hidl-defaults",
+        "libcodec2-aidl-defaults",
+    ],
+
+    srcs: ["service.cpp"],
+
+    shared_libs: [
+        "libbinder_ndk",
+    ],
+
+    // The store libraries (c2.dolby.store, libcodec2_store_dolby) and their
+    // decoders come from vendor/xiaomi/malachite and are loaded with dlopen.
+}
+
+// Old name of objcpy() for stock's Dolby Vision client, see objcpy_shim.cpp.
+cc_library_shared {
+    name: "libcodec2_hidl_shim",
+    vendor: true,
+    defaults: ["libcodec2-hidl-defaults"],
+    srcs: ["objcpy_shim.cpp"],
+}

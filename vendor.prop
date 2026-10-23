@@ -65,16 +65,15 @@ ro.bluetooth.a2dp_offload.supported=true
 persist.bluetooth.a2dp_offload.cap=sbc-aac
 persist.bluetooth.a2dp_offload.disabled=false
 
-# LE Audio hardware offload: the audio DSP encodes and decodes LC3, through
-# the LE Audio ports of the primary module (stock's MediaTek offload ports;
-# stock itself leaves this off). The Bluetooth stack needs disabled=false set
-# explicitly (codec_manager.cc defaults it to true). Developer options "Disable
-# LE audio hardware offload", or disabling A2DP offload, sets
-# persist.bluetooth.leaudio_offload.disabled=true; after a reboot the stack
-# encodes LC3 in software and audio policy reads
-# audio_policy_configuration_le_offload_disabled.xml (or the A2DP one).
+# LE Audio: software LC3 by default, as stock. With hardware offload (the audio
+# DSP through the primary module's LE Audio ports, which stock never enables)
+# LE Audio connected but the sound stayed on the phone's speaker (tester,
+# 20261016-5); with "Disable LE audio hardware offload" it played on the
+# earbuds. disabled=true makes the stack encode LC3 in software and audio policy
+# read audio_policy_configuration_le_offload_disabled.xml. supported=true keeps
+# the Developer options switch, so offload can still be tried.
 ro.bluetooth.leaudio_offload.supported=true
-persist.bluetooth.leaudio_offload.disabled=false
+persist.bluetooth.leaudio_offload.disabled=true
 
 # LE Audio (unicast). Stock switches every profile off. Earbuds that also speak
 # classic Bluetooth stay on A2DP and HFP until LE Audio is switched on in their
@@ -357,6 +356,19 @@ telephony.lteOnCdmaDevice=1
 # Seamless transfer
 sys.fflag.override.settings_seamless_transfer=true
 
+# Backlight through MediaTek's composer, as stock: SurfaceFlinger then gets the SDR and the
+# display level separately and dims SDR content while HDR content is shown brighter. The
+# composer writes 1 + 20478 * the framework's backlight float to lcd-backlight, which the
+# panel takes as its level; configs/display_id_*.xml maps those levels to stock's nits.
+ro.vendor.mtk_backlight_hwc_support=1
+# With the composer on the backlight, it puts lcd-backlight into MediaTek's sync mode
+# (led_type 1, because the DTB's led_mode is 4) when platform switch bit 15 is set. In
+# that mode the kernel no longer writes the level to the panel; on stock, Xiaomi's display
+# service (not shipped) writes it to mi_display's backlight node. Clear bit 15:
+# HWCMediator::updatePlatformConfig applies this before every BrightnessWrap update, at
+# start and on each dump, then resets the property to -1; the cleared bit stays.
+vendor.debug.hwc.plat_switch_clear_bit=15
+
 # Surface Flinger
 debug.sf.auto_latch_unsignaled=1
 debug.sf.disable_client_composition_cache=0
@@ -375,13 +387,20 @@ debug.sf.earlyGl.app.duration=14600000
 ro.surface_flinger.clear_slots_with_set_layer_buffer=false
 ro.surface_flinger.enable_frame_rate_override=false
 ro.surface_flinger.ignore_hdr_camera_layers=true
-ro.surface_flinger.use_content_detection_for_refresh_rate=true
+# Refresh rate as stock: no content detection and an 1100 ms idle timer
+# (stock: debug.sf.set_idle_timer_ms=1100). With 80 ms and content detection the
+# panel switched modes many times a second, and every switch on this panel can
+# show as a flicker.
+ro.surface_flinger.use_content_detection_for_refresh_rate=false
 ro.surface_flinger.max_frame_buffer_acquired_buffers=3
 ro.surface_flinger.set_display_power_timer_ms=1000
-ro.surface_flinger.set_idle_timer_ms=80
+ro.surface_flinger.set_idle_timer_ms=1100
 ro.surface_flinger.set_touch_timer_ms=150
 ro.surface_flinger.supports_background_blur=1
 ro.surface_flinger.has_HDR_display=true
+# The composer does not report Dolby Vision; the Dolby decoders (dolby/codec2)
+# render it, so SurfaceFlinger adds it to the internal display.
+ro.surface_flinger.has_dolby_vision=true
 ro.surface_flinger.has_wide_color_display=true
 ro.surface_flinger.protected_contents=true
 ro.surface_flinger.use_color_management=true

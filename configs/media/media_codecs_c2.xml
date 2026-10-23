@@ -15,6 +15,7 @@
 -->
 
 <MediaCodecs>
+    <Include href="media_codecs_dolby_audio.xml" />
     <Settings>
         <!-- disable TV and telephony domains by default. These must be opted in by OEMs -->
         <Domain name="telephony" enabled="false" />
@@ -22,6 +23,36 @@
         <Variant name="slow-cpu" enabled="false" />
     </Settings>
     <Decoders>
+        <!-- Dolby Vision, limits as stock OS2.0.208.0.VOOMIXM -->
+        <MediaCodec name="c2.dolby.decoder.hevc" type="video/dolby-vision">
+            <Limit name="size" min="64x64" max="4096x4096"/>
+            <Limit name="alignment" value="2x2"/>
+            <Limit name="block-size" value="16x16"/>
+            <Limit name="block-count" range="1-34560"/>
+            <Limit name="blocks-per-second" min="1" max="1958400"/>
+            <Limit name="bitrate" range="1-100000000"/>
+            <Limit name="frame-rate" range="1-240"/>
+            <Feature name="adaptive-playback"/>
+            <Limit name="concurrent-instances" max="16"/>
+            <Limit name="performance-point-4096x2160" value="56"/>
+            <Limit name="performance-point-3840x2160" value="60"/>
+            <Limit name="performance-point-1920x1080" value="240"/>
+        </MediaCodec>
+        <MediaCodec name="c2.dolby.decoder.hevc.secure" type="video/dolby-vision">
+            <Limit name="size" min="96x96" max="4096x4096" />
+            <Limit name="block-count" range="36-36864" />
+            <Limit name="alignment" value="2x2" />
+            <Limit name="block-size" value="16x16" />
+            <Limit name="blocks-per-second" min="24" max="2073600" />
+            <Limit name="bitrate" range="1-40000000" />
+            <Limit name="frame-rate" range="1-60" />
+            <Limit name="concurrent-instances" max="1" />
+            <Limit name="performance-point-4096x2304" value="30" />
+            <Limit name="performance-point-4096x2160" value="60" />
+            <Limit name="performance-point-3840x2160" value="60" />
+            <Feature name="adaptive-playback" />
+            <Feature name="secure-playback" required="true" />
+        </MediaCodec>
         <MediaCodec name="c2.mtk.avc.decoder" type="video/avc" >
             <Limit name="size" min="64x64" max="4096x2176" />
             <Quirk name="wants-NAL-fragments" />

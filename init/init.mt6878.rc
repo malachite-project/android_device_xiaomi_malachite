@@ -966,6 +966,7 @@ on property:sys.shutdown.requested=0service
 # the charging screen instead of Android (vendor/bin/offmode_charge.sh).
 on charger
     start vendor.offmode_charge
+    start vendor.charger_backlight
 
 service vendor.offmode_charge /vendor/bin/offmode_charge.sh
     user root

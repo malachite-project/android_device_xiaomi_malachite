@@ -34,6 +34,7 @@ namespace {
 // Goodix GT9916R: any value but "0" sends the 480 Hz report rate command, "0" the 240 Hz one.
 constexpr char kReportRatePath[] = "/sys/devices/platform/goodix_ts.0/goodix_ts_report_rate";
 constexpr char kDispFeaturePath[] = "/dev/mi_display/disp_feature";
+constexpr int kResendIntervalMs = 5000;
 
 bool writeReportRate(bool high) {
     if (!WriteStringToFile(high ? "1" : "0", kReportRatePath)) {
@@ -90,11 +91,25 @@ void HighTouchPollingRate::reapplyOnDisplayOn() {
             .revents = 0,
     };
     char buf[1024];
+    // The service starts while the display is on.
+    bool screenOn = true;
     while (true) {
-        if (poll(&pfd, 1, -1) < 0) {
+        // The driver also resets the IC without a display event: on the firmware's reset
+        // requests (goodix_ts_request_handle) and in ESD recovery (goodix_ts_esd_work power
+        // cycles it), and neither sends the rate again. While the screen is on, send it every
+        // few seconds; the command is idempotent. Never while the IC sleeps.
+        int ret = poll(&pfd, 1, screenOn ? kResendIntervalMs : -1);
+        if (ret < 0) {
             if (errno == EINTR) continue;
             PLOG(ERROR) << "Failed to poll " << kDispFeaturePath;
             return;
+        }
+        if (ret == 0) {
+            std::lock_guard<std::mutex> lock(mLock);
+            if (mEnabled) {
+                writeReportRate(true);
+            }
+            continue;
         }
         ssize_t size = read(fd.get(), buf, sizeof(buf));
         if (size < 0) {
@@ -103,18 +118,19 @@ void HighTouchPollingRate::reapplyOnDisplayOn() {
         }
 
         // A read can return several events back to back.
-        bool displayOn = false;
+        bool powerEvent = false;
         size_t offset = 0;
         while (offset + sizeof(disp_event) <= static_cast<size_t>(size)) {
             auto* event = reinterpret_cast<disp_event_resp*>(buf + offset);
             size_t end = offset + sizeof(disp_event) + event->base.length;
             if (end > static_cast<size_t>(size)) break;
             if (event->base.type == MI_DISP_EVENT_POWER && event->base.length > 0) {
-                displayOn = event->data[0] == MI_DISP_POWER_ON;
+                powerEvent = true;
+                screenOn = event->data[0] == MI_DISP_POWER_ON;
             }
             offset = end;
         }
-        if (!displayOn) continue;
+        if (!powerEvent || !screenOn) continue;
 
         // The reset takes about 100 ms after the work runs; try once after it and once more
         // in case the first command reached the IC while it was still starting.

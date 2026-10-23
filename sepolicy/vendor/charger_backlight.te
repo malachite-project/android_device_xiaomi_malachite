@@ -1,0 +1,10 @@
+# Off-mode charging: re-sends the backlight when the panel turns on (charger/).
+type charger_backlight, domain;
+type charger_backlight_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(charger_backlight)
+
+allow charger_backlight vendor_displayfeature_device:chr_file rw_file_perms;
+
+allow charger_backlight sysfs_leds:dir search;
+allow charger_backlight sysfs_leds:file rw_file_perms;

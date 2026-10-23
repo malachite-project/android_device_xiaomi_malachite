@@ -251,16 +251,40 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
         setFodStatus(FOD_STATUS_OFF);
     }
 
+    void setIgnoreDisplayTouches(bool ignore) {
+        LOG(DEBUG) << __func__ << " ignore: " << ignore;
+        std::lock_guard<std::mutex> lock(fodLock_);
+        ignoreTouches_ = ignore;
+        applyTouchFodLocked();
+    }
+
+    void onDisplayOffChanged(bool off) {
+        LOG(DEBUG) << __func__ << " off: " << off;
+        std::lock_guard<std::mutex> lock(fodLock_);
+        displayOff_ = off;
+        applyTouchFodLocked();
+    }
+
   private:
     fingerprint_device_t* mDevice;
     android::base::unique_fd touch_fd_;
     android::base::unique_fd disp_fd_;
     bool isFpcFod;
 
-    // Guards fodEnabled_ and the local HBM requests, so a press handled by the
+    // Guards the FOD state and the local HBM requests, so a press handled by the
     // fod_press_status thread cannot turn the spot back on after FOD was switched off.
     std::mutex fodLock_;
+    // FOD as requested by the HAL and the framework's finger events.
+    bool fodRequested_ = false;
+    // FOD as set in the touch IC: off while SystemUI ignores display touches.
     bool fodEnabled_ = false;
+    // SystemUI hides the UDFPS overlay but the HAL keeps authenticating, e.g. under
+    // the secure camera on the lockscreen. The touch IC would still turn presses on
+    // the sensor area (the shutter button) into fingerprint captures.
+    bool ignoreTouches_ = false;
+    // With the screen off or in AOD SystemUI also stops handling touches, but
+    // screen-off unlock needs the touch IC's FOD detection.
+    bool displayOff_ = false;
 
     void setLocalHbm(bool on) {
         disp_local_hbm_req req;
@@ -271,14 +295,20 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
         ioctl(disp_fd_.get(), MI_DISP_IOCTL_SET_LOCAL_HBM, &req);
     }
 
-    void setTouchFod(bool on) {
-        std::lock_guard<std::mutex> lock(fodLock_);
+    void applyTouchFodLocked() {
+        bool on = fodRequested_ && (!ignoreTouches_ || displayOff_);
         fodEnabled_ = on;
         if (!on) {
             setLocalHbm(false);
         }
         int buf[MAX_BUF_SIZE] = {TOUCH_ID, Touch_Fod_Enable, on ? 1 : 0};
         ioctl(touch_fd_.get(), TOUCH_IOC_SET_CUR_VALUE, &buf);
+    }
+
+    void setTouchFod(bool on) {
+        std::lock_guard<std::mutex> lock(fodLock_);
+        fodRequested_ = on;
+        applyTouchFodLocked();
     }
 
     void setFodStatus(int value) { setTouchFod(value == FOD_STATUS_ON); }

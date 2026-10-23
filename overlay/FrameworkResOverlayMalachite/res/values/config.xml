@@ -31,8 +31,10 @@
     <bool name="config_unplugTurnsOnScreen">true</bool>
 
     <!-- If true, the screen can be rotated via the accelerometer in all 4
-         rotations as the default behavior. -->
-    <bool name="config_allowAllRotations">true</bool>
+         rotations as the default behavior. Off, as on stock: with it on, apps
+         that ask for a sensor orientation (e.g. sensorPortrait in Facebook
+         Reels) turn upside down even with auto-rotate off. -->
+    <bool name="config_allowAllRotations">false</bool>
 
     <!-- The default intensity level for notification vibrations. See
          Settings.System.NOTIFICATION_VIBRATION_INTENSITY more details on the constant values and
@@ -49,18 +51,28 @@
          -2 is invalid so setting will resort to int value specified above.
          Set this to 0.0 to allow screen to go to minimal brightness.
          The user is forbidden from setting the brightness below this level. -->
+    <!-- Backlight floats, not brightness: the composer writes 1 + 20478 * value, so this is
+         panel level 15 (see screenBrightnessMap in configs/display_id_*.xml). -->
     <item name="config_screenBrightnessSettingMinimumFloat" format="float" type="dimen">0.000683661</item>
 
     <!-- Maximum screen brightness allowed by the power manager.
          -2 is invalid so setting will resort to int value specified above.
          Set this to 1.0 for maximum brightness range.
          The user is forbidden from setting the brightness above this level. -->
-    <item name="config_screenBrightnessSettingMaximumFloat" format="float" type="dimen">1.0</item>
+    <!-- Panel level 4094, 1200 nits. 4095 turns on the panel's peak mode, whose driver path
+         deadlocks the display. -->
+    <item name="config_screenBrightnessSettingMaximumFloat" format="float" type="dimen">0.199873034</item>
 
     <!-- Default screen brightness setting set.
          -2 is invalid so setting will resort to int value specified above.
          Must be in the range specified by minimum and maximum. -->
     <item name="config_screenBrightnessSettingDefaultFloat" format="float" type="dimen">0.07495849</item>
+
+    <!-- HDR headroom on and off (SDR unchanged) over about a second instead of the fast
+         ramp's 0.3 s: the composer writes the backlight outside MediaTek's sync mode, a frame
+         apart from SurfaceFlinger's SDR dimming, so large steps flash (frameworks/base
+         DisplayPowerController). -->
+    <item name="config_brightnessRampRateHdrOnly" format="float" type="dimen">0.3</item>
 
     <!-- Screen brightness used to dim the screen while dozing in a very low power state.
          May be less than the minimum allowed brightness setting
@@ -543,6 +555,22 @@
          rates are available from hardware composer. Only has an effect if the value is
          non-zero. -->
     <integer name="config_defaultPeakRefreshRate">120</integer>
+
+    <!-- Low-brightness flicker zone. Each rate switch can show as a flicker on this panel, and
+         it is most visible when the screen is dim. Stock skips the idle drop to 60 Hz at or
+         below brightness 1580 of 20479 (ro.vendor.disable_idle_fps.threshold in
+         libmisurfaceflinger, about 75 nits). Here, at or below brightness 22 (of 255, about
+         80 nits with our map), the framework holds the current rate (120 Hz, or the user's
+         maximum) instead of letting the idle timer switch it. Its 120 Hz vote has the lowest
+         priority, so a rate an app asks for (a 60 fps video) still applies, as on stock.
+         No ambient light condition (-1), so the light sensor isn't needed for it. -->
+    <integer-array translatable="false" name="config_brightnessThresholdsOfPeakRefreshRate">
+        <item>22</item>
+    </integer-array>
+    <integer-array translatable="false" name="config_ambientThresholdsOfPeakRefreshRate">
+        <item>-1</item>
+    </integer-array>
+    <integer name="config_defaultRefreshRateInZone">120</integer>
 
     <!-- The type of the light sensor to be used by the display framework for things like
          auto-brightness. If unset, then it just gets the default sensor of type TYPE_LIGHT. -->

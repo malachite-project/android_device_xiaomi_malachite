@@ -205,6 +205,12 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('android.hardware.graphics.common-V4-ndk.so', 'android.hardware.graphics.common-V7-ndk.so')
         .replace_needed('android.hardware.graphics.allocator-V1-ndk.so', 'android.hardware.graphics.allocator-V2-ndk.so'),
 
+    'vendor/lib64/c2.dolby.client.so': blob_fixup()
+        .add_needed('libcodec2_hidl_shim.so'),
+
+    ('vendor/lib64/c2.dolby.hevc.dec.so', 'vendor/lib64/c2.dolby.hevc.sec.dec.so'): blob_fixup()
+        .add_needed('libcodec2_shim.so'),
+
     'vendor/lib64/libcodec2_fsr.so': blob_fixup()
         .call(blob_fixup_graphic_buffer_size)
         .replace_needed('android.hardware.graphics.common-V4-ndk.so', 'android.hardware.graphics.common-V7-ndk.so')

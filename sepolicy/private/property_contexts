@@ -1,0 +1,2 @@
+# Read by SurfaceFlinger (frameworks/native fork) to report Dolby Vision.
+ro.surface_flinger.has_dolby_vision u:object_r:surfaceflinger_prop:s0 exact bool

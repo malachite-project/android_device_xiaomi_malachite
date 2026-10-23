@@ -6,4 +6,9 @@
 <resources>
     <!-- Show battery cycle count -->
     <bool name="config_show_battery_cycle_count" translatable="false">true</bool>
+
+    <!-- Settings > Display > Minimum and Maximum refresh rate. The same rate for both keeps
+         the panel from switching modes at all. The lists can't cross. -->
+    <bool name="config_show_min_refresh_rate_switch" translatable="false">true</bool>
+    <bool name="config_show_peak_refresh_rate_switch" translatable="false">true</bool>
 </resources>

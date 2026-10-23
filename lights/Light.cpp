@@ -103,8 +103,16 @@ static inline uint32_t getScaledBrightness(const HwLightState& state) {
     return scaleBrightness(brightness);
 }
 
+/*
+ * Level 4095 makes the panel driver switch peak mode on (and any lower level
+ * off) with mi_disp_panel_ddic_send_cmd(), which takes the CRTC lock that the
+ * backlight path already holds, so the display deadlocks until a forced
+ * reboot. 4094 is the 1200 nit top of the brightness map, so nothing is lost.
+ */
+#define PANEL_LEVEL_SAFE_MAX 4094
+
 static void handleBacklight(const HwLightState& state) {
-    uint32_t brightness = getScaledBrightness(state);
+    uint32_t brightness = std::min<uint32_t>(getScaledBrightness(state), PANEL_LEVEL_SAFE_MAX);
     set(LCD_LED BRIGHTNESS, brightness);
     set(BRIGHTNESS_CLONE, std::min<uint32_t>(brightness * 5, MAX_BRIGHTNESS_CLONE));
 }

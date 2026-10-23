@@ -99,11 +99,11 @@ class DeviceContracts(unittest.TestCase):
         for level in range(2, 256):
             with self.subTest(level=level):
                 self.assertLessEqual(abs(table[level] - 4095 * (level - 1) / 254), 1)
-        # Float 0.5, the high-brightness transition point, is the normal maximum.
+        # Float 0.5 is the normal maximum on the lights HAL path (no longer the backlight
+        # path, see test_composer_backlight_levels_are_panel_levels).
         self.assertEqual(table[128], 2047)
         self.assertGreater(table[129], 2047)
         display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
-        self.assertEqual(display.find("highBrightnessMode/transitionPoint").text, "0.499951")
         # Zero HBM time makes the controller reschedule itself continuously in sunlight.
         timing = display.find("highBrightnessMode/timing")
         self.assertGreater(int(timing.find("timeMaxSecs").text), 0)
@@ -135,14 +135,105 @@ class DeviceContracts(unittest.TestCase):
         # 0x10d, expert wide colour, shows only a faint red without Xiaomi's display service.
         self.assertNotIn("269", modes)
 
-    def test_hdr_has_headroom_for_full_screen_hdr_only(self):
+    def test_hdr_headroom_is_the_calibrated_curve(self):
         hbm = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot().find(
             "highBrightnessMode")
+        # Half the screen (AOSP's default): small HDR layers toggled the boost and flashed.
         self.assertEqual(hbm.find("minimumHdrPercentOfScreen").text, "0.5")
-        ratios = [float(p.find("hdrRatio").text) for p in hbm.find("sdrHdrRatioMap").iter("point")]
-        # The whole screen is boosted here, so stay within the normal range (<= 500 nits).
-        self.assertLessEqual(max(ratios), 2.0)
-        self.assertEqual(ratios[-1], 1.0)
+        points = [(float(p.find("sdrNits").text), float(p.find("hdrRatio").text))
+                  for p in hbm.find("sdrHdrRatioMap").iter("point")]
+        nits = [n for n, _ in points]
+        ratios = [r for _, r in points]
+        self.assertEqual(nits, sorted(nits))
+        # Most headroom at the lowest brightness, never below SDR, never above stock's 8x.
+        self.assertEqual(ratios, sorted(ratios, reverse=True))
+        self.assertLessEqual(max(ratios), 8.0)
+        self.assertGreaterEqual(min(ratios), 1.0)
+
+    def test_backlight_never_enters_panel_peak_mode(self):
+        # HDR headroom and 100 % brightness reach the top of the range. Level 4095 turns on
+        # the panel's peak mode, whose driver path deadlocks the display (prebuilt modules).
+        light = (ROOT / "lights/Light.cpp").read_text()
+        self.assertIn("#define PANEL_LEVEL_SAFE_MAX 4094", light)
+        self.assertIn("std::min<uint32_t>(getScaledBrightness(state), PANEL_LEVEL_SAFE_MAX)",
+                      light)
+
+    def test_composer_backlight_levels_are_panel_levels(self):
+        # MediaTek's composer writes level = int(1 + 20478 * value + 0.5) to lcd-backlight
+        # (min_brightness 1, max_brightness 20479), and the panel takes it as is.
+        props = (ROOT / "vendor.prop").read_text()
+        self.assertRegex(props, r"(?m)^ro\.vendor\.mtk_backlight_hwc_support=1$")
+        # Sync backlight mode (led_type 1) leaves the panel without a writer on this ROM.
+        self.assertRegex(props, r"(?m)^vendor\.debug\.hwc\.plat_switch_clear_bit=15$")
+        # init drops vendor.prop lines vendor_init may not set, without failing the boot.
+        self.assertIn("set_prop(vendor_init, vendor_mtk_hwc_debug_log_prop)",
+                      (ROOT / "sepolicy/vendor/vendor_init.te").read_text())
+        display = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot()
+        points = [(float(p.find("value").text), float(p.find("nits").text))
+                  for p in display.find("screenBrightnessMap").iter("point")]
+        levels = [int(1 + 20478 * value + 0.5) for value, _ in points]
+        nits = [n for _, n in points]
+        for (value, _), level in zip(points, levels):
+            with self.subTest(value=value):
+                # Each point is exactly a panel level, not between two.
+                self.assertAlmostEqual(1 + 20478 * value, level, delta=0.01)
+        self.assertEqual(levels, sorted(set(levels)))
+        self.assertEqual(nits, sorted(nits))
+        # Level 15 is the minimum; 4095 would turn on the panel's peak mode, whose driver
+        # path deadlocks the display.
+        self.assertEqual(levels[0], 15)
+        self.assertEqual(levels[-1], 4094)
+        self.assertAlmostEqual(nits[-1], 1200, delta=1)
+        overlay = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
+        dimens = {node.get("name"): float(node.text)
+                  for node in overlay.getroot().iter("item") if node.get("type") == "dimen"}
+        self.assertEqual(dimens["config_screenBrightnessSettingMinimumFloat"], points[0][0])
+        self.assertEqual(dimens["config_screenBrightnessSettingMaximumFloat"], points[-1][0])
+        self.assertEqual(dimens["config_screenBrightnessDimFloat"], points[0][0])
+
+        def brightness_at(target):
+            # Brightness is the backlight range rescaled to 0..1 (DisplayDeviceConfig).
+            for (v0, n0), (v1, n1) in zip(points, points[1:]):
+                if n0 <= target <= n1:
+                    value = v0 + (v1 - v0) * (target - n0) / (n1 - n0)
+                    return (value - points[0][0]) / (points[-1][0] - points[0][0])
+            raise AssertionError(target)
+
+        # Sunlight brightness starts at 500 nits, as stock. DisplayDeviceConfig reads the
+        # transition point as a backlight value and throws at boot (system_server bootloop)
+        # unless it is below the backlight maximum.
+        transition = float(display.find("highBrightnessMode/transitionPoint").text)
+        self.assertLess(transition, dimens["config_screenBrightnessSettingMaximumFloat"])
+        self.assertGreater(transition, dimens["config_screenBrightnessSettingMinimumFloat"])
+        for (v0, n0), (v1, n1) in zip(points, points[1:]):
+            if n0 <= 500 <= n1:
+                self.assertAlmostEqual(transition, v0 + (v1 - v0) * (500 - n0) / (n1 - n0),
+                                       delta=0.000002)
+        # The default stays at about 75 nits.
+        self.assertAlmostEqual(dimens["config_screenBrightnessSettingDefaultFloat"],
+                               brightness_at(75), delta=0.002)
+
+    def test_low_brightness_keeps_one_refresh_rate(self):
+        overlay = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
+        root = overlay.getroot()
+        arrays = {node.get("name"): [int(item.text) for item in node.iter("item")]
+                  for node in root.iter("integer-array")}
+        integers = {node.get("name"): node.text for node in root.iter("integer")}
+        self.assertEqual(arrays["config_brightnessThresholdsOfPeakRefreshRate"], [22])
+        # Negative: no ambient light condition.
+        self.assertEqual(arrays["config_ambientThresholdsOfPeakRefreshRate"], [-1])
+        self.assertEqual(integers["config_defaultRefreshRateInZone"], "120")
+        props = (ROOT / "vendor.prop").read_text()
+        self.assertIn("ro.surface_flinger.set_idle_timer_ms=1100\n", props)
+        self.assertIn("ro.surface_flinger.use_content_detection_for_refresh_rate=false\n", props)
+        # The panel drivers offer nothing below 60 Hz; no minimum refresh rate writer.
+        self.assertNotIn("MalachiteRefreshRate", (ROOT / "device.mk").read_text())
+        self.assertFalse((ROOT / "refreshrate").exists())
+        settings = ET.parse(ROOT / "overlay/SettingsResOverlayMalachite/res/values/"
+                            "lineage_config.xml").getroot()
+        bools = {node.get("name"): node.text for node in settings.iter("bool")}
+        self.assertEqual(bools["config_show_min_refresh_rate_switch"], "true")
+        self.assertEqual(bools["config_show_peak_refresh_rate_switch"], "true")
 
     def test_headset_detection_uses_input_events(self):
         config = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
@@ -293,7 +384,7 @@ class DeviceContracts(unittest.TestCase):
                      "persist.bluetooth.a2dp_offload.disabled=false",
                      "persist.bluetooth.a2dp_offload.cap=sbc-aac",
                      "ro.bluetooth.leaudio_offload.supported=true",
-                     "persist.bluetooth.leaudio_offload.disabled=false"):
+                     "persist.bluetooth.leaudio_offload.disabled=true"):
             with self.subTest(prop=line):
                 self.assertRegex(props, rf"(?m)^{re.escape(line)}$")
         self.assertNotIn("persist.bluetooth.bluetooth_audio_hal.disabled", props)
