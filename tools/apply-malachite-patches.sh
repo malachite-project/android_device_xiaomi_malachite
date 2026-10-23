@@ -1,8 +1,7 @@
 #!/bin/bash
 # Apply the malachite-specific commits on top of crDroid's own framework repos.
 # Run from the Android source root, AFTER `repo sync`, BEFORE `breakfast`.
-# Tested against crDroid 16.0 on 2026-10-22 (all commits below applied cleanly or were already present).
-# Safe to run twice: commits already in the tree are skipped.
+# Tested against crDroid 16.0 on 2026-10-23. Safe to run twice: commits already in the tree are skipped.
 set -u
 ROOT=$(pwd)
 BASE=https://github.com/malachite-project
@@ -19,6 +18,9 @@ apply() {  # apply <path> <repo-name> <sha>...
   for sha in "$@"; do
     local subj; subj=$(git log -1 --format=%s "$sha" 2>/dev/null)
     if [ -z "$subj" ]; then echo "!! $path: commit $sha not found (fork was rebased?)"; FAIL=1; continue; fi
+    if git log -n 300 --format=%B HEAD | grep -qF "cherry picked from commit $sha"; then
+      echo "present  $path: $subj (applied by an earlier run)"; continue
+    fi
     if git cherry-pick -x "$sha" >/dev/null 2>&1; then
       echo "ok       $path: $subj"
     elif [ -z "$(git status --porcelain | grep -v '^??')" ]; then
@@ -54,6 +56,20 @@ apply packages/modules/Bluetooth android_packages_modules_Bluetooth \
 # WPA3 opt-out for the MediaTek WiFi driver
 apply external/wpa_supplicant_8 android_external_wpa_supplicant_8 \
   0cd9f1c12855f7233ea487af9fe33928534c1d29
+
+# device.mk: crDroid already ships FaceUnlock (same package as ParanoidSense), so the
+# ParanoidSense module clashes with it. Remove the line locally (fix your fork too).
+DM="$ROOT/device/xiaomi/malachite/device.mk"
+if [ -f "$DM" ] && grep -q '^    ParanoidSense$' "$DM"; then
+  python3 -I - "$DM" <<'PY'
+import sys
+p = sys.argv[1]; s = open(p).read()
+old = "PRODUCT_PACKAGES += \\\n    ParanoidSense\n"
+assert old in s, "ParanoidSense block not in the expected form - edit device.mk by hand"
+open(p, "w").write(s.replace(old, ""))
+PY
+  [ $? -eq 0 ] && echo "ok       device.mk: removed ParanoidSense (crDroid ships FaceUnlock)" || { echo "!! device.mk edit failed"; FAIL=1; }
+fi
 
 [ "$FAIL" = 0 ] && echo "DONE: all patches applied." || echo "DONE WITH PROBLEMS: see lines starting with '!!' above."
 exit $FAIL
