@@ -199,6 +199,16 @@
         ""
       ],
       "Type": "Property"
+    },
+    {
+      "Name": "FpsgoControl",
+      "Path": "/sys/kernel/fpsgo/composer/fpsgo_control",
+      "Values": [
+        "1",
+        "0"
+      ],
+      "DefaultIndex": 1,
+      "ResetOnInit": true
     }
   ],
   "Actions": [
@@ -308,6 +318,12 @@
       "PowerHint": "GAME",
       "Type": "EndHint",
       "Value": "INTERACTION"
+    },
+    {
+      "PowerHint": "GAME",
+      "Node": "FpsgoControl",
+      "Duration": 0,
+      "Value": "1"
     },
     {
       "PowerHint": "EXPENSIVE_RENDERING",

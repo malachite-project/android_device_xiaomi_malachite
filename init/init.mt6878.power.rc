@@ -145,6 +145,18 @@ on property:sys.boot_completed=1
     write /sys/devices/system/cpu/cpufreq/policy4/scaling_governor "sugov_ext"
     write /sys/devices/platform/soc/112b0000.ufshci/clkgate_enable 1
 
+    # FPSGO's FBT would set its own per-task uclamp.min/max (and VIP) on the
+    # render threads it controls, overwriting the uclamp ADPF sessions set on
+    # the same threads with sched_setattr. perfserv_ta (top-app boosting is
+    # handled elsewhere) turns those writes off; FBT still times each frame
+    # and passes the target FPS to GED. See bringup/POWER-BOOSTS.md.
+    write /sys/kernel/fpsgo/common/perfserv_ta 1
+    # FBT queues FPSGO_SET_SCHED_RATE commands (fpsgo_sentcmd) for the
+    # MediaTek power HAL to read with FPSGO_GET_CMD whenever a controlled
+    # render starts or stops. Nothing here reads them, so each one would stay
+    # allocated until reboot. libperfmgr does not take this hint either.
+    write /sys/kernel/fpsgo/fbt/enable_switch_down_throttle 0
+
     # cpuqos_v3.ko stays disabled until boot completes; this switches it to
     # BALANCE and partitions L3 between top-app and background groups.
     write /sys/devices/system/cpu/cpuqos/cpuqos_boot_complete 1

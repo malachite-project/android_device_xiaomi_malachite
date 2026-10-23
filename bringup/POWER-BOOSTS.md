@@ -108,6 +108,63 @@ The uclamp values C2PS sets are per task and are no longer capped by
 `/sys/devices/system/cpu/cpuqos/cpuqos_boot_complete`, which stock and the
 Galaga tree do at boot completion. The tree now does the same.
 
+## FPSGO and the GPU frame target
+
+GED's frame-based GPU DVFS (`ged_dvfs_fb_gpu_dvfs`) sets the frequency to a
+frame's busy cycles over its target time. The per-queue target comes only
+from FPSGO (`fstb` calls `ged_kpi_set_target_FPS_margin` from FBT's
+per-frame path); otherwise GED uses the panel refresh period, which the
+display driver reports. A game running at 30 or 60 fps on the 120 Hz panel
+was therefore clocked to finish each frame in 8.3 ms.
+
+FPSGO learns about a queue only from libgui's `FPSGO_BQID`,
+`FPSGO_QUEUE_CONNECT`, `FPSGO_DEQUEUE` and `FPSGO_QUEUE` events on
+`/proc/perfmgr/perf_ioctl`. MediaTek's libgui sends them from every
+producer, and MediaTek's vendor policy grants apps, surfaceflinger and the
+media and camera servers those ioctls, but AOSP's libgui did not, so
+`fpsgo.ko` was loaded and idle. The frameworks/native fork now sends them
+under `support_mtk_fpsgo`, using the GED KPI window ID as FPSGO's buffer ID
+so FPSGO's target reaches the same GED queue.
+
+FPSGO only tracks a queue unless it controls it. Stock's MediaTek power HAL
+turns control on per game (`fpsgo_control_pid`). Here neither the power HAL
+nor anything with write access to `sysfs_fpsgo` knows the game's pid
+(GameManagerService has only the uid, and reading the top-app cgroup when
+`GAME` arrives races the framework's asynchronous cgroup moves), so the
+`GAME` hint sets the global `/sys/kernel/fpsgo/composer/fpsgo_control`
+while a game is in front. FBT then sizes the game's render-thread CPU boost
+per frame and GED gets the game's own target.
+
+The global switch also covers other processes' queues while a game is in
+front. HWUI queues stay out because HWUI tags its RenderThread with
+`FPSGO_SWAP_BUFFER` on every swap (frameworks/base, same
+`support_mtk_fpsgo` flag) and FPSGO leaves HWUI queues to their ADPF
+sessions (`control_hwui` is 0). Main-thread producers, queues that do not
+feed SurfaceFlinger and media producers are bypassed as well. What remains
+controlled besides the game is another process's non-HWUI GL or camera
+producer running at the same time.
+
+FBT applies its CPU boost by writing the render thread's own uclamp.min and
+uclamp.max with `sched_setattr` (`fbt_set_per_task_cap`), the same per-task
+values libperfmgr writes for ADPF sessions, so on a game that uses ADPF the
+two would overwrite each other every frame. The tree writes
+`/sys/kernel/fpsgo/common/perfserv_ta` (top-app boosting is handled
+elsewhere), which turns FBT's uclamp and VIP writes off
+(`fbt_switch_uclamp_onoff`); FBT's frame path, and with it the GED target,
+keeps running. CPU boosting stays with ADPF, schedutil and the `GAME`
+floors, as before FPSGO was fed.
+
+FBT also queues commands for the MediaTek power HAL (`fpsgo_sentcmd`, read
+back with `FPSGO_GET_CMD`). With the defaults above only one kind is still
+sent: `FPSGO_SET_SCHED_RATE`, whenever a controlled render starts or stops
+(`fbt_set_down_throttle_locked`). Nothing here reads the queue, so each
+command would stay allocated until reboot; the tree turns it off with
+`/sys/kernel/fpsgo/fbt/enable_switch_down_throttle`. Rescue boosts, which
+would queue top-app boost commands, are off by default (`rescue_enable`).
+
+Check on a device: `cat /sys/kernel/fpsgo/fstb/fpsgo_status` lists the queues
+FPSGO sees; in a game, `ged` trace marks show the target FPS.
+
 ## Returning to the larger boost profile
 
 1. Put back the configured values from the table: the two rc lines, the
