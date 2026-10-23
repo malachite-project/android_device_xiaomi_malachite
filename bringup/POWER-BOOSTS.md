@@ -108,6 +108,19 @@ The uclamp values C2PS sets are per task and are no longer capped by
 `/sys/devices/system/cpu/cpuqos/cpuqos_boot_complete`, which stock and the
 Galaga tree do at boot completion. The tree now does the same.
 
+## Battery saver caps the CPUs
+
+Battery saver sends the `LOW_POWER` mode. `power-libperfmgr` always reports
+it as supported and turns it into the `LOW_POWER` hint, which the table had
+no actions for, so battery saver left the CPUs alone. It now caps the A78
+cluster at 2.0 GHz (of 2.5) and the A55 cluster at 1.7 GHz (of 2.0) for as
+long as it is on. The top OPPs pay the highest voltage per cycle, so these
+are the least efficient steps; peak single-thread speed drops by about 20%
+and 15%. Boosts that raise the minimum frequency (launch, touch, fixed
+performance) are clamped to the caps by cpufreq. No other hint writes the
+max-frequency nodes; `tests/test_powerhint.py` keeps it that way, since a
+request for their first value (no cap) would outrank the cap.
+
 ## Returning to the larger boost profile
 
 1. Put back the configured values from the table: the two rc lines, the
