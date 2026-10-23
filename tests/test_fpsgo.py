@@ -34,6 +34,8 @@ class FpsgoTests(unittest.TestCase):
         # FBT's per-task uclamp writes would overwrite ADPF's on shared threads.
         rc = (ROOT / "init/init.mt6878.power.rc").read_text()
         self.assertIn("write /sys/kernel/fpsgo/common/perfserv_ta 1\n", rc)
+        # Its power-HAL commands would pile up unread.
+        self.assertIn("write /sys/kernel/fpsgo/fbt/enable_switch_down_throttle 0\n", rc)
 
     def test_power_hal_may_write_the_control(self):
         policy = (ROOT / "sepolicy/vendor/hal_power_default.te").read_text()

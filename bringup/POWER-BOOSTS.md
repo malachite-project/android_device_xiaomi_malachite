@@ -154,6 +154,14 @@ elsewhere), which turns FBT's uclamp and VIP writes off
 keeps running. CPU boosting stays with ADPF, schedutil and the `GAME`
 floors, as before FPSGO was fed.
 
+FBT also queues commands for the MediaTek power HAL (`fpsgo_sentcmd`, read
+back with `FPSGO_GET_CMD`). With the defaults above only one kind is still
+sent: `FPSGO_SET_SCHED_RATE`, whenever a controlled render starts or stops
+(`fbt_set_down_throttle_locked`). Nothing here reads the queue, so each
+command would stay allocated until reboot; the tree turns it off with
+`/sys/kernel/fpsgo/fbt/enable_switch_down_throttle`. Rescue boosts, which
+would queue top-app boost commands, are off by default (`rescue_enable`).
+
 Check on a device: `cat /sys/kernel/fpsgo/fstb/fpsgo_status` lists the queues
 FPSGO sees; in a game, `ged` trace marks show the target FPS.
 
