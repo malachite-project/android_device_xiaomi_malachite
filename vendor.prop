@@ -285,7 +285,12 @@ ro.lmk.kill_heaviest_task=true
 ro.lmk.kill_timeout_ms=50
 ro.lmk.filecache_min_kb=153600
 ro.lmk.stall_limit_critical=40
-ro.lmk.swap_free_low_percentage=100
+# Swap counts as low below 10% free, lmkd's default and Pixel's. At 100 swap
+# was always "low" (one swapped page, or easily available memory below the
+# zram size, was enough), so a low-watermark breach could kill down to
+# perceptible+1 (previous app, home, services) instead of cached apps only,
+# and page-cache thrashing killed even with free memory above the watermarks.
+ro.lmk.swap_free_low_percentage=10
 
 # Media
 media.c2.hal.selection=aidl
