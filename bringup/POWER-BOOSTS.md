@@ -127,12 +127,24 @@ under `support_mtk_fpsgo`, using the GED KPI window ID as FPSGO's buffer ID
 so FPSGO's target reaches the same GED queue.
 
 FPSGO only tracks a queue unless it controls it. Stock's MediaTek power HAL
-turns control on per game (`fpsgo_control_pid`); this tree has no pid, so
-the `GAME` hint sets `/sys/kernel/fpsgo/composer/fpsgo_control` while a game
-is in front. FBT then sizes the game's render-thread CPU boost per frame and
-GED gets the game's own target. Outside games every queue is bypassed, and
-app RenderThreads keep ADPF. The `GAME` CPU floors still apply and limit
-what FBT can save on the CPU side.
+turns control on per game (`fpsgo_control_pid`). Here neither the power HAL
+nor anything with write access to `sysfs_fpsgo` knows the game's pid
+(GameManagerService has only the uid, and reading the top-app cgroup when
+`GAME` arrives races the framework's asynchronous cgroup moves), so the
+`GAME` hint sets the global `/sys/kernel/fpsgo/composer/fpsgo_control`
+while a game is in front. FBT then sizes the game's render-thread CPU boost
+per frame and GED gets the game's own target.
+
+The global switch also covers other processes' queues while a game is in
+front. HWUI queues stay out because HWUI tags its RenderThread with
+`FPSGO_SWAP_BUFFER` on every swap (frameworks/base, same
+`support_mtk_fpsgo` flag) and FPSGO leaves HWUI queues to their ADPF
+sessions (`control_hwui` is 0). Main-thread producers, queues that do not
+feed SurfaceFlinger and media producers are bypassed as well. What remains
+controlled besides the game is another process's non-HWUI GL or camera
+producer running at the same time. The `GAME` CPU floors still apply and
+limit what FBT can save on the CPU side; a game that also opens ADPF
+sessions gets both floors, and the higher one wins.
 
 Check on a device: `cat /sys/kernel/fpsgo/fstb/fpsgo_status` lists the queues
 FPSGO sees; in a game, `ged` trace marks show the target FPS.
