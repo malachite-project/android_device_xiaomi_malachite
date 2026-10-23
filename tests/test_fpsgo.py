@@ -30,6 +30,11 @@ class FpsgoTests(unittest.TestCase):
         self.assertEqual([(a["PowerHint"], a["Value"], a["Duration"]) for a in writers],
                          [("GAME", "1", 0)])
 
+    def test_fbt_leaves_thread_uclamp_to_adpf(self):
+        # FBT's per-task uclamp writes would overwrite ADPF's on shared threads.
+        rc = (ROOT / "init/init.mt6878.power.rc").read_text()
+        self.assertIn("write /sys/kernel/fpsgo/common/perfserv_ta 1\n", rc)
+
     def test_power_hal_may_write_the_control(self):
         policy = (ROOT / "sepolicy/vendor/hal_power_default.te").read_text()
         self.assertIn("rw_dir_file(hal_power_default, sysfs_fpsgo)", policy)

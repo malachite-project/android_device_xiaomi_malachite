@@ -142,9 +142,17 @@ front. HWUI queues stay out because HWUI tags its RenderThread with
 sessions (`control_hwui` is 0). Main-thread producers, queues that do not
 feed SurfaceFlinger and media producers are bypassed as well. What remains
 controlled besides the game is another process's non-HWUI GL or camera
-producer running at the same time. The `GAME` CPU floors still apply and
-limit what FBT can save on the CPU side; a game that also opens ADPF
-sessions gets both floors, and the higher one wins.
+producer running at the same time.
+
+FBT applies its CPU boost by writing the render thread's own uclamp.min and
+uclamp.max with `sched_setattr` (`fbt_set_per_task_cap`), the same per-task
+values libperfmgr writes for ADPF sessions, so on a game that uses ADPF the
+two would overwrite each other every frame. The tree writes
+`/sys/kernel/fpsgo/common/perfserv_ta` (top-app boosting is handled
+elsewhere), which turns FBT's uclamp and VIP writes off
+(`fbt_switch_uclamp_onoff`); FBT's frame path, and with it the GED target,
+keeps running. CPU boosting stays with ADPF, schedutil and the `GAME`
+floors, as before FPSGO was fed.
 
 Check on a device: `cat /sys/kernel/fpsgo/fstb/fpsgo_status` lists the queues
 FPSGO sees; in a game, `ged` trace marks show the target FPS.
