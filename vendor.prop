@@ -285,7 +285,11 @@ ro.lmk.kill_heaviest_task=true
 ro.lmk.kill_timeout_ms=50
 ro.lmk.filecache_min_kb=153600
 ro.lmk.stall_limit_critical=40
-ro.lmk.swap_free_low_percentage=100
+# Swap counts as low below 10% free, lmkd's default and Pixel's. At 100 lmkd
+# treats zram as exhausted once one page is swapped (or once easily available
+# memory drops below the zram size) and kills cached apps at every high
+# watermark breach instead of letting kswapd compress them into zram.
+ro.lmk.swap_free_low_percentage=10
 
 # Media
 media.c2.hal.selection=aidl

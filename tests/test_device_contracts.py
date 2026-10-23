@@ -235,6 +235,15 @@ class DeviceContracts(unittest.TestCase):
         self.assertEqual(bools["config_show_min_refresh_rate_switch"], "true")
         self.assertEqual(bools["config_show_peak_refresh_rate_switch"], "true")
 
+    def test_lmkd_uses_zram_before_killing(self):
+        # lmkd's swap_is_low is free swap (capped by easily available memory)
+        # below this share of total swap; it gates the LOW_MEM_AND_SWAP and
+        # LOW_SWAP_AND_THRASHING kills. 100 makes swap permanently "low".
+        props = dict(line.split("=", 1) for line in
+                     (ROOT / "vendor.prop").read_text().splitlines()
+                     if line.startswith("ro.lmk."))
+        self.assertLessEqual(int(props.get("ro.lmk.swap_free_low_percentage", "10")), 20)
+
     def test_headset_detection_uses_input_events(self):
         config = ET.parse(ROOT / "overlay/FrameworkResOverlayMalachite/res/values/config.xml")
         bools = {node.get("name"): node.text for node in config.getroot().iter("bool")}
