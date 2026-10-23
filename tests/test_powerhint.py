@@ -99,6 +99,25 @@ class PowerHintTests(unittest.TestCase):
         self.assertNotIn("MemFreq", {a["Node"] for a in actions("GAME")})
         self.assertIn("MemFreq", {a["Node"] for a in actions("GAME_LOADING")})
 
+    def test_battery_saver_caps_both_clusters(self):
+        # BatterySaverController sends LOW_POWER; power-libperfmgr only reports
+        # the mode as supported, and acts on it, when the table names it.
+        declared = nodes()
+        caps = {a["Node"]: a for a in actions("LOW_POWER")}
+        self.assertEqual(set(caps), {"CPUBigClusterMaxFreq", "CPULittleClusterMaxFreq"})
+        for name, action in caps.items():
+            with self.subTest(node=name):
+                self.assertEqual(action["Duration"], 0)
+                values = declared[name]["Values"]
+                # Below the top OPP, but not low enough to stall the UI.
+                self.assertLess(int(action["Value"]), int(values[1]))
+                self.assertGreaterEqual(int(action["Value"]), int(values[1]) * 3 // 4)
+        # No other hint may request a max-frequency node: index 0 (no cap) would
+        # outrank the battery-saver cap while both are held.
+        for action in table()["Actions"]:
+            if action.get("Node") in caps:
+                self.assertEqual(action["PowerHint"], "LOW_POWER")
+
     def test_adpf_profiles_parse(self):
         profiles = table().get("AdpfConfig", [])
         self.assertTrue(profiles)
