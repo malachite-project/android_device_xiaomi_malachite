@@ -250,6 +250,9 @@ PRODUCT_PACKAGES += \
 # frameworks/native fork builds that code only with this flag, and turns it
 # off at runtime when /proc/ged reports GED KPI disabled.
 $(call soong_config_set_bool,libgui,support_mtk_ged_kpi,true)
+# FPSGO (fpsgo.ko) learns each queue's frame rate only from libgui's
+# BufferQueue events, and passes it on to GED as the frame-time target.
+$(call soong_config_set_bool,libgui,support_mtk_fpsgo,true)
 
 PRODUCT_PACKAGES += \
     android.hardware.memtrack-service.mediatek

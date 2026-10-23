@@ -108,6 +108,35 @@ The uclamp values C2PS sets are per task and are no longer capped by
 `/sys/devices/system/cpu/cpuqos/cpuqos_boot_complete`, which stock and the
 Galaga tree do at boot completion. The tree now does the same.
 
+## FPSGO and the GPU frame target
+
+GED's frame-based GPU DVFS (`ged_dvfs_fb_gpu_dvfs`) sets the frequency to a
+frame's busy cycles over its target time. The per-queue target comes only
+from FPSGO (`fstb` calls `ged_kpi_set_target_FPS_margin` from FBT's
+per-frame path); otherwise GED uses the panel refresh period, which the
+display driver reports. A game running at 30 or 60 fps on the 120 Hz panel
+was therefore clocked to finish each frame in 8.3 ms.
+
+FPSGO learns about a queue only from libgui's `FPSGO_BQID`,
+`FPSGO_QUEUE_CONNECT`, `FPSGO_DEQUEUE` and `FPSGO_QUEUE` events on
+`/proc/perfmgr/perf_ioctl`. MediaTek's libgui sends them from every
+producer, and MediaTek's vendor policy grants apps, surfaceflinger and the
+media and camera servers those ioctls, but AOSP's libgui did not, so
+`fpsgo.ko` was loaded and idle. The frameworks/native fork now sends them
+under `support_mtk_fpsgo`, using the GED KPI window ID as FPSGO's buffer ID
+so FPSGO's target reaches the same GED queue.
+
+FPSGO only tracks a queue unless it controls it. Stock's MediaTek power HAL
+turns control on per game (`fpsgo_control_pid`); this tree has no pid, so
+the `GAME` hint sets `/sys/kernel/fpsgo/composer/fpsgo_control` while a game
+is in front. FBT then sizes the game's render-thread CPU boost per frame and
+GED gets the game's own target. Outside games every queue is bypassed, and
+app RenderThreads keep ADPF. The `GAME` CPU floors still apply and limit
+what FBT can save on the CPU side.
+
+Check on a device: `cat /sys/kernel/fpsgo/fstb/fpsgo_status` lists the queues
+FPSGO sees; in a game, `ged` trace marks show the target FPS.
+
 ## Returning to the larger boost profile
 
 1. Put back the configured values from the table: the two rc lines, the
