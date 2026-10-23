@@ -285,7 +285,9 @@ ro.lmk.kill_heaviest_task=true
 ro.lmk.kill_timeout_ms=50
 ro.lmk.filecache_min_kb=153600
 ro.lmk.stall_limit_critical=40
-ro.lmk.swap_free_low_percentage=100
+# swap_free_low_percentage stays at lmkd's default (10). At 100 lmkd treats
+# swap as low whenever any of it is used, and kills cached apps instead of
+# letting them swap to zram; see bringup/MEMORY.md.
 
 # Media
 media.c2.hal.selection=aidl
