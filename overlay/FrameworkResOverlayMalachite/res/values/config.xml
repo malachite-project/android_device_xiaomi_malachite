@@ -68,12 +68,6 @@
          Must be in the range specified by minimum and maximum. -->
     <item name="config_screenBrightnessSettingDefaultFloat" format="float" type="dimen">0.07495849</item>
 
-    <!-- HDR headroom on and off (SDR unchanged) over about a second instead of the fast
-         ramp's 0.3 s: the composer writes the backlight outside MediaTek's sync mode, a frame
-         apart from SurfaceFlinger's SDR dimming, so large steps flash (frameworks/base
-         DisplayPowerController). -->
-    <item name="config_brightnessRampRateHdrOnly" format="float" type="dimen">0.3</item>
-
     <!-- Screen brightness used to dim the screen while dozing in a very low power state.
          May be less than the minimum allowed brightness setting
          that can be set by the user. -->

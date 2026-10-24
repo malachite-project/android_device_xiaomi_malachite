@@ -151,13 +151,10 @@
         <!-- Low power mode limitation for HBM -->
         <allowInLowPowerMode>true</allowInLowPowerMode>
         <!-- HDR as stock: 8x headroom over the SDR level, capped by the 1200 nit top of the
-             map. The composer sets the backlight (ro.vendor.mtk_backlight_hwc_support), so
-             SurfaceFlinger dims SDR content by the same ratio and only the HDR content gets
-             brighter. Only for HDR layers covering half the screen (AOSP's default): with 0,
-             an HDR thumbnail scrolling through recents toggled the boost several times a
-             second, and each toggle flashed because the composer writes the backlight
-             outside MediaTek's sync mode, a frame apart from the SDR dimming. -->
-        <minimumHdrPercentOfScreen>0.5</minimumHdrPercentOfScreen>
+             map, for any visible HDR layer. The composer sets the backlight
+             (ro.vendor.mtk_backlight_hwc_support), so SurfaceFlinger dims SDR content by the
+             same ratio and only the HDR content gets brighter. -->
+        <minimumHdrPercentOfScreen>0</minimumHdrPercentOfScreen>
         <sdrHdrRatioMap>
             <point><sdrNits>2.0</sdrNits><hdrRatio>8.0</hdrRatio></point>
             <point><sdrNits>1200.0</sdrNits><hdrRatio>8.0</hdrRatio></point>

@@ -138,8 +138,8 @@ class DeviceContracts(unittest.TestCase):
     def test_hdr_headroom_is_the_calibrated_curve(self):
         hbm = ET.parse(ROOT / "configs/display_id_4627039422300187648.xml").getroot().find(
             "highBrightnessMode")
-        # Half the screen (AOSP's default): small HDR layers toggled the boost and flashed.
-        self.assertEqual(hbm.find("minimumHdrPercentOfScreen").text, "0.5")
+        # As stock: any visible HDR layer gets headroom.
+        self.assertEqual(hbm.find("minimumHdrPercentOfScreen").text, "0")
         points = [(float(p.find("sdrNits").text), float(p.find("hdrRatio").text))
                   for p in hbm.find("sdrHdrRatioMap").iter("point")]
         nits = [n for n, _ in points]
