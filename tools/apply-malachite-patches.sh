@@ -38,38 +38,3 @@ FAIL=0
 # Face unlock fix, backlight, voice-call volume, market name
 apply frameworks/base android_frameworks_base \
   92a5e79525b15c1fc596f56c44c3e4d4ec00f230 \
-  f61033b480ec1eb9dbfb7c56c798f546d9c7c2f9 \
-  30a81f64116efad3d00ba421579bbdc07c84971a \
-  af3e3bc601f69e2f36ba30c9ac0939dbb34d2984
-# libgui ABI fix (needed for the MediaTek blobs)
-apply frameworks/native android_frameworks_native \
-  4fbba134a20d5c565709607fe095bae368043659
-# Native eSIM
-apply packages/apps/Settings android_packages_apps_Settings \
-  0d78ceaf31e94250f1f8d1c66a1b98b81bb8a96c
-apply packages/services/Telephony android_packages_services_Telephony \
-  f20390c0cc976c18618fdda2bb155313b23ba923 \
-  fc67e9d80276175a24332fe8afe2f106c548274f
-# Bluetooth A2DP offload coex fix
-apply packages/modules/Bluetooth android_packages_modules_Bluetooth \
-  11dfd43472a428c0af0fae4ff3903070fb8d00aa
-# WPA3 opt-out for the MediaTek WiFi driver
-apply external/wpa_supplicant_8 android_external_wpa_supplicant_8 \
-  0cd9f1c12855f7233ea487af9fe33928534c1d29
-
-# device.mk: crDroid already ships FaceUnlock (same package as ParanoidSense), so the
-# ParanoidSense module clashes with it. Remove the line locally (fix your fork too).
-DM="$ROOT/device/xiaomi/malachite/device.mk"
-if [ -f "$DM" ] && grep -q '^    ParanoidSense$' "$DM"; then
-  python3 -I - "$DM" <<'PY'
-import sys
-p = sys.argv[1]; s = open(p).read()
-old = "PRODUCT_PACKAGES += \\\n    ParanoidSense\n"
-assert old in s, "ParanoidSense block not in the expected form - edit device.mk by hand"
-open(p, "w").write(s.replace(old, ""))
-PY
-  [ $? -eq 0 ] && echo "ok       device.mk: removed ParanoidSense (crDroid ships FaceUnlock)" || { echo "!! device.mk edit failed"; FAIL=1; }
-fi
-
-[ "$FAIL" = 0 ] && echo "DONE: all patches applied." || echo "DONE WITH PROBLEMS: see lines starting with '!!' above."
-exit $FAIL
