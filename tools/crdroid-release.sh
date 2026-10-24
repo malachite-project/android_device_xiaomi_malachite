@@ -42,7 +42,8 @@ do_keys() {
 do_build() {
   [ -f "$KEYS/keys.mk" ] || { echo "no keys yet: run 'keys' first"; exit 1; }
   export MALACHITE_RELEASE=true USE_CCACHE=1 CCACHE_EXEC=/usr/bin/ccache
-  set +u; source build/envsetup.sh; set -u
+  export BUILD_USERNAME=ridhzxlabs BUILD_HOSTNAME=ridhzxlabs
+  set +eu; source build/envsetup.sh
   breakfast malachite userdebug
   mka bacon 2>&1 | tee "$HOME/build-release-$(date +%m%d-%H%M).log"
   ls -lh out/target/product/malachite/*.zip out/target/product/malachite/*.img 2>/dev/null
