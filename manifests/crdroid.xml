@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Local manifest: crDroid 16.0 for malachite.
+  Copy to <source>/.repo/local_manifests/malachite.xml BEFORE `repo sync`.
+  Framework repos (frameworks/base, frameworks/native, Settings, Telephony,
+  Bluetooth, wpa_supplicant_8) stay crDroid's own. The malachite-specific
+  commits are added on top by tools/apply-malachite-patches.sh after sync.
+-->
+<manifest>
+  <remote name="malachite-project" fetch="https://github.com/malachite-project/" />
+  <remote name="ridhzlabs" fetch="https://github.com/ridhzlabs/" />
+
+  <!-- Device -->
+  <remove-project path="device/xiaomi/malachite" optional="true" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="ridhzlabs" revision="crdroid-malachite" />
+  <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
+  <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-23.2" />
+  <remove-project path="vendor/xiaomi/malachite" optional="true" />
+  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="lineage-23.2" />
+
+  <!-- Platform (crDroid does not override these, so the malachite forks replace LineageOS's) -->
+  <remove-project path="hardware/mediatek" optional="true" />
+  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="lineage-23.2" />
+  <remove-project path="hardware/xiaomi" optional="true" />
+  <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-23.2" />
+  <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="lineage-23.2" />
+  <remove-project path="vendor/mediatek/ims" optional="true" />
+  <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-23.2" />
+
+  <!-- Additions -->
+  <remove-project path="hardware/dolby" optional="true" />
+  <project path="hardware/dolby" name="android_hardware_dolby" remote="malachite-project" revision="lineage-23.2" />
+</manifest>
