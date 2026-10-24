@@ -5,6 +5,8 @@
 -->
 <resources>
     <bool name="config_mtk_euicc_slot_switch">true</bool>
+    <string name="build_maintainer_summary">ridhzxlabs</string>
+    <string name="build_maintainer_donate_url">https://github.com/ridhzlabs</string>
 
     <!-- The number of vibration intensity levels supported by the device.
 
