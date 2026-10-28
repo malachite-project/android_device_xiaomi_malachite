@@ -189,6 +189,20 @@ would queue top-app boost commands, are off by default (`rescue_enable`).
 Check on a device: `cat /sys/kernel/fpsgo/fstb/fpsgo_status` lists the queues
 FPSGO sees; in a game, `ged` trace marks show the target FPS.
 
+## Optional battery saver CPU cap
+
+Battery saver sends the `LOW_POWER` mode, which power-libperfmgr turns into
+the `LOW_POWER` hint. That hint only sets `vendor.powerhal.battery_saver=1`;
+it caps nothing by itself. Settings > Battery saver > Limit CPU speed
+(`persist.sys.battery_saver_cpu_cap`, default off) picks 90, 80, 70, 60 or
+50% of each cluster's top frequency (A78 2.5 GHz, A55 2.0 GHz), and
+`init.mt6878.power.rc` writes that cap to `scaling_max_freq` while both are
+set. Saver off, or the limit set to off, writes the nodes back to 9999999.
+No powerhint.json hint writes the max-frequency nodes, and nothing in the
+stock vendor image does either, so the reset can't clear another cap.
+The default is off because caps bind during scrolling (18% of samples at
+2.1 GHz or more on policy4 in the 2026-10-24 trace).
+
 ## Returning to the larger boost profile
 
 1. Put back the configured values from the table: the two rc lines, the
