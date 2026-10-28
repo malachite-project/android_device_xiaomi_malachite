@@ -246,6 +246,15 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
         }
     }
 
+    void onAuthenticationStarted() {
+        LOG(DEBUG) << __func__;
+        // goodix sends "waiting for finger" (21) only after a finished match, not after
+        // a cancelled one, so an app prompt after a PIN or face unlock never armed FOD.
+        if (!isFpcFod) {
+            setFodStatus(FOD_STATUS_ON);
+        }
+    }
+
     void cancel() {
         LOG(DEBUG) << __func__;
         setFodStatus(FOD_STATUS_OFF);
@@ -262,6 +271,13 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
         LOG(DEBUG) << __func__ << " off: " << off;
         std::lock_guard<std::mutex> lock(fodLock_);
         displayOff_ = off;
+        applyTouchFodLocked();
+    }
+
+    void onKeyguardOperationChanged(bool keyguard) {
+        LOG(DEBUG) << __func__ << " keyguard: " << keyguard;
+        std::lock_guard<std::mutex> lock(fodLock_);
+        keyguardOp_ = keyguard;
         applyTouchFodLocked();
     }
 
@@ -285,6 +301,10 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
     // With the screen off or in AOD SystemUI also stops handling touches, but
     // screen-off unlock needs the touch IC's FOD detection.
     bool displayOff_ = false;
+    // The ignore state outlives the overlay that sent it: the lockscreen overlay's
+    // "ignore" on removal can arrive after BiometricPrompt's overlay asked for
+    // touches, which left FOD off in apps. Only the keyguard needs ignoring.
+    bool keyguardOp_ = false;
 
     void setLocalHbm(bool on) {
         disp_local_hbm_req req;
@@ -296,7 +316,7 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
     }
 
     void applyTouchFodLocked() {
-        bool on = fodRequested_ && (!ignoreTouches_ || displayOff_);
+        bool on = fodRequested_ && (!(ignoreTouches_ && keyguardOp_) || displayOff_);
         fodEnabled_ = on;
         if (!on) {
             setLocalHbm(false);
