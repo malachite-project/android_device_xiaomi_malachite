@@ -1,6 +1,9 @@
 # Camera
 vendor.xiaomi.hardware.aidlbgservice.IBGService/default u:object_r:hal_aidlbgservice_service:s0
 
+# Face unlock
+vendor.xiaomi.hardware.aon.IAlwaysOn/miaonservicebymiface u:object_r:hal_miface_service:s0
+
 # Fingerprint
 vendor.xiaomi.hardware.fx.tunnel.IMiFxTunnel/default u:object_r:vendor_hal_fingerprint_service_xiaomi:s0
 

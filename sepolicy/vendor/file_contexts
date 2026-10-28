@@ -42,6 +42,10 @@
 # DisplayFeature
 /dev/mi_display/disp_feature u:object_r:vendor_displayfeature_device:s0
 
+# Face unlock
+/(vendor|odm)/bin/hw/mifaced u:object_r:hal_miface_default_exec:s0
+/data/vendor/face(/.*)? u:object_r:face_vendor_data_file:s0
+
 # Fingerprint
 /(vendor|system/vendor)/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.xiaomi u:object_r:hal_fingerprint_default_exec:s0
 /data/vendor/fpc(/.*)? u:object_r:fingerprint_data_file:s0

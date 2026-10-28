@@ -1376,6 +1376,16 @@ vendor/lib64/liboemcrypto.so
 # eUICC - from mustang BD3A.251105.010.E1/14337626
 product/priv-app/EuiccGoogle/EuiccGoogle.apk;PRESIGNED|34aee23a5ade68f3d86252074edbbc8a57acfdc3
 
+# Face unlock
+vendor/bin/hw/mifaced
+vendor/etc/init/miface.rc
+vendor/etc/vintf/manifest/miface.xml
+vendor/lib64/libFaceUnlock.so
+vendor/lib64/libgazetracking.arcsoft.so
+vendor/lib64/libmiface.so
+vendor/lib64/libcamera2ndk_vendor.so:vendor/lib64/libcamera2ndk_vendor-stock.so;FIX_SONAME
+vendor/lib64/vendor.xiaomi.hardware.aon-V1-ndk.so
+
 # Fingerprint
 odm/lib64/hw/fingerprint.goodix_fod.so:vendor/lib64/hw/fingerprint.goodix_fod.default.so;FIX_SONAME
 vendor/lib64/hw/fingerprint.fpc_fod.so:vendor/lib64/hw/fingerprint.fpc_fod.default.so;FIX_SONAME

@@ -11,4 +11,8 @@
          the panel from switching modes at all. The lists can't cross. -->
     <bool name="config_show_min_refresh_rate_switch" translatable="false">true</bool>
     <bool name="config_show_peak_refresh_rate_switch" translatable="false">true</bool>
+
+    <!-- mifaced opens the front camera itself and draws the enrollment preview into
+         the surface Settings passes to FaceManager.enroll() (LineageOS 24.0 flag). -->
+    <bool name="config_face_enroll_hal_owns_camera">true</bool>
 </resources>
