@@ -1,0 +1,9 @@
+# Source ID of the build (ro.malachite.source.*, /system_ext/etc/source): readable from
+# adb (shell, pull) and in bug reports, not by apps, so it adds nothing for apps that look for
+# custom ROMs.
+system_internal_prop(malachite_source_prop)
+type malachite_source_file, file_type, system_file_type;
+
+get_prop({ shell dumpstate }, malachite_source_prop)
+allow { adbd shell dumpstate } malachite_source_file:dir r_dir_perms;
+allow { adbd shell dumpstate } malachite_source_file:file r_file_perms;

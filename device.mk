@@ -554,5 +554,22 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libladder
 
+# Source ID. ro.malachite.source.{device,vendor,kernel}: the repository and commit of
+# these trees, forks included, read at every build (see tools/source-id.sh).
+# ro.malachite.source.id and /system_ext/etc/source/manifest.xml: every project of the
+# ROM tree, recorded by tools/source-snapshot.sh before the build. Apps can't read
+# either (sepolicy/private/source_id.te).
+malachite_source = $(shell bash $(DEVICE_PATH)/tools/source-id.sh $(1))
+malachite_source_snapshot := $(DEVICE_PATH)/source/source-manifest.xml
+PRODUCT_SYSTEM_EXT_PROPERTIES += \
+    ro.malachite.source.id=$(shell bash $(DEVICE_PATH)/tools/source-id.sh --snapshot-id $(malachite_source_snapshot) $(DEVICE_PATH) vendor/xiaomi/malachite $(DEVICE_PATH)-kernel) \
+    ro.malachite.source.device=$(call malachite_source,$(DEVICE_PATH)) \
+    ro.malachite.source.vendor=$(call malachite_source,vendor/xiaomi/malachite) \
+    ro.malachite.source.kernel=$(call malachite_source,$(DEVICE_PATH)-kernel)
+ifneq ($(wildcard $(malachite_source_snapshot)),)
+PRODUCT_COPY_FILES += \
+    $(malachite_source_snapshot):$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/source/manifest.xml
+endif
+
 # Inherit the proprietary files
 $(call inherit-product, vendor/xiaomi/malachite/malachite-vendor.mk)
