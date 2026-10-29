@@ -39,8 +39,20 @@ repo forall -j"$jobs" -c '
   git update-index -q --refresh >/dev/null 2>&1
   state=
   git diff-index --quiet HEAD -- 2>/dev/null || state=uncommitted
-  [ -n "$(git for-each-ref --contains HEAD --count=1 refs/remotes 2>/dev/null)" ] ||
-    state="${state:+$state,}unpushed"
+  published=
+  for ref in $(git for-each-ref --contains HEAD --format="%(refname:strip=2)" refs/remotes 2>/dev/null); do
+    case "$ref" in m/* | */HEAD) continue ;; esac
+    remote=${ref%%/*}
+    url=$(git remote get-url "$remote" 2>/dev/null)
+    case "$url" in
+      "" | /* | .* | file://*) continue ;;
+      *://* | *:*) ;;
+      *) continue ;;
+    esac
+    published=true
+    break
+  done
+  [ -n "$published" ] || state="${state:+$state,}unpushed"
   [ -z "$state" ] || echo "$REPO_PATH $state"
 ' | grep -E '^[^ ]+ (uncommitted|unpushed|uncommitted,unpushed)$' | sort > "$tmp/state" || true
 

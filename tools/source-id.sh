@@ -50,7 +50,14 @@ published=-unpublished
 for ref in $(git -C "$tree" for-each-ref --contains HEAD --format='%(refname:strip=2)' \
     refs/remotes 2>/dev/null); do
   case "$ref" in m/* | */HEAD) continue ;; esac
-  remote=${ref%%/*}
+  candidate=${ref%%/*}
+  candidate_url=$(git -C "$tree" remote get-url "$candidate" 2>/dev/null)
+  case "$candidate_url" in
+    "" | /* | .* | file://*) continue ;;
+    *://* | *:*) ;;
+    *) continue ;;
+  esac
+  remote=$candidate
   published=
   break
 done
