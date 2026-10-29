@@ -7,12 +7,16 @@
 $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit_only.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
+# Stock mifaced provides face unlock; do not install a second face service.
+TARGET_FACE_UNLOCK_SUPPORTED := false
+
 # Inherit from device makefile.
 $(call inherit-product, device/xiaomi/malachite/device.mk)
 
-# Inherit some common LineageOS stuff.
+# Inherit the common crDroid phone configuration.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
+# crDroid keeps the lineage_ product prefix in its build tools.
 PRODUCT_NAME := lineage_malachite
 PRODUCT_DEVICE := malachite
 PRODUCT_MANUFACTURER := Xiaomi

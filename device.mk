@@ -198,8 +198,7 @@ PRODUCT_PACKAGES += \
     init.euicc.rc
 
 # Face unlock: stock's AIDL face HAL (mifaced, vendor blobs) on the front
-# camera. frameworks/base talks to it directly; its PixelOS FaceSense provider
-# stays off while ro.face.sense_service is unset.
+# camera. frameworks/base talks to it directly.
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.biometrics.face.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/android.hardware.biometrics.face.xml
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     SPDX-FileCopyrightText: The LineageOS Project
+     SPDX-License-Identifier: Apache-2.0
+
+     crDroid 13 (Android 17) for malachite, based on the LOS24 device stack.
+     Initialize crdroidandroid/android at 17.0 and copy this manifest into
+     .repo/local_manifests/. The feature/crdroid-17.0 branches must be
+     published before syncing from GitHub.
+
+     Framework overrides contain the malachite support commits on top of
+     crDroid's own 17.0 projects. Stock mifaced supplies face unlock;
+     crDroid supplies its screenshot gestures and screenshot flash control.
+-->
+<manifest>
+  <remote name="malachite-project" fetch="https://github.com/malachite-project/" />
+  <remove-project path="device/xiaomi/malachite" optional="true" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
+  <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="vendor/xiaomi/malachite" optional="true" />
+  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="hardware/mediatek" optional="true" />
+  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="hardware/xiaomi" optional="true" />
+  <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="vendor/mediatek/ims" optional="true" />
+  <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="external/wpa_supplicant_8" optional="true" />
+  <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="frameworks/base" optional="true" />
+  <project path="frameworks/base" name="android_frameworks_base" remote="malachite-project" revision="feature/crdroid-17.0" groups="pdk-cw-fs,pdk-fs,sysui-studio" />
+  <remove-project path="frameworks/native" optional="true" />
+  <project path="frameworks/native" name="android_frameworks_native" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="packages/apps/Settings" optional="true" />
+  <project path="packages/apps/Settings" name="android_packages_apps_Settings" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="packages/services/Telephony" optional="true" />
+  <project path="packages/services/Telephony" name="android_packages_services_Telephony" remote="malachite-project" revision="feature/crdroid-17.0" />
+  <remove-project path="packages/modules/Bluetooth" optional="true" />
+  <project path="packages/modules/Bluetooth" name="android_packages_modules_Bluetooth" remote="malachite-project" revision="feature/crdroid-17.0" groups="pdk" />
+  <project path="hardware/dolby" name="android_hardware_dolby" remote="malachite-project" revision="feature/crdroid-17.0" />
+</manifest>

@@ -4,4 +4,4 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_malachite.mk
+    $(LOCAL_DIR)/crdroid_malachite.mk
