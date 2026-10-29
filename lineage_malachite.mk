@@ -10,6 +10,9 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 # Inherit from device makefile.
 $(call inherit-product, device/xiaomi/malachite/device.mk)
 
+# The local signing script writes this path; Evolution X loads evolution-priv.
+$(call inherit-product-if-exists, vendor/lineage-priv/keys/keys.mk)
+
 # Inherit some common LineageOS stuff. On feature/evolutionx-24.0,
 # vendor/lineage is Evolution X's vendor tree, so this builds Evolution X.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)

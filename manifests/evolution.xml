@@ -10,20 +10,24 @@
 
      Evolution X mounts its own vendor tree at vendor/lineage and carries
      its own forks of frameworks/base, frameworks/native, Settings,
-     Telephony and Bluetooth. None of those are overridden here: the
-     framework-side malachite features of lineage-24.0 (three-finger
-     screenshot, FaceSense face provider, unrounded backlight, MediaTek
-     GED KPI frame timestamps, the eSIM settings UI, the LE Audio fixes)
-     are not in this port. Porting them is its own work after the first
+     Telephony and Bluetooth. Only frameworks/native is overridden here,
+     with an Evolution X branch carrying the safe GED KPI implementation.
+     It keeps GED state outside Surface, preserving its public layout.
+     The other framework forks stay Evolution X's. The framework-side
+     malachite features of lineage-24.0 (three-finger screenshot, unrounded
+     backlight, FPSGO hooks, the eSIM settings UI, the LE Audio fixes) are
+     not in this port. Porting them is its own work after the first
      Evolution X build boots; pointing these paths at our lineage forks
      instead would break Evolution X's own features.
 
-     The device tree is the feature/evolutionx-24.0 branch. Every other
-     fork stays on its lineage-24.0 branch. These carry changes on top
+     The device and frameworks/native trees use feature/evolutionx-24.0.
+     Every other fork stays on lineage-24.0. These carry changes on top
      of their source:
        device tree         the Evolution X port: this manifest and the
                            Evolution X options in lineage_malachite.mk,
                            on top of lineage-24.0
+       frameworks/native   Evolution X cnb + the layout-safe GED KPI
+                           implementation from our lineage-24.0 fork
        wpa_supplicant_8    current LineageOS + CONFIG_DISABLE_WPA_VERSION_3
                            (the shipped MTK driver ignores WPA3; the
                            framework switch is off by default) + the
@@ -47,9 +51,9 @@
      malachite-kernel and vendor/mediatek/ims are chara's release state,
      unmodified. ParanoidSense (face unlock app) is PixelOS's
      sixteen-qpr2, unmodified, under the name lineage-24.0. Its
-     SenseProvider is registered by frameworks/base, which Evolution X
-     replaces, so face unlock is expected to be broken until that part
-     is ported. hardware/dolby is crDroid's LunarisDolby branch reduced
+     SenseProvider is already present in Evolution X's frameworks/base;
+     compatibility still needs a build and phone test.
+     hardware/dolby is crDroid's LunarisDolby branch reduced
      to its Dolby control app; the Dolby DAX vendor stack comes from
      stock 208 in vendor/xiaomi/malachite.
 
@@ -80,7 +84,9 @@
   <remove-project path="packages/apps/ParanoidSense" optional="true" />
   <project path="packages/apps/ParanoidSense" name="android_packages_apps_ParanoidSense" remote="malachite-project" revision="lineage-24.0" />
 
-  <!-- Override of a project Evolution X takes from LineageOS -->
+  <!-- Overrides of LineageOS's supplicant and Evolution X's native tree -->
   <remove-project path="external/wpa_supplicant_8" optional="true" />
   <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="lineage-24.0" />
+  <remove-project path="frameworks/native" optional="true" />
+  <project path="frameworks/native" name="android_frameworks_native" remote="malachite-project" revision="feature/evolutionx-24.0" groups="pdk" />
 </manifest>

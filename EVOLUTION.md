@@ -13,16 +13,26 @@ forks: their manifest pins every LineageOS project at lineage-24.0, replaces
 frameworks/base, frameworks/native, Settings, Telephony, Bluetooth, build,
 system/sepolicy and others with Evolution X's forks, and mounts their
 `vendor_evolution` repo at `vendor/lineage` - the same path our tree already
-inherits from. That is why the port is two files:
+inherits from. The device configuration consists of:
 
 - `manifests/evolution.xml` - the local manifest for their manifest
   (device, kernel-prebuilt, vendor, hardware/mediatek, hardware/xiaomi,
   sepolicy_vndr, vendor/mediatek/ims, hardware/dolby, ParanoidSense added;
-  external/wpa_supplicant_8 replaced with our fork; everything else is
-  Evolution X's).
+  external/wpa_supplicant_8 replaced with our fork; frameworks/native uses
+  our Evolution X branch described below).
 - `lineage_malachite.mk` - the Evolution X options (EVO_BUILD_TYPE,
   WITH_GMS := false, TARGET_ENABLE_FP_OVERRIDE := false,
   TARGET_PROVIDES_FACE_UNLOCK_HAL := true, TARGET_BOOT_ANIMATION_RES := 1080).
+  It also inherits the existing local inline-signing configuration.
+
+`android_frameworks_native`, branch `feature/evolutionx-24.0`, starts at
+Evolution X cnb `cc9996b` and replaces its GED KPI implementation with the
+safe implementation from our lineage-24.0 commit `a469d75` (native fix
+`2bcc679`). GED stays enabled,
+but its state lives outside `Surface`, so framework callers and prebuilts
+agree on the class layout. The port also retains the source fix's locked
+state table, one-time probe, null-buffer checks and fence handling.
+All other Evolution X native changes are retained.
 
 The product name stays `lineage_malachite`; that follows Evolution X's own
 device trees (marble, rosemary), whose trees are unmodified LineageOS trees
@@ -48,21 +58,24 @@ never compiled)
 
 Our framework-side features do not exist here, because Evolution X's
 frameworks are their own forks and pointing those paths at our lineage forks
-would break Evolution X's features: three-finger screenshot, FaceSense
-provider, unrounded backlight, MediaTek GED KPI frame timestamps, the eSIM
+would break Evolution X's features: three-finger screenshot,
+unrounded backlight, the FPSGO BufferQueue hooks, the eSIM
 settings UI, the LE Audio fixes, the brightness smoothing framework parts.
 Each needs its own Evolution X branch after the first build boots. The source
 ID (feature/source-id-24.0) is not merged into lineage-24.0 and is not here
 either; porting it needs an evo variant of tools/source-id.sh (their
 LINEAGE_VERSION has a different format).
 
-Face unlock: ParanoidSense is built, but its SenseProvider is registered by
-frameworks/base, which evo replaces. Expected broken until that part is
-ported (or until the miface port covers it).
+Face unlock: ParanoidSense is built and Evolution X already registers
+SenseProvider when ro.face.sense_service is true, as this device requests.
+It is not known broken because of a missing provider; compatibility still
+needs a build and phone test.
 
 ## Before the first build
 
-1. Push this branch. The authoring session never pushes.
+1. Push feature/evolutionx-24.0 in both the device and frameworks/native
+   forks. The authoring session never pushes. Both branches are required
+   by evolution.xml; the native branch keeps Evolution X's base.
 2. Merge `fix/wifi-supplicant-nan-24.0` (3be5c41) into hardware/mediatek
    `lineage-24.0` and push that too. Without it wpa_supplicant crashes on
    every start and Wi-Fi is dead (the 2026-10-27 24.0 bug; note
@@ -79,6 +92,7 @@ mkdir -p .repo/local_manifests
 curl -o .repo/local_manifests/evolution.xml \
   https://raw.githubusercontent.com/malachite-project/android_device_xiaomi_malachite/feature/evolutionx-24.0/manifests/evolution.xml
 repo sync -c -j4 --no-tags --no-clone-bundle
+TOP="$PWD" bash /mnt/e/LineageOS-23.2-Malachite/tools/setup_inline_keys.sh || exit 1
 source build/envsetup.sh
 breakfast malachite userdebug
 mka -j$(nproc) --skip-soong-tests target-files-package otatools
@@ -88,8 +102,21 @@ mka -j$(nproc) --skip-soong-tests target-files-package otatools
   userdebug variant is not debuggable here (see above).
 - `repo init --reference` against the existing 24.0 tree should make the
   sync cheap: evo pins LineageOS projects at exactly lineage-24.0.
-- Signing: the usual inline-keys step applies; evo's vanilla build has no
-  MindTheGapps dependency. Expected zip name:
+- Signing: run setup_inline_keys.sh with TOP set to the new EvoX tree, as
+  above, before product configuration. It uses the existing local keys and
+  reference signed target-files and writes vendor/lineage-priv/keys. The
+  device product explicitly inherits that keys.mk because Evolution X's
+  vendor config only looks under vendor/evolution-priv. Keep this workflow
+  on the lineage-priv path; do not make a second copy under evolution-priv.
+  If the script reports missing keys or a missing reference, stop and
+  resolve it before compiling. No keys belong in either public branch.
+- Before packaging, run
+  `python3 /mnt/e/LineageOS-23.2-Malachite/tools/check_inline_signing.py REFERENCE_signed-target_files.zip EVOX_target_files.zip`
+  from the source root with the build environment sourced. Replace the two
+  file names with the reference used by setup_inline_keys.sh and the new
+  target-files zip. Stop if the command fails; do not package that output.
+  No signed EvoX output has been checked yet.
+- EvoX's vanilla build has no MindTheGapps dependency. Expected zip name:
   EvolutionX-17.0-<date>-lineage_malachite-12.3-Vanilla-Unofficial.zip.
 - Google apps: baked evo gapps instead of vanilla = delete the
   `WITH_GMS := false` line (vendor/gms ships either way).

@@ -1,25 +1,30 @@
-# LineageOS 24.0 for the Redmi Note 14 Pro 5G / POCO X7 5G (malachite)
+# Evolution X for the Redmi Note 14 Pro 5G / POCO X7 5G (malachite)
 
-Device tree for an unofficial LineageOS 24.0 (Android 17) build for malachite.
+Device tree for an unofficial Evolution X (Android 17) build for malachite,
+ported from LineageOS 24.0. Not built or tested on a phone yet.
 
 **Downloads, updates and support:** [Telegram group](https://t.me/malachite_project)
 
 ## Branch
 
-`lineage-24.0` is the current branch, in this repository and in every other
-[malachite-project](https://github.com/malachite-project) fork. To base work on
-these trees, use `lineage-24.0`. `lineage-23.2` (Android 16) stays as it was;
+`feature/evolutionx-24.0` is the Evolution X branch in this device tree and
+the [malachite-project](https://github.com/malachite-project) frameworks/native
+fork. Other dependencies use `lineage-24.0`. See [EVOLUTION.md](EVOLUTION.md)
+for the port state and remaining prerequisites. `lineage-23.2` (Android 16) stays as it was;
 [bringup/LINEAGE-24.md](bringup/LINEAGE-24.md) lists what moving each fork to
 24.0 changed.
 
 ## Building
 
-See [BUILDING.md](BUILDING.md) for building ROMs from these trees (forking, staying in
-sync, source ID) and [AGENTS.md](AGENTS.md) for the working rules.
+See [EVOLUTION.md](EVOLUTION.md) for the Evolution X build and signing steps,
+[BUILDING.md](BUILDING.md) for general fork maintenance, and [AGENTS.md](AGENTS.md)
+for the working rules.
 
-`manifests/malachite.xml` is the local manifest for the whole tree: set up a
-LineageOS 24.0 checkout, copy it to `.repo/local_manifests/`, sync, then
-`breakfast malachite`. The comment at its top lists what each fork changes.
+`manifests/evolution.xml` is the local manifest for this branch: set up an
+Evolution X cnb checkout and copy it to `.repo/local_manifests/`. Follow
+EVOLUTION.md before syncing and building. Do not also install malachite.xml,
+which selects the LineageOS framework forks. The manifest comment lists what
+each fork changes.
 Kernel sources are built separately; see
 [kernel_manifest-6.1](https://github.com/malachite-project/kernel_manifest-6.1).
 
