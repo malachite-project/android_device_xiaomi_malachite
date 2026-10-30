@@ -13,6 +13,7 @@
 
 #include <poll.h>
 #include <sys/ioctl.h>
+#include <chrono>
 #include <fstream>
 #include <mutex>
 #include <thread>
@@ -121,21 +122,11 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
                     continue;
                 }
                 bool pressed = readBool(fd);
-
-                {
-                    std::lock_guard<std::mutex> lock(fodLock_);
-                    // The touch driver can still report a press after FOD was switched off,
-                    // e.g. a finger sliding over the sensor right after a successful match.
-                    // Its release is then never reported, so the white spot would stay lit
-                    // until the screen turns off. Only act on presses while FOD is armed.
-                    if (pressed && !fodEnabled_) {
-                        continue;
-                    }
-                    setLocalHbm(pressed);
+                if (pressed) {
+                    onPress(true);
+                } else {
+                    onTouchRelease();
                 }
-                // Outside the lock: the HAL may call back into onAcquired().
-                mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS,
-                                pressed ? PARAM_FOD_PRESSED : PARAM_FOD_RELEASED);
             }
         }).detach();
 
@@ -206,12 +197,17 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
 
         // Ensure touchscreen is aware of the press state, ideally this is not needed
         setFingerDown(true);
+
+        // In apps the touch IC reports no FOD press, so the panel's spot never lit and
+        // the sensor never captured. SystemUI's press drives both, like the touch IC's.
+        onPress(false);
     }
 
     void onFingerUp() {
         LOG(DEBUG) << __func__;
         // Ensure touchscreen is aware of the press state, ideally this is not needed
         setFingerDown(false);
+        onFrameworkRelease();
     }
 
     void onAcquired(int32_t result, int32_t vendorCode) {
@@ -305,6 +301,78 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
     // "ignore" on removal can arrive after BiometricPrompt's overlay asked for
     // touches, which left FOD off in apps. Only the keyguard needs ignoring.
     bool keyguardOp_ = false;
+    // A finger on the sensor as reported by the touch IC (fod_press_status) and by
+    // SystemUI. On the lockscreen both report the same press; the sensor is told once.
+    bool touchPressed_ = false;
+    bool framePressed_ = false;
+    std::chrono::steady_clock::time_point touchPressedAt_;
+
+    void onPress(bool fromTouch) {
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            // The touch driver can still report a press after FOD was switched off,
+            // e.g. a finger sliding over the sensor right after a successful match.
+            // Its release is then never reported, so the white spot would stay lit
+            // until the screen turns off. Only act on presses while FOD is armed.
+            if (!fodEnabled_) {
+                return;
+            }
+            // SystemUI always reports the release. The touch IC can lose it (see above),
+            // so only its recent press means this finger was already reported.
+            auto now = std::chrono::steady_clock::now();
+            bool reported;
+            if (fromTouch) {
+                reported = framePressed_;
+                touchPressed_ = true;
+                touchPressedAt_ = now;
+            } else {
+                reported = touchPressed_ && now - touchPressedAt_ < std::chrono::seconds(1);
+                framePressed_ = true;
+            }
+            setLocalHbm(true);
+            if (reported) {
+                return;
+            }
+        }
+        LOG(INFO) << "FOD pressed (" << (fromTouch ? "touch" : "framework") << ")";
+        // Outside the lock: the HAL may call back into onAcquired().
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_PRESSED);
+    }
+
+    void onTouchRelease() {
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            if (!touchPressed_) {
+                return;
+            }
+            touchPressed_ = false;
+            if (framePressed_) {
+                return;
+            }
+            setLocalHbm(false);
+        }
+        notifyReleased("touch");
+    }
+
+    void onFrameworkRelease() {
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            // The finger is off the sensor, whatever the touch IC still reports.
+            bool wasDown = framePressed_ || touchPressed_;
+            framePressed_ = false;
+            touchPressed_ = false;
+            if (!wasDown) {
+                return;
+            }
+            setLocalHbm(false);
+        }
+        notifyReleased("framework");
+    }
+
+    void notifyReleased(const char* source) {
+        LOG(INFO) << "FOD released (" << source << ")";
+        mDevice->extCmd(mDevice, COMMAND_FOD_PRESS_STATUS, PARAM_FOD_RELEASED);
+    }
 
     void setLocalHbm(bool on) {
         disp_local_hbm_req req;
