@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+     Local manifest for RisingOS Revived 17 (Android 17) on malachite.
+
+     Initialize RisingOS with git-lfs support, copy this file to
+     .repo/local_manifests/rising.xml, then run repo sync.
+
+     The device, vendor, kernel and MediaTek hardware trees come from the
+     malachite-project forks. RisingOS's own frameworks/base, frameworks/native,
+     Settings, Telephony and Bluetooth are kept, because replacing them with
+     LineageOS-based forks would remove RisingOS features. The device fixes
+     those RisingOS forks lack are in patches/rising/ and are applied by
+     tools/rising/apply-patches.sh after a sync.
+-->
+<manifest>
+  <remote name="malachite-project" fetch="https://github.com/malachite-project/" />
+  <remote name="ridhzlabs" fetch="https://github.com/ridhzlabs/" />
+
+  <!-- Device, vendor and prebuilt kernel -->
+  <remove-project path="device/xiaomi/malachite" optional="true" />
+  <project path="device/xiaomi/malachite" name="android_device_xiaomi_malachite" remote="ridhzlabs" revision="rising-17" />
+  <remove-project path="device/xiaomi/malachite-kernel" optional="true" />
+  <project path="device/xiaomi/malachite-kernel" name="android_device_xiaomi_malachite-kernel" remote="malachite-project" revision="lineage-24.0" />
+  <remove-project path="vendor/xiaomi/malachite" optional="true" />
+  <project path="vendor/xiaomi/malachite" name="proprietary_vendor_xiaomi_malachite" remote="malachite-project" revision="lineage-24.0" />
+
+  <!-- Platform -->
+  <remove-project path="hardware/mediatek" optional="true" />
+  <project path="hardware/mediatek" name="android_hardware_mediatek" remote="malachite-project" revision="lineage-24.0" />
+  <remove-project path="hardware/xiaomi" optional="true" />
+  <project path="hardware/xiaomi" name="android_hardware_xiaomi" remote="malachite-project" revision="lineage-24.0" />
+  <remove-project path="device/mediatek/sepolicy_vndr" optional="true" />
+  <project path="device/mediatek/sepolicy_vndr" name="android_device_mediatek_sepolicy_vndr" remote="malachite-project" revision="lineage-24.0" />
+  <remove-project path="vendor/mediatek/ims" optional="true" />
+  <project path="vendor/mediatek/ims" name="android_vendor_mediatek_ims" remote="malachite-project" revision="lineage-24.0" />
+
+  <!-- Device-specific fixes that RisingOS still takes from LineageOS -->
+  <remove-project path="external/wpa_supplicant_8" optional="true" />
+  <project path="external/wpa_supplicant_8" name="android_external_wpa_supplicant_8" remote="malachite-project" revision="lineage-24.0" />
+
+  <!-- Dolby control app; the DAX vendor stack comes from vendor/xiaomi/malachite -->
+  <remove-project path="hardware/dolby" optional="true" />
+  <project path="hardware/dolby" name="android_hardware_dolby" remote="malachite-project" revision="lineage-24.0" />
+</manifest>
