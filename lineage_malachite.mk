@@ -18,15 +18,15 @@ $(call inherit-product-if-exists, vendor/lineage-priv/keys/keys.mk)
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
 # Evolution X options. The build type is named so Unofficial is a
-# decision, not the default. WITH_GMS := false keeps the ROM Google-free
-# like lineage-24.0; Google apps stay a separate sideload and the build
-# is named ...-Vanilla. TARGET_ENABLE_FP_OVERRIDE := false keeps the
+# decision, not the default. WITH_GMS := true bakes in Evolution X's
+# Google apps (vendor/gms): lineage-24.0 is the Google-free ROM, and no
+# Android 17 GApps sideload is needed. TARGET_ENABLE_FP_OVERRIDE := false keeps the
 # stock Xiaomi fingerprint set below instead of Evolution X's Pixel
 # spoof. The tree ships stock's mifaced face HAL, so Evolution X's
 # generic FaceUnlock packages stay out. 1080 is the boot animation resolution
 # for the 1220x2712 panel.
 EVO_BUILD_TYPE := Unofficial
-WITH_GMS := false
+WITH_GMS := true
 TARGET_ENABLE_FP_OVERRIDE := false
 TARGET_PROVIDES_FACE_UNLOCK_HAL := true
 TARGET_BOOT_ANIMATION_RES := 1080

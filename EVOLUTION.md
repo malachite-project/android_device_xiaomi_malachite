@@ -21,7 +21,7 @@ inherits from. The device configuration consists of:
   external/wpa_supplicant_8 replaced with our fork; frameworks/native uses
   our Evolution X branch described below).
 - `lineage_malachite.mk` - the Evolution X options (EVO_BUILD_TYPE,
-  WITH_GMS := false, TARGET_ENABLE_FP_OVERRIDE := false,
+  WITH_GMS := true, TARGET_ENABLE_FP_OVERRIDE := false,
   TARGET_PROVIDES_FACE_UNLOCK_HAL := true, TARGET_BOOT_ANIMATION_RES := 1080).
   It also inherits the existing local inline-signing configuration.
 
@@ -114,8 +114,8 @@ mka -j$(nproc) --skip-soong-tests target-files-package otatools
   No signed EvoX output has been checked yet.
 - EvoX's vanilla build has no MindTheGapps dependency. Expected zip name:
   EvolutionX-17.0-<date>-lineage_malachite-12.3-Vanilla-Unofficial.zip.
-- Google apps: baked evo gapps instead of vanilla = delete the
-  `WITH_GMS := false` line (vendor/gms ships either way).
+- Google apps are baked in (WITH_GMS := true, vendor/gms). For a vanilla
+  build set WITH_GMS := false.
 
 ## What the first build will most likely surface
 
@@ -128,7 +128,7 @@ mka -j$(nproc) --skip-soong-tests target-files-package otatools
 
 ## Decisions made (user may change)
 
-- Vanilla, no baked Google apps (WITH_GMS := false).
+- Google apps baked in (WITH_GMS := true); lineage-24.0 stays the Google-free ROM.
 - Stock Xiaomi fingerprint kept; evo's Pixel fingerprint spoof off
   (TARGET_ENABLE_FP_OVERRIDE := false).
 - Branch name: feature/evolutionx-24.0 (project convention: -24.0 suffix for
