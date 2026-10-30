@@ -17,7 +17,7 @@ inherits from. The device configuration consists of:
 
 - `manifests/evolution.xml` - the local manifest for their manifest
   (device, kernel-prebuilt, vendor, hardware/mediatek, hardware/xiaomi,
-  sepolicy_vndr, vendor/mediatek/ims, hardware/dolby, ParanoidSense added;
+  sepolicy_vndr, vendor/mediatek/ims, hardware/dolby added;
   external/wpa_supplicant_8 replaced with our fork; frameworks/native uses
   our Evolution X branch described below).
 - `lineage_malachite.mk` - the Evolution X options (EVO_BUILD_TYPE,
@@ -61,15 +61,17 @@ frameworks are their own forks and pointing those paths at our lineage forks
 would break Evolution X's features: three-finger screenshot,
 unrounded backlight, the FPSGO BufferQueue hooks, the eSIM
 settings UI, the LE Audio fixes, the brightness smoothing framework parts.
-Each needs its own Evolution X branch after the first build boots. The source
-ID (feature/source-id-24.0) is not merged into lineage-24.0 and is not here
-either; porting it needs an evo variant of tools/source-id.sh (their
-LINEAGE_VERSION has a different format).
+Each needs its own Evolution X branch after the first build boots. Also
+missing for the same reason (2026-10-30): the Settings entry for the battery
+saver CPU cap (the device side works; persist.sys.battery_saver_cpu_cap can
+be set by hand) and the SystemUI fix for the black square around the
+fingerprint circle (frameworks/base fix/fod-canvas, clear the hardware canvas).
 
-Face unlock: ParanoidSense is built and Evolution X already registers
-SenseProvider when ro.face.sense_service is true, as this device requests.
-It is not known broken because of a missing provider; compatibility still
-needs a build and phone test.
+Since 2026-10-30 this branch carries everything merged into lineage-24.0:
+MiFace (stock mifaced face HAL, replaces ParanoidSense), the keyguard-only
+FOD touch gating, the camera platform_app_36 policy fix, the touch-rate
+event fix, libpowerhalwrap_vendor and the source ID (tools/source-id.sh reads
+git only, so it works unchanged here).
 
 ## Before the first build
 
@@ -127,8 +129,6 @@ mka -j$(nproc) --skip-soong-tests target-files-package otatools
   forks (SettingsResOverlayMalachite, TeleServiceResOverlayMalachite,
   WifiOverlay, NetworkStackResMalachite): fix by adjusting the overlay, not
   by pointing the manifest at our lineage forks.
-- ParanoidSense may fail to compile against evo's frameworks; if so, that is
-  the moment to decide between porting it and dropping it.
 - Whatever evo changed in build/make that a LineageOS tree assumption
   depends on. Read the error; do not disable the check that found it.
 

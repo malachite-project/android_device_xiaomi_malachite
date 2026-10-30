@@ -22,8 +22,8 @@ $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 # like lineage-24.0; Google apps stay a separate sideload and the build
 # is named ...-Vanilla. TARGET_ENABLE_FP_OVERRIDE := false keeps the
 # stock Xiaomi fingerprint set below instead of Evolution X's Pixel
-# spoof. The tree's face HAL is ParanoidSense, so Evolution X's generic
-# FaceUnlock packages stay out. 1080 is the boot animation resolution
+# spoof. The tree ships stock's mifaced face HAL, so Evolution X's
+# generic FaceUnlock packages stay out. 1080 is the boot animation resolution
 # for the 1220x2712 panel.
 EVO_BUILD_TYPE := Unofficial
 WITH_GMS := false
