@@ -44,10 +44,12 @@ curl -o .repo/local_manifests/rising.xml \
 repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j32
 ```
 
-Then create the release keys once and build a signed user build:
+Then apply the device fixes that RisingOS's framework forks do not carry yet,
+create the release keys once, and build a signed user build:
 
 ```bash
 source build/envsetup.sh
+bash device/xiaomi/malachite/tools/rising/apply-patches.sh
 bash device/xiaomi/malachite/tools/rising/setup-signing.sh
 riseup malachite user
 rise sb
@@ -93,9 +95,10 @@ taken before a later device, vendor or kernel change is marked `-stale`.
 - The vendor blobs are the HyperOS 2.0.208.0.VOOMIXM baseline. The build
   fingerprint override inherited from the device tree is kept as it is.
 - MediaTek GED KPI frame timestamps are already in RisingOS's
-  `frameworks/native`. The malachite fork's FPSGO BufferQueue reporting and
-  `BnProducerListener` ABI shim are not part of RisingOS; they can be ported
-  onto RisingOS's `frameworks/native` later without replacing the repository.
+  `frameworks/native`. The malachite `BnProducerListener::onBufferDetached(int)`
+  ABI shim is applied as a patch so stock MiuiCamera can keep using the older
+  libgui ABI. FPSGO BufferQueue reporting is not ported yet; it can be added to
+  RisingOS's `frameworks/native` without replacing the repository.
 - Dolby support comes from the malachite `hardware/dolby` app and the DAX
   vendor stack in `vendor/xiaomi/malachite`.
 

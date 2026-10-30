@@ -1,0 +1,40 @@
+From ebfa522f5d897a57a0a85798e0f16fd1aa22e220 Mon Sep 17 00:00:00 2001
+From: Chara <legend.alkalex07@gmail.com>
+Date: Thu, 10 Sep 2026 23:09:15 +0200
+Subject: [PATCH] libgui: restore BnProducerListener detach ABI
+
+Vendor libraries built against the older libgui ABI still call
+BnProducerListener::onBufferDetached(int). In lineage-24.0
+ProducerListener::onBufferDetached takes (int, uint64_t), so declaring the
+old member would hide the new overload and break BnProducerListener itself.
+Export the old symbol from a free function with the same assembler name
+instead.
+
+(cherry picked from commit ebfa522f5d897a57a0a85798e0f16fd1aa22e220)
+---
+ libs/gui/IProducerListener.cpp | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/libs/gui/IProducerListener.cpp b/libs/gui/IProducerListener.cpp
+index 6b53fffe3bf..c239d92c26b 100644
+--- a/libs/gui/IProducerListener.cpp
++++ b/libs/gui/IProducerListener.cpp
+@@ -168,6 +168,16 @@ bool BnProducerListener::needsReleaseNotify() {
+ }
+ 
+ void BnProducerListener::onBuffersDiscarded(const std::vector<int32_t>& /*discardedSlots*/) {
+ }
+ 
++// Keep exporting BnProducerListener::onBufferDetached(int) for vendor libraries built
++// against the older libgui ABI. ProducerListener::onBufferDetached now also takes the
++// buffer ID, and a member with the old signature would hide it, so define the old
++// symbol as a free function with the same calling convention instead.
++extern "C" __attribute__((visibility("default"))) void BnProducerListener_onBufferDetachedCompat(
++        BnProducerListener* /*self*/, int /*slot*/)
++        __asm__("_ZN7android18BnProducerListener16onBufferDetachedEi");
++extern "C" void BnProducerListener_onBufferDetachedCompat(BnProducerListener* /*self*/,
++                                                          int /*slot*/) {}
++
+ } // namespace android
+-- 
+2.43.0
