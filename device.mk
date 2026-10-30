@@ -197,15 +197,9 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     init.euicc.rc
 
-# Face unlock (ParanoidSense, front camera). frameworks/base registers its
-# SenseProvider only when ro.face.sense_service is true. It registers as
-# STRENGTH_WEAK, so it can never release keystore-bound keys.
-PRODUCT_PACKAGES += \
-    ParanoidSense
-
-PRODUCT_SYSTEM_EXT_PROPERTIES += \
-    ro.face.sense_service=true
-
+# Face unlock: stock's AIDL face HAL (mifaced, vendor blobs) on the front
+# camera. frameworks/base talks to it directly; its PixelOS FaceSense provider
+# stays off while ro.face.sense_service is unset.
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.biometrics.face.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/android.hardware.biometrics.face.xml
 
@@ -449,7 +443,8 @@ PRODUCT_PACKAGES += \
     init.mt6878.power.rc
 
 PRODUCT_PACKAGES += \
-    libmtkperf_client_vendor
+    libmtkperf_client_vendor \
+    libpowerhalwrap_vendor
 
 PRODUCT_COPY_FILES += \
     $(DEVICE_PATH)/configs/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
@@ -559,6 +554,23 @@ PRODUCT_COPY_FILES += \
 # of stock's, which keeps dumping backtraces with no AEE to receive them.
 PRODUCT_PACKAGES += \
     libladder
+
+# Source ID. ro.malachite.source.{device,vendor,kernel}: the repository and commit of
+# these trees, forks included, read at every build (see tools/source-id.sh).
+# ro.malachite.source.id and /system_ext/etc/source/manifest.xml: every project of the
+# ROM tree, recorded by tools/source-snapshot.sh before the build. Apps can't read
+# either (sepolicy/private/source_id.te).
+malachite_source = $(shell bash $(DEVICE_PATH)/tools/source-id.sh $(1))
+malachite_source_snapshot := $(DEVICE_PATH)/source/source-manifest.xml
+PRODUCT_SYSTEM_EXT_PROPERTIES += \
+    ro.malachite.source.id=$(shell bash $(DEVICE_PATH)/tools/source-id.sh --snapshot-id $(malachite_source_snapshot) $(DEVICE_PATH) vendor/xiaomi/malachite $(DEVICE_PATH)-kernel) \
+    ro.malachite.source.device=$(call malachite_source,$(DEVICE_PATH)) \
+    ro.malachite.source.vendor=$(call malachite_source,vendor/xiaomi/malachite) \
+    ro.malachite.source.kernel=$(call malachite_source,$(DEVICE_PATH)-kernel)
+ifneq ($(wildcard $(malachite_source_snapshot)),)
+PRODUCT_COPY_FILES += \
+    $(malachite_source_snapshot):$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/source/manifest.xml
+endif
 
 # Inherit the proprietary files
 $(call inherit-product, vendor/xiaomi/malachite/malachite-vendor.mk)

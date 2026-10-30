@@ -4,6 +4,9 @@ persist.vendor.XDRVersion  u:object_r:vendor_camera_persist_prop:s0
 vendor.camera. u:object_r:vendor_camera_prop:s0
 vendor.debug. u:object_r:vendor_camera_prop:s0
 
+# Face unlock
+persist.vendor.security.securecamera u:object_r:vendor_secure_camera_prop:s0
+
 # Fingerprint
 persist.vendor.fpc. u:object_r:vendor_fp_prop:s0
 persist.vendor.goodix. u:object_r:vendor_fp_prop:s0

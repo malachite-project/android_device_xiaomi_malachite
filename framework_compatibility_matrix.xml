@@ -93,4 +93,11 @@
           <instance>default</instance>
       </interface>
   </hal>
+  <hal format="aidl" optional="true">
+      <name>vendor.xiaomi.hardware.aon</name>
+      <interface>
+          <name>IAlwaysOn</name>
+          <instance>miaonservicebymiface</instance>
+      </interface>
+  </hal>
 </compatibility-matrix>

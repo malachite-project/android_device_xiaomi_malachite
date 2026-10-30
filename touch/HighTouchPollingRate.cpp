@@ -155,18 +155,21 @@ void HighTouchPollingRate::reapplyWhileDisplayOn() {
             return;
         }
 
-        // A read can return several events back to back.
+        // A read can return several events back to back. Each event's length counts its
+        // header too: mi_disp_feature_event_notify() in mediatek-drm stores the payload
+        // size plus sizeof(disp_event). Counting the header twice dropped every event, so
+        // the screen was taken to be on forever and the rate was sent to the sleeping IC.
         bool powerEvent = false;
         size_t offset = 0;
         while (offset + sizeof(disp_event) <= static_cast<size_t>(size)) {
             auto* event = reinterpret_cast<disp_event_resp*>(buf + offset);
-            size_t end = offset + sizeof(disp_event) + event->base.length;
-            if (end > static_cast<size_t>(size)) break;
-            if (event->base.type == MI_DISP_EVENT_POWER && event->base.length > 0) {
+            size_t length = event->base.length;
+            if (length < sizeof(disp_event) || offset + length > static_cast<size_t>(size)) break;
+            if (event->base.type == MI_DISP_EVENT_POWER && length > sizeof(disp_event)) {
                 powerEvent = true;
                 screenOn = event->data[0] == MI_DISP_POWER_ON;
             }
-            offset = end;
+            offset += length;
         }
         if (!powerEvent || !screenOn) continue;
 

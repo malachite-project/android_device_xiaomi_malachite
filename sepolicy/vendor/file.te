@@ -1,3 +1,7 @@
+# Face unlock
+type hal_miface_service, hal_service_type, service_manager_type;
+vendor_internal_prop(vendor_secure_camera_prop)
+
 # PD Adapter
 type vendor_sysfs_pd_adapter, sysfs_type, fs_type;
 

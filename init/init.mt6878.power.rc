@@ -208,3 +208,35 @@ service batterysecret /vendor/bin/batterysecret
     user root
     group system system wakelock
     disabled
+
+# Battery saver CPU cap, off unless a limit is picked in Settings > Battery
+# saver (persist.sys.battery_saver_cpu_cap, percent of each cluster's top
+# frequency, 0 = off). powerhint.json sets vendor.powerhal.battery_saver
+# while the LOW_POWER mode is on. cpufreq rounds each cap down to an OPP.
+on property:vendor.powerhal.battery_saver=1 && property:persist.sys.battery_saver_cpu_cap=90
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 1800000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 2250000
+
+on property:vendor.powerhal.battery_saver=1 && property:persist.sys.battery_saver_cpu_cap=80
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 1600000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 2000000
+
+on property:vendor.powerhal.battery_saver=1 && property:persist.sys.battery_saver_cpu_cap=70
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 1400000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 1750000
+
+on property:vendor.powerhal.battery_saver=1 && property:persist.sys.battery_saver_cpu_cap=60
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 1200000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 1500000
+
+on property:vendor.powerhal.battery_saver=1 && property:persist.sys.battery_saver_cpu_cap=50
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 1000000
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 1250000
+
+on property:vendor.powerhal.battery_saver=0
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 9999999
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 9999999
+
+on property:persist.sys.battery_saver_cpu_cap=0
+    write /sys/devices/system/cpu/cpufreq/policy0/scaling_max_freq 9999999
+    write /sys/devices/system/cpu/cpufreq/policy4/scaling_max_freq 9999999

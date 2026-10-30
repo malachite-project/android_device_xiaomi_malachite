@@ -1,9 +1,9 @@
 # The Xiaomi camera (com.android.camera) is platform signed, so it runs as
-# platform_app with app_data_file as its home. Its download-only feature
+# platform_app (platform_app_36 on Android 17) with app_data_file as its home. Its download-only feature
 # splits (panorama, clone, vlog, ...) are installed by qigsaw under
 # app_qigsaw/ in that home, and loading their native libraries maps them
 # executable. Without this, System.loadLibrary fails ("couldn't map ...
 # segment 2: Permission denied") and the app exits when Panorama starts.
 # Stock grants { getattr map execute execute_no_trans } here; only execute
 # is needed to map libraries, so running files from app data stays denied.
-allow platform_app app_data_file:file execute;
+allow platform_app_all app_data_file:file execute;

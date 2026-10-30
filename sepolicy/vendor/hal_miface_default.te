@@ -1,0 +1,48 @@
+# Xiaomi face unlock (mifaced): android.hardware.biometrics.face V3 on the
+# front camera, through the vendor camera NDK, with templates in the mitee TA.
+# Rules follow stock OS2.0.208.0 hal_miface_default; /dev/tee0 is
+# mitee_client_device here, tee_device on stock.
+type hal_miface_default, domain;
+hal_server_domain(hal_miface_default, hal_face)
+
+type hal_miface_default_exec, exec_type, vendor_file_type, file_type;
+init_daemon_domain(hal_miface_default)
+
+# vendor.xiaomi.hardware.aon IAlwaysOn/miaonservicebymiface
+add_service(hal_miface_default, hal_miface_service)
+
+# Front camera through android.frameworks.cameraservice (libcamera2ndk_vendor)
+allow hal_miface_default fwk_camera_service:service_manager find;
+allow hal_miface_default fwk_camera_hwservice:hwservice_manager find;
+binder_call(hal_miface_default, cameraserver)
+allow cameraserver hal_miface_default:dir search;
+allow cameraserver hal_miface_default:file r_file_perms;
+get_prop(hal_miface_default, camera_config_prop)
+
+# Enrollment preview: Settings' surface reaches the HAL as a HIDL token.
+# Stock makes the HAL an allocator server for its gralloc and heap rules.
+hwbinder_use(hal_miface_default)
+allow hal_miface_default hidl_token_hwservice:hwservice_manager find;
+allow hal_miface_default hal_graphics_mapper_hwservice:hwservice_manager find;
+allow hal_miface_default fwk_sensor_hwservice:hwservice_manager find;
+hal_server_domain(hal_miface_default, hal_graphics_allocator)
+hal_client_domain(hal_miface_default, hal_graphics_allocator)
+allow hal_miface_default hal_graphics_allocator_default_tmpfs:file rw_file_perms;
+allow hal_miface_default dmabuf_system_heap_device:chr_file r_file_perms;
+
+# Frames and templates go to the face TA
+allow hal_miface_default mitee_client_device:chr_file rw_file_perms;
+allow hal_miface_default tee_device:chr_file rw_file_perms;
+
+allow hal_miface_default face_vendor_data_file:dir create_dir_perms;
+allow hal_miface_default face_vendor_data_file:file create_file_perms;
+
+set_prop(hal_miface_default, vendor_secure_camera_prop)
+
+# CPU/GPU boosts while the camera runs
+allow hal_miface_default proc_perfmgr:dir r_dir_perms;
+allow hal_miface_default proc_perfmgr:file r_file_perms;
+allowxperm hal_miface_default proc_perfmgr:file ioctl { 0x6700-0x6710 0x6764-0x676b 0x67c8 };
+allow hal_miface_default proc_ged:file rw_file_perms;
+allowxperm hal_miface_default proc_ged:file ioctl { 0x6700-0x6710 0x6764-0x676b 0x67c8 };
+allow hal_miface_default sysfs:file r_file_perms;
