@@ -75,15 +75,9 @@ git only, so it works unchanged here).
 
 ## Before the first build
 
-1. Push feature/evolutionx-24.0 in both the device and frameworks/native
-   forks. The authoring session never pushes. Both branches are required
-   by evolution.xml; the native branch keeps Evolution X's base.
-2. Merge `fix/wifi-supplicant-nan-24.0` (3be5c41) into hardware/mediatek
-   `lineage-24.0` and push that too. Without it wpa_supplicant crashes on
-   every start and Wi-Fi is dead (the 2026-10-27 24.0 bug; note
-   2026-10-27-test24-build.md in the workspace). evolution.xml references
-   lineage-24.0 branches, so the fix must be on the branch, not only in a
-   local merge.
+Done on 2026-10-30: both feature/evolutionx-24.0 branches (device and
+frameworks/native) are pushed, and the Wi-Fi supplicant NAN fix (3be5c41) is
+in hardware/mediatek `lineage-24.0`, which evolution.xml references.
 
 ## Building (nothing here has run yet; treat every step as unproven)
 
