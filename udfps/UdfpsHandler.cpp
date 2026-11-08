@@ -256,6 +256,26 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
         setFodStatus(FOD_STATUS_OFF);
     }
 
+    void onOperationFinished() {
+        LOG(DEBUG) << __func__;
+        // The last enrollment sample has no GOOD acquired message, so nothing else turns
+        // the spot off here. SystemUI's release no longer reaches us once the client has
+        // finished: a finger kept down would leave the spot lit after it lifts, and the
+        // stale press would swallow the next one.
+        setFodStatus(FOD_STATUS_OFF);
+        bool wasDown;
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            wasDown = framePressed_ || touchPressed_;
+            framePressed_ = false;
+            touchPressed_ = false;
+        }
+        if (wasDown) {
+            // This runs on the HAL's callback thread, extCmd() must not be called from it.
+            std::thread([this]() { notifyReleased("operation finished"); }).detach();
+        }
+    }
+
     void setIgnoreDisplayTouches(bool ignore) {
         LOG(DEBUG) << __func__ << " ignore: " << ignore;
         std::lock_guard<std::mutex> lock(fodLock_);

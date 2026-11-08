@@ -5,7 +5,7 @@
 -->
 <resources> 
 
-    <string name="doze_brightness_sensor_type" translatable="false">android.sensor.light</string>
+    <string name="doze_brightness_sensor_type" translatable="false">xiaomi.sensor.aod</string>
 
     <!-- No proximity sensor for SystemUI. The only one is the Elliptic
          ultrasound sensor: turning it on while the speaker plays makes the
@@ -24,12 +24,12 @@
                to brightness values in the integer scale [1, 255]; -1 means keeping the current
                brightness. -->
     <integer-array name="config_doze_brightness_sensor_to_brightness">
-        <item>0</item>     <!-- 0.0: Pitch black -->
-        <item>2</item>     <!-- 1.0: Dim room -->
-        <item>2</item>     <!-- 2.0: Normal room -->
-        <item>3</item>     <!-- 3.0: Bright room -->
-        <item>4</item>     <!-- 4.0: Flashlight / Direct Sun -->
-        <item>2</item>     <!-- 5.0: Dark environment (Xiaomi specific) -->
+        <item>-1</item>    <!-- 0.0: Never used -->
+        <item>-1</item>    <!-- 1.0: Never used -->
+        <item>-1</item>    <!-- 2.0: Never used -->
+        <item>-1</item>    <!-- 3.0: Never used -->
+        <item>16</item>    <!-- 4.0: Bright environment, 60 nits like the panel's AOD high -->
+        <item>2</item>     <!-- 5.0: Dark environment, 7 nits, near the panel's AOD low -->
     </integer-array>
 
     <!-- Doze: Table that translates sensor values from the doze_brightness_sensor_type sensor
@@ -37,7 +37,7 @@
                Valid range is from 0 (transparent) to 255 (opaque).
                -1 means keeping the current opacity. -->
     <integer-array name="config_doze_brightness_sensor_to_scrim_opacity">
-        <item>255</item>
+        <item>-1</item>
         <item>0</item>
         <item>0</item>
         <item>0</item>
