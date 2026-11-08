@@ -12,3 +12,7 @@ allow vendor_init proc_percpu_pagelist_high_fraction:file w_file_perms;
 
 # The touch HAL's rc hands the Goodix report rate node to system.
 allow vendor_init vendor_sysfs_touch_report_rate:file { getattr setattr };
+
+# vendor.prop sets MiCamera's privileged-client list; init applies /vendor/build.prop
+# as vendor_init, so without this the line is refused and the list stays empty.
+set_prop(vendor_init, vendor_camera_privapp_list_prop)

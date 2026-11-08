@@ -10,4 +10,7 @@
          (an incoming call) pulses, "near" makes SystemUI ignore every touch,
          and in AOD it keeps the ultrasound running and lowers speaker gain. -->
     <bool name="doze_proximity_sensor_supported">false</bool>
+
+    <!-- Fade on the power button instead of the wave. -->
+    <bool name="config_powerButtonFadeReveal">true</bool>
 </resources>
