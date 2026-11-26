@@ -5,3 +5,8 @@ on init
     setprop sys.usb.controller "11201000.usb0"
 
     write /sys/class/leds/lcd-backlight/brightness 1700
+
+    # Recovery sets 50 % of max_brightness itself. max_brightness is 20479 (Xiaomi's clone
+    # scale) but the panel takes up to 4095, so 50 % is past its peak. 8 % = 1638.
+    setprop ro.recovery.ui.brightness_normal_percent 8
+    setprop ro.recovery.ui.brightness_dimmed_percent 2
