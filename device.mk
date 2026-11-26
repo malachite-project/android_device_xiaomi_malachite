@@ -203,13 +203,14 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.biometrics.face.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/permissions/android.hardware.biometrics.face.xml
 
-# Diagnostics (userdebug). Keep logcat, kernel log included, from every boot
-# in /data/misc/logd, so a bootloop, freeze or reboot can be read afterwards
-# with `adb bugreport` or tools/collect_logs.sh. Up to 32 x 4 MiB. Build with
-# MALACHITE_DIAGNOSTICS=false, or run `adb shell logpersist.stop`, to turn it
-# off. Persisted settings on the phone override these defaults.
-ifneq ($(TARGET_BUILD_VARIANT),user)
-ifneq ($(MALACHITE_DIAGNOSTICS),false)
+# Diagnostics, opt-in: build with MALACHITE_DIAGNOSTICS=true (build_malachite.sh
+# DIAGNOSTIC=1 does) to keep logcat, kernel log included, from every boot in
+# /data/misc/logd, up to 32 x 4 MiB, so a bootloop, freeze or reboot can be read
+# afterwards with `adb bugreport` or tools/collect_logs.sh. Releases leave it out:
+# the persistent writer and logd's kernel log copy cost about 6 % of a core all
+# the time and 0.5-1.5 GB of flash writes a day. Bug reports still carry the
+# logcat buffers, the kernel log and the last boot's logs (pstore).
+ifeq ($(MALACHITE_DIAGNOSTICS),true)
 PRODUCT_PRODUCT_PROPERTIES += \
     persist.logd.logpersistd=logcatd \
     persist.logd.logpersistd.buffer=all \
@@ -217,7 +218,11 @@ PRODUCT_PRODUCT_PROPERTIES += \
     persist.logd.logpersistd.size=32 \
     persist.logd.size=16M \
     ro.logd.kernel=true
-endif
+else
+# logd copies the kernel log into logcat by default in userdebug builds, which
+# releases are (made not debuggable).
+PRODUCT_PRODUCT_PROPERTIES += \
+    ro.logd.kernel=false
 endif
 
 # Fastboot (vendor/lineage adds fastbootd itself since lineage-24.0)
