@@ -1,8 +1,6 @@
 type vendor_sysfs_nfc_chip_name, sysfs_type, fs_type;
-type vendor_tmsnfc_service, hal_service_type, service_manager_type;
 vendor_internal_prop(vendor_nfc_prop)
 
 allow hal_nfc_default vendor_sysfs_nfc_chip_name:file r_file_perms;
-add_service(hal_nfc_default, vendor_tmsnfc_service)
 
 set_prop(hal_nfc_default, vendor_nfc_prop)
