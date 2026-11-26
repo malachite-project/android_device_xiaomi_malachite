@@ -9,6 +9,3 @@ vendor.xiaomi.hardware.fx.tunnel.IMiFxTunnel/default u:object_r:vendor_hal_finge
 
 # Sensors
 vendor.xiaomi.sensor.citsensorservice.ICitSensorService/default u:object_r:vendor_hal_citsensorservice_xiaomi_service:s0
-
-# NFC
-vendor.tms.tmsnfc_aidl.ITmsNfc/default u:object_r:vendor_tmsnfc_service:s0
