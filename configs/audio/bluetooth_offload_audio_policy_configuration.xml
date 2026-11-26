@@ -7,9 +7,11 @@
      (audio_policy_configuration_le_offload_disabled.xml). -->
 <module name="bluetooth" halVersion="2.0">
     <mixPorts>
-        <!-- A2DP Audio Ports. Spatializer only, as in bluetooth_audio_policy_configuration.xml:
-             a plain output would get a FastMixer and its MonoPipe delay. -->
-        <mixPort name="a2dp output" role="source" flags="AUDIO_OUTPUT_FLAG_SPATIALIZER"/>
+        <!-- A2DP Audio Ports. A plain stereo output, like stock, so Dolby gets stereo and not
+             the spatializer's multichannel mix. Deep buffer only to keep AudioFlinger from
+             adding a FastMixer: the mixer then runs in the Bluetooth HAL's 10 ms periods with
+             no MonoPipe, the same latency as the spatializer output it replaces. -->
+        <mixPort name="a2dp output" role="source" flags="AUDIO_OUTPUT_FLAG_DEEP_BUFFER"/>
         <!-- Hearing AIDs Audio Ports -->
         <mixPort name="hearing aid output" role="source">
             <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
