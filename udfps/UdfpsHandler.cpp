@@ -186,6 +186,17 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
     void onFingerDown(uint32_t x, uint32_t y, float /*minor*/, float /*major*/) {
         LOG(DEBUG) << __func__ << "x: " << x << ", y: " << y;
 
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            // SystemUI's finger-down can arrive after the match it belongs to has
+            // finished (10 ms after a screen-off unlock). Its finger-up is then dropped,
+            // so arming FOD for it left the white spot lit until the screen turned off.
+            if (!operationActive_) {
+                LOG(INFO) << "FOD press ignored (no operation)";
+                return;
+            }
+        }
+
         /*
          * On fpc_fod devices, the waiting for finger message is not reliably sent...
          * The finger down message is only reliably sent when the screen is turned off, so enable
@@ -244,6 +255,10 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
 
     void onAuthenticationStarted() {
         LOG(DEBUG) << __func__;
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            operationActive_ = true;
+        }
         // goodix sends "waiting for finger" (21) only after a finished match, not after
         // a cancelled one, so an app prompt after a PIN or face unlock never armed FOD.
         if (!isFpcFod) {
@@ -251,8 +266,18 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
         }
     }
 
+    void onEnrollmentStarted() {
+        LOG(DEBUG) << __func__;
+        std::lock_guard<std::mutex> lock(fodLock_);
+        operationActive_ = true;
+    }
+
     void cancel() {
         LOG(DEBUG) << __func__;
+        {
+            std::lock_guard<std::mutex> lock(fodLock_);
+            operationActive_ = false;
+        }
         setFodStatus(FOD_STATUS_OFF);
     }
 
@@ -269,6 +294,7 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
             wasDown = framePressed_ || touchPressed_;
             framePressed_ = false;
             touchPressed_ = false;
+            operationActive_ = false;
         }
         if (wasDown) {
             // This runs on the HAL's callback thread, extCmd() must not be called from it.
@@ -326,6 +352,9 @@ class XiaomiMalachiteUdfpsHandler : public UdfpsHandler {
     bool touchPressed_ = false;
     bool framePressed_ = false;
     std::chrono::steady_clock::time_point touchPressedAt_;
+    // An authentication or enrollment is running: from its start until it finishes or
+    // is cancelled. SystemUI's finger events only count while one is.
+    bool operationActive_ = false;
 
     void onPress(bool fromTouch) {
         {
