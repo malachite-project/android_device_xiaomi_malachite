@@ -92,6 +92,11 @@ PRODUCT_PACKAGES += \
 # and audio_effects.xml entries are in this tree and vendor/xiaomi/malachite.
 $(call inherit-product, hardware/dolby/dolby.mk)
 
+# Stock's DAX tuning with the speaker tuned (configs/dolby/README.md). Headphone,
+# Bluetooth and other outputs stay stock, byte for byte.
+PRODUCT_COPY_FILES += \
+    $(DEVICE_PATH)/configs/dolby/dax-default.xml:$(TARGET_COPY_OUT_VENDOR)/etc/dolby/dax-default.xml
+
 # Bluetooth audio: MediaTek's provider and stock's Bluetooth audio HAL
 # (audio.bluetooth.mt6878) come from vendor/xiaomi/malachite. The AOSP pair
 # uses a separate session library and cannot run beside them.
