@@ -94,13 +94,13 @@
     <item name="config_screenBrightnessDimFloat" format="float" type="dimen">0.000683661</item>
 
     <!-- Brightness ramp durations as stock HyperOS (framework-ext-res
-         config_animation_duration_*), except HDR content on/off: 900 ms (stock's 4 s felt too
-         slow). Slider 500 ms, window override and keys/quick settings 800 ms (stock's manual
+         config_animation_duration_*), including HDR content on/off at stock's 4 s (testers
+         prefer it to 900 ms). Slider 500 ms, window override and keys/quick settings 800 ms (stock's manual
          duration), dim 1200 ms. Auto-brightness keeps the displayconfig ramp rates. -->
     <integer name="config_brightnessRampDimDurationMillis">1200</integer>
     <integer name="config_brightnessRampTemporaryDurationMillis">500</integer>
     <integer name="config_brightnessRampOverrideDurationMillis">800</integer>
-    <integer name="config_brightnessRampHdrDurationMillis">900</integer>
+    <integer name="config_brightnessRampHdrDurationMillis">4000</integer>
     <integer name="config_brightnessRampManualDurationMillis">800</integer>
 
     <!-- Array of light sensor lux values to define our levels for auto backlight brightness support.
