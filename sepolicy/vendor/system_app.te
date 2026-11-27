@@ -1,2 +1,7 @@
 allow system_app sys_thermal_flash_state:file { getattr open read watch watch_reads };
 allow system_app sys_thermal_torch_real_level:file { getattr open read watch watch_reads };
+
+# MalachiteThermalScene writes the thermal scene id for mi_thermald, as stock's
+# PowerKeeper does (thermal/scene).
+allow system_app sysfs_therm:dir search;
+allow system_app sysfs_thermal_sconfig:file { getattr w_file_perms };

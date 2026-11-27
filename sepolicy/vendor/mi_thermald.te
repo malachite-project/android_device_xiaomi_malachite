@@ -39,3 +39,6 @@ allow mi_thermald {
 } rw_file_perms;
 
 set_prop(mi_thermald, vendor_thermal_engine_prop)
+
+# Thermal scene id (sconfig), set by MalachiteThermalScene.
+allow mi_thermald sysfs_thermal_sconfig:file rw_file_perms;

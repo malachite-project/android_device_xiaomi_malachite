@@ -7,3 +7,6 @@ type vendor_sysfs_pd_adapter, sysfs_type, fs_type;
 
 # Goodix touch report rate (240/480 Hz), written by the touch HAL.
 type vendor_sysfs_touch_report_rate, sysfs_type, fs_type;
+
+# mi_thermald's thermal scene (sconfig), written by MalachiteThermalScene.
+type sysfs_thermal_sconfig, sysfs_type, fs_type;
