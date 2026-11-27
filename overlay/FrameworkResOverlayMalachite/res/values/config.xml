@@ -658,8 +658,11 @@
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
 
-    <!-- If AOD can show an ambient version of the wallpaper -->
-    <bool name="config_dozeSupportsAodWallpaper">true</bool>
+    <!-- If AOD can show an ambient version of the wallpaper. Off: stock HyperOS keeps the
+         AOD background black, so only the clock and icons light up. With it on, the dimmed
+         wallpaper lit the "black" areas (testers: AOD looks like an IPS screen) and cost
+         battery. -->
+    <bool name="config_dozeSupportsAodWallpaper">false</bool>
 
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
