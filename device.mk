@@ -492,8 +492,12 @@ PRODUCT_PACKAGES += \
     android.hardware.thermal-service.pixel \
     thermal_symlinks
 
+# Stock's mi_thermald tables for every scene and region (configs/mi_thermal =
+# stock OS2.0.208.0 vendor/etc/thermal-*.conf) and the scene switcher stock
+# runs in PowerKeeper (thermal/scene).
 PRODUCT_PACKAGES += \
-    init.mt6878.thermal.rc
+    init.mt6878.thermal.rc \
+    MalachiteThermalScene
 
 PRODUCT_COPY_FILES += \
     $(call find-copy-subdir-files,*,$(DEVICE_PATH)/configs/mi_thermal/,$(TARGET_COPY_OUT_VENDOR)/etc) \
